@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "module": "Node16", // 出力される JavaScript のモジュール形式を指定します
+    "target": "ES2022", // コンパイル後の JavaScript のバージョンを指定します
+    "useDefineForClassFields": true,
+    "lib": ["ES2022"],
+    "skipLibCheck": true,
+
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "sourceMap": true,
+    "baseUrl": ".",
+    "paths": {
+      "@src/*": ["src/*"]
+    },
+
+    "strict": true,
+    "noFallthroughCasesInSwitch": true
+    //"noUnusedParameters": true,
+    //"noUnusedLocals": true
+  },
+  "include": ["src"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}

@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "module": "ESNext", // 出力される JavaScript のモジュール形式を指定します
+    "target": "ES2022", // コンパイル後の JavaScript のバージョンを指定します
+    "useDefineForClassFields": true, // クラスフィールドの初期化を行うための定義を追加します
+    "lib": ["ES2022", "DOM", "DOM.Iterable"], // コンパイル時に使用するライブラリを指定します
+    "skipLibCheck": true, // ライブラリの型チェックをスキップします
+
+    "moduleResolution": "bundler", // モジュールの解決方法を指定します
+    "allowImportingTsExtensions": true, // TypeScript の拡張子を省略してインポートできるようにします
+    "resolveJsonModule": true, // JSON ファイルをインポートできるようにします
+    "isolatedModules": true, // ファイルごとにコンパイルを行うようにします
+    "noEmit": true, // コンパイル後のファイルを出力しないようにします
+    "jsx": "react-jsx", // JSX の書き方を指定します
+    "sourceMap": true, // ソースマップを出力します
+    "baseUrl": ".", // ルートディレクトリを指定します
+    "paths": {
+      // パスのエイリアスを設定します
+      "@src/*": ["src/*"],
+      "@common/*": ["../src/common/*"]
+    },
+
+    "strict": true, // 厳格な型チェックを行うようにします
+    "noFallthroughCasesInSwitch": true // switch 文での case の落ちし忘れを検出します
+    //"noUnusedParameters": true, // 使用されていないパラメータを検出します
+    //"noUnusedLocals": true // 使用されていないローカル変数を検出します
+  },
+  "include": ["src", "../src/common"],
+  "references": [{ "path": "../tsconfig.node.json" }]
+}
