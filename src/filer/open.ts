@@ -1,9 +1,59 @@
 import { check } from '@src/common/check';
-import { ListItemsResponnse, MessageKey, Request } from '@src/common/messages';
+import {
+  ItemType,
+  ListItemsRequest,
+  ListItemsResponnse,
+  MessageKey,
+  Request,
+} from '@src/common/messages';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 import * as vscode from 'vscode';
 
+type State = {
+  currentDir?: string;
+};
+const state: State = {};
+
+const getCurrentDirectory = (): string => {
+  const active = vscode.window.activeTextEditor;
+  if (active !== undefined) {
+    return path.dirname(active.document.fileName);
+  } else {
+    const dirs = vscode.workspace.workspaceFolders;
+    if (dirs !== undefined && dirs.length > 0) {
+      return dirs[0].uri.fsPath;
+    } else {
+      return os.homedir();
+    }
+  }
+};
+
+const getItemType = (dir: string): ItemType =>
+  fs.statSync(dir).isDirectory() ? 'directory' : 'file';
+
+const getItems = (
+  item: string,
+): ReadonlyArray<Readonly<{ name: string; type: ItemType }>> => {
+  const type = getItemType(item);
+  const [dir, prefix] =
+    type === 'directory'
+      ? [item, null]
+      : [path.dirname(item), path.basename(item)];
+  return fs.readdirSync(dir).flatMap(fname => {
+    if (prefix === null || fname.startsWith(prefix)) {
+      const fpath = path.join(dir, fname);
+      const ftype = getItemType(fpath);
+      return [{ name: fname, type: ftype }];
+    } else {
+      return [];
+    }
+  });
+};
+
 export const open = (context: vscode.ExtensionContext) => {
-  // The code you place here will be executed every time your command is executed
+  const currentDir = getCurrentDirectory();
 
   // Create and show a new webview
   const panel = vscode.window.createWebviewPanel(
@@ -21,24 +71,21 @@ export const open = (context: vscode.ExtensionContext) => {
   panel.webview.onDidReceiveMessage(
     (message: Request<MessageKey>) => {
       switch (message.key) {
-        case 'list-items':
+        case 'list-items': {
+          const req = message as ListItemsRequest;
+          const searchPath = req.path ?? currentDir;
+          const itemList = getItems(searchPath);
           panel.webview.postMessage(
             check<ListItemsResponnse>({
               key: 'list-items',
               id: message.id,
               type: 'response',
-              path: '/',
-              items: [
-                { name: 'file1', type: 'file' },
-                { name: 'file2', type: 'file' },
-                { name: 'file3', type: 'file' },
-                { name: 'directory1', type: 'directory' },
-                { name: 'directory2', type: 'directory' },
-                { name: 'directory3', type: 'directory' },
-              ],
+              path: searchPath,
+              items: itemList,
             }),
           );
           return;
+        }
       }
     },
     undefined,

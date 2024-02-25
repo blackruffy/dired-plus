@@ -11,7 +11,7 @@ export default defineConfig({
     },
     emptyOutDir: false,
     rollupOptions: {
-      external: ['vscode', 'path'],
+      external: ['vscode', 'path', 'fs', 'os'],
     },
   },
   resolve: {

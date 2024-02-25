@@ -13,7 +13,10 @@ export type Message<
 export type Request<Key extends MessageKey> = Message<Key, 'request'>;
 export type Response<Key extends MessageKey> = Message<Key, 'response'>;
 
-export type ListItemsRequest = Request<'list-items'>;
+export type ListItemsRequest = Request<'list-items'> &
+  Readonly<{
+    path?: string;
+  }>;
 
 export type ListItemsResponnse = Response<'list-items'> & ItemList;
 
