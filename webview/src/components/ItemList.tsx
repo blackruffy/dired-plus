@@ -15,7 +15,12 @@ export const ItemList = (): React.ReactElement => {
     useStore();
 
   return (
-    <List>
+    <List
+      sx={{
+        flex: 1,
+        overflow: 'scroll',
+      }}
+    >
       {(itemList === undefined ? [] : itemList.items).map((item, index) => (
         <ListItemButton
           key={index}
@@ -23,7 +28,15 @@ export const ItemList = (): React.ReactElement => {
             selectedView.name === 'list-item' && selectedView.index === index
           }
           sx={{
-            height: `24px`,
+            '& .MuiListItem-root': {
+              paddingTop: `0px`,
+              paddingBottom: `0px`,
+              '& .MuiButtonBase-root': {
+                paddingTop: `0px`,
+                paddingBottom: `0px`,
+              },
+            },
+            // height: `24px`,
           }}
         >
           <ListItemIcon>
