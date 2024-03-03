@@ -14,6 +14,7 @@
       // "stopOnEntry": false,
       "sourceMaps": true,
       // "outDir": "${workspaceRoot}/dist",
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
       "preLaunchTask": "build"
     }
   ]

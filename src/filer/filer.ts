@@ -1,1 +1,1 @@
-export * from '@src/filer/open';
+export * from '@src/filer/filer-panel';

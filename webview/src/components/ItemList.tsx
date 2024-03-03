@@ -11,7 +11,7 @@ import { useStore } from '@src/store';
 import React from 'react';
 
 export const ItemList = (): React.ReactElement => {
-  const { itemList, selectedIndex, checked, setSelectedIndex, setChecked } =
+  const { itemList, selectedView, checked, setSelectedView, setChecked } =
     useStore();
 
   return (
@@ -19,7 +19,9 @@ export const ItemList = (): React.ReactElement => {
       {(itemList === undefined ? [] : itemList.items).map((item, index) => (
         <ListItemButton
           key={index}
-          selected={selectedIndex === index}
+          selected={
+            selectedView.name === 'list-item' && selectedView.index === index
+          }
           sx={{
             height: `24px`,
           }}
@@ -29,7 +31,11 @@ export const ItemList = (): React.ReactElement => {
               //edge='start'
               checked={checked[index] ?? false}
               onClick={() => {
-                setSelectedIndex(index);
+                setSelectedView({
+                  name: 'list-item',
+                  index,
+                  updatedAt: selectedView.updatedAt,
+                });
                 setChecked({
                   ...checked,
                   [index]:

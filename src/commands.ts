@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 export const commands = (context: vscode.ExtensionContext) => {
   context.subscriptions.push(
     vscode.commands.registerCommand('incremental-filer.helloWorld', () =>
-      filer.open(context),
+      filer.getFilerPanel(context).reveal(),
     ),
   );
 };

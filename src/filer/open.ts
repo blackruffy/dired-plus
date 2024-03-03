@@ -1,56 +1,20 @@
 import { check } from '@src/common/check';
 import {
-  ItemType,
   ListItemsRequest,
   ListItemsResponnse,
   MessageKey,
+  OpenFileRequest,
+  OpenFileResponse,
   Request,
 } from '@src/common/messages';
-import * as fs from 'fs';
-import * as os from 'os';
-import * as path from 'path';
 import * as vscode from 'vscode';
+import { getCurrentDirectory, getItems } from './helpers';
 
 type State = {
   currentDir?: string;
 };
+
 const state: State = {};
-
-const getCurrentDirectory = (): string => {
-  const active = vscode.window.activeTextEditor;
-  if (active !== undefined) {
-    return path.dirname(active.document.fileName);
-  } else {
-    const dirs = vscode.workspace.workspaceFolders;
-    if (dirs !== undefined && dirs.length > 0) {
-      return dirs[0].uri.fsPath;
-    } else {
-      return os.homedir();
-    }
-  }
-};
-
-const getItemType = (dir: string): ItemType =>
-  fs.statSync(dir).isDirectory() ? 'directory' : 'file';
-
-const getItems = (
-  item: string,
-): ReadonlyArray<Readonly<{ name: string; type: ItemType }>> => {
-  const type = getItemType(item);
-  const [dir, prefix] =
-    type === 'directory'
-      ? [item, null]
-      : [path.dirname(item), path.basename(item)];
-  return fs.readdirSync(dir).flatMap(fname => {
-    if (prefix === null || fname.startsWith(prefix)) {
-      const fpath = path.join(dir, fname);
-      const ftype = getItemType(fpath);
-      return [{ name: fname, type: ftype }];
-    } else {
-      return [];
-    }
-  });
-};
 
 export const open = (context: vscode.ExtensionContext) => {
   const currentDir = getCurrentDirectory();
@@ -69,12 +33,12 @@ export const open = (context: vscode.ExtensionContext) => {
   );
 
   panel.webview.onDidReceiveMessage(
-    (message: Request<MessageKey>) => {
+    async (message: Request<MessageKey>) => {
       switch (message.key) {
         case 'list-items': {
           const req = message as ListItemsRequest;
           const searchPath = req.path ?? currentDir;
-          const itemList = getItems(searchPath);
+          const itemList = await getItems(searchPath);
           panel.webview.postMessage(
             check<ListItemsResponnse>({
               key: 'list-items',
@@ -82,6 +46,20 @@ export const open = (context: vscode.ExtensionContext) => {
               type: 'response',
               path: searchPath,
               items: itemList,
+            }),
+          );
+          return;
+        }
+        case 'open-file': {
+          const req = message as OpenFileRequest;
+          const fileUri = vscode.Uri.file(req.path);
+          const doc = await vscode.workspace.openTextDocument(fileUri);
+          await vscode.window.showTextDocument(doc);
+          panel.webview.postMessage(
+            check<OpenFileResponse>({
+              key: 'open-file',
+              id: message.id,
+              type: 'response',
             }),
           );
           return;

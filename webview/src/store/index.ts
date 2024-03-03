@@ -2,19 +2,31 @@ import { ItemList } from '@common/messages';
 import { create } from 'zustand';
 
 export type State = Readonly<{
+  searchWord: string;
   itemList?: ItemList;
-  selectedIndex: number;
+  selectedView: SelectedView;
   checked: Readonly<{ [key: number]: boolean }>;
+  setSearchWord: (searchWord: string) => void;
   setItemList: (itemList: ItemList) => void;
-  setSelectedIndex: (selectedIndex: number) => void;
+  setSelectedView: (selectedView: SelectedView) => void;
   setChecked: (checked: Readonly<{ [key: number]: boolean }>) => void;
 }>;
 
-// stateの定義と更新ロジックを含むストアを作成。
+export type SelectedView = SearchBox | ListItem;
+
+type SearchBox = Readonly<{ name: 'search-box'; updatedAt: number }>;
+type ListItem = Readonly<{
+  name: 'list-item';
+  index: number;
+  updatedAt: number;
+}>;
+
 export const useStore = create<State>(set => ({
-  selectedIndex: 0,
+  searchWord: '',
+  selectedView: { name: 'search-box', updatedAt: 0 },
   checked: {},
+  setSearchWord: searchWord => set(() => ({ searchWord })),
   setItemList: itemList => set(() => ({ itemList })),
-  setSelectedIndex: selectedIndex => set(() => ({ selectedIndex })),
+  setSelectedView: selectedView => set(() => ({ selectedView })),
   setChecked: checked => set(() => ({ checked })),
 }));

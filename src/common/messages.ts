@@ -1,4 +1,4 @@
-export type MessageKey = 'list-items';
+export type MessageKey = 'list-items' | 'open-file';
 export type MessageType = 'request' | 'response';
 
 export type Message<
@@ -20,9 +20,13 @@ export type ListItemsRequest = Request<'list-items'> &
 
 export type ListItemsResponnse = Response<'list-items'> & ItemList;
 
-export type ItemType = 'file' | 'directory';
+export type OpenFileRequest = Request<'open-file'> & Readonly<{ path: string }>;
+export type OpenFileResponse = Response<'open-file'>;
+
+export type ItemType = 'file' | 'directory' | 'none';
 export type Item = Readonly<{
   name: string;
+  path: string;
   type: ItemType;
 }>;
 export type ItemList = Readonly<{
