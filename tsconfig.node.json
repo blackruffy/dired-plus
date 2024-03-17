@@ -7,5 +7,9 @@
     "allowSyntheticDefaultImports": true,
     "strict": true
   },
-  "include": ["vite.config.extension.ts", "vite.config.webview.ts"]
+  "include": [
+    "vite.config.extension.ts",
+    "vite.config.webview.ts",
+    "vite.config.webview.dev.ts"
+  ]
 }

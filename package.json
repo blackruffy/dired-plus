@@ -20,6 +20,7 @@
     ]
   },
   "scripts": {
+    "start:mock": "vite --mode mock --open --config vite.config.webview.dev.ts",
     "vscode:package": "vsce package",
     "launch": "npm run vscode:package && code --install-extension incremental-filer-0.0.1.vsix",
     "launch:debug": "npm run build && code --extensionDevelopmentPath=./",

@@ -1,10 +1,13 @@
 import { Box } from '@mui/material';
 import { FilterInput } from '@src/components/FilterInput';
 import { ItemList } from '@src/components/ItemList';
+import { Action } from '@src/store';
 import React from 'react';
 import { ActionPanel } from './ActionPanel';
 
-export const Main = (): React.ReactElement => {
+export const Main = ({
+  action,
+}: Readonly<{ action?: Action }>): React.ReactElement => {
   return (
     <Box
       sx={{
@@ -16,7 +19,7 @@ export const Main = (): React.ReactElement => {
     >
       <FilterInput />
       <ItemList />
-      <ActionPanel />
+      <ActionPanel action={action} />
     </Box>
   );
 };

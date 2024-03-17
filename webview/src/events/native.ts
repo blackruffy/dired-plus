@@ -1,4 +1,12 @@
 import {
+  CreateDirectoryRequest,
+  CreateDirectoryResponse,
+  CreateFileRequest,
+  CreateFileResponse,
+  DeleteDirectoryRequest,
+  DeleteDirectoryResponse,
+  DeleteFileRequest,
+  DeleteFileResponse,
   ItemList,
   ListItemsRequest,
   ListItemsResponnse,
@@ -33,6 +41,34 @@ export const updateItemList = async ({
 export const openFile = async (path: string): Promise<void> => {
   await request<OpenFileRequest, OpenFileResponse>({
     key: 'open-file',
+    path,
+  });
+};
+
+export const createFile = async (path: string): Promise<void> => {
+  await request<CreateFileRequest, CreateFileResponse>({
+    key: 'create-file',
+    path,
+  });
+};
+
+export const createDirectory = async (path: string): Promise<void> => {
+  await request<CreateDirectoryRequest, CreateDirectoryResponse>({
+    key: 'create-directory',
+    path,
+  });
+};
+
+export const deleteFile = async (path: string): Promise<void> => {
+  await request<DeleteFileRequest, DeleteFileResponse>({
+    key: 'delete-file',
+    path,
+  });
+};
+
+export const deleteDirectory = async (path: string): Promise<void> => {
+  await request<DeleteDirectoryRequest, DeleteDirectoryResponse>({
+    key: 'delete-directory',
     path,
   });
 };

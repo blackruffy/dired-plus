@@ -28,19 +28,16 @@ export const ItemList = (): React.ReactElement => {
             selectedView.name === 'list-item' && selectedView.index === index
           }
           sx={{
-            '& .MuiListItem-root': {
-              paddingTop: `0px`,
-              paddingBottom: `0px`,
-              '& .MuiButtonBase-root': {
-                paddingTop: `0px`,
-                paddingBottom: `0px`,
-              },
-            },
+            paddingTop: `0px`,
+            paddingBottom: `0px`,
             // height: `24px`,
           }}
         >
           <ListItemIcon>
             <Checkbox
+              sx={{
+                padding: `0px`,
+              }}
               //edge='start'
               checked={checked[index] ?? false}
               onClick={() => {
