@@ -35,9 +35,10 @@ export const historyState = scope(() => {
 export const initializeEditorHistory = async (
   context: vscode.ExtensionContext,
 ) => {
+  // vscode.window.showInformationMessage('Initializing editor history');
   historyState.setContext(context);
   const activePath = vscode.window.activeTextEditor?.document.uri.fsPath;
-  await context.globalState.update(
+  await context.workspaceState.update(
     historyKey,
     activePath === undefined ? [activePath] : [],
   );
@@ -52,7 +53,7 @@ export const initializeEditorHistory = async (
               ? h.slice(historyState.get().index, -1)
               : h.slice(historyState.get().index),
           h => [fsPath, ...h],
-          h => context.globalState.update(historyKey, h),
+          h => context.workspaceState.update(historyKey, h),
         );
       } else if (isHistoryOpen()) {
         historyState.update(s => ({ ...s, openedPath: undefined }));
@@ -62,7 +63,7 @@ export const initializeEditorHistory = async (
 };
 
 export const getHistory = (): ReadonlyArray<string> =>
-  historyState.get().context!.globalState.get(historyKey) ?? [];
+  historyState.get().context!.workspaceState.get(historyKey) ?? [];
 
 export const getHistoryItem = (index: number): string | undefined =>
   getHistory()[index];

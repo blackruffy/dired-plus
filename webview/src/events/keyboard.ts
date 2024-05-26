@@ -130,9 +130,14 @@ export const useKeyDownEvent = (action?: Action) => {
           ) && _.code === event.code,
       );
 
-      console.log(`Key down: ${event.code}`);
+      console.log(
+        `Key down: ${event.code}, ${JSON.stringify(modifierKeys)}, actionKey: ${actionKey?.desc}`,
+      );
 
-      if (actionKey !== undefined) {
+      if (modifierKeys.metaKey && event.code === 'KeyX') {
+        updateModifierUp('MetaLeft', state);
+        updateModifierUp('MetaRight', state);
+      } else if (actionKey !== undefined) {
         event.preventDefault();
         event.stopPropagation();
         actionKey

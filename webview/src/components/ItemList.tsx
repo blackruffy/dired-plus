@@ -59,7 +59,7 @@ export const ItemList = (): React.ReactElement => {
             sx={{
               paddingTop: `0px`,
               paddingBottom: `0px`,
-              // height: `24px`,
+              //height: `24px`,
             }}
             onClick={() => {
               setSelectedView({
@@ -74,6 +74,9 @@ export const ItemList = (): React.ReactElement => {
                 disabled={isDot}
                 sx={{
                   padding: `0px`,
+                  '.MuiCheckbox-root': {
+                    height: `12px`,
+                  },
                 }}
                 //edge='start'
                 checked={(!isDot && checked[index]) ?? false}

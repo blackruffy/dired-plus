@@ -1,3 +1,4 @@
+import { Item } from '@common/item';
 import {
   ListItemsRequest,
   MessageKey,
@@ -5,6 +6,7 @@ import {
   Response,
 } from '@common/messages';
 import { scope } from '@common/scope';
+import { identity } from 'fp-ts/lib/function';
 
 export const request = scope(() => {
   const getId = (key: string) =>
@@ -28,11 +30,11 @@ export const request = scope(() => {
             path: r.path,
             items: Array.from({ length: 10 }).map((_, i) => {
               const type = i % 2 === 0 ? 'directory' : 'file';
-              return {
+              return identity<Item>({
                 name: `${type}${i}`,
                 path: `${r.path}/${type}${i}`,
-                type: type,
-              };
+                itemType: type,
+              });
             }),
           } as unknown as Res;
         case 'open-file':

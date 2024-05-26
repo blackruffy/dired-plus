@@ -10,6 +10,7 @@ import {
   isSingleFile,
   joinItemPath,
 } from '@common/item';
+import * as task2 from '@common/task';
 import {
   copyDirectory,
   copyFile,
@@ -185,7 +186,7 @@ export const openItem = (
               setItemList,
             }),
           ),
-          task.chain(() =>
+          task.flatMap(() =>
             task.fromPromise(() => goToSearchBox({ setSelectedView }).run()),
           ),
         )
