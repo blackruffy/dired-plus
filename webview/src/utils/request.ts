@@ -47,7 +47,7 @@ export const request = scope(() => {
     return <Req extends Request<MessageKey>, Res extends Response<MessageKey>>(
       req: Omit<Req, 'id' | 'type'>,
     ): Promise<Res> =>
-      new Promise(resolve => {
+      new Promise((resolve, reject) => {
         const data = {
           ...req,
           id: getId(req.key),
@@ -56,7 +56,12 @@ export const request = scope(() => {
 
         const callback = (event: MessageEvent<Res>) => {
           if (event.data.id === data.id) {
-            resolve(event.data);
+            if (event.data.error === undefined) {
+              resolve(event.data);
+            } else {
+              reject(Error(event.data.error));
+            }
+
             window.removeEventListener('message', callback);
           }
         };

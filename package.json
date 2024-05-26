@@ -9,13 +9,43 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "incremental-filer.helloWorld",
-        "title": "Hello World"
+        "command": "incremental-filer.open",
+        "title": "Incremental Filer"
+      },
+      {
+        "command": "incremental-filer.history:prev",
+        "title": "Open the previous file in history"
+      },
+      {
+        "command": "incremental-filer.history:next",
+        "title": "Open the next file in history"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "incremental-filer.open",
+        "key": "ctrl+x f",
+        "mac": "ctrl+x f",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "incremental-filer.history:prev",
+        "key": "alt+left",
+        "mac": "alt+left",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "incremental-filer.history:next",
+        "key": "alt+right",
+        "mac": "alt+right",
+        "when": "editorTextFocus"
       }
     ]
   },
@@ -32,11 +62,12 @@
     "typecheck:webview": "cd webview && tsc -p tsconfig.json",
     "typecheck:extension": "tsc -p tsconfig.json",
     "lint": "eslint . --ext ts,tsx",
-    "format": "prettier --write .",
+    "format": "prettier --experimental-ternaries --write .",
     "test": "vscode-test"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/fs-extra": "^11.0.4",
     "@types/mocha": "^10.0.6",
     "@types/node": "18.x",
     "@types/react": "^18.2.58",
@@ -64,6 +95,8 @@
     "@mui/icons-material": "^5.15.10",
     "@mui/material": "^5.15.10",
     "@mui/system": "^5.15.9",
+    "fp-ts": "^2.16.5",
+    "fs-extra": "^11.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "zustand": "^4.5.1"

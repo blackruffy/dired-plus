@@ -1,6 +1,6 @@
 import SearchIcon from '@mui/icons-material/Search';
 import { InputAdornment, TextField } from '@mui/material';
-import { updateItemList } from '@src/events/native';
+import { updateItemList } from '@src/action/helpers';
 import { useStore } from '@src/store';
 import React from 'react';
 
@@ -20,7 +20,7 @@ export const FilterInput = (): React.ReactElement => {
   return (
     <TextField
       sx={{ padding: `8px` }}
-      label='Filter'
+      // label='Filter'
       inputRef={ref}
       fullWidth
       variant='standard'

@@ -1,4 +1,8 @@
 import {
+  CopyDirectoryRequest,
+  CopyDirectoryResponse,
+  CopyFileRequest,
+  CopyFileResponse,
   CreateDirectoryRequest,
   CreateDirectoryResponse,
   CreateFileRequest,
@@ -7,25 +11,42 @@ import {
   DeleteDirectoryResponse,
   DeleteFileRequest,
   DeleteFileResponse,
+  GetBaseNameRequest,
+  GetBaseNameResponse,
+  GetParentDirectoryRequest,
+  GetParentDirectoryResponse,
+  JoinPathRequest,
+  JoinPathResponse,
   ListItemsRequest,
   ListItemsResponnse,
   MessageKey,
   OpenFileRequest,
   OpenFileResponse,
+  RenameDirectoryRequest,
+  RenameDirectoryResponse,
+  RenameFileRequest,
+  RenameFileResponse,
   Request,
   errorResponse,
   response,
 } from '@src/common/messages';
+import * as nodePath from 'path';
 import * as vscode from 'vscode';
 import {
+  copyDirectory,
+  copyFile,
   createDirectory,
   createFile,
   deleteDirectory,
   deleteFile,
+  getBaseName,
   getCurrentDirectory,
   getItemType,
   getItems,
+  getParentDirectory,
   openFile,
+  renameDirectory,
+  renameFile,
 } from './helpers';
 
 const showMessage = (msg: string) => {
@@ -56,6 +77,34 @@ export const startListen = (
             );
             return;
           }
+          case 'get-parent-directory': {
+            const req = message as GetParentDirectoryRequest;
+            panel.webview.postMessage(
+              response<GetParentDirectoryResponse>(req, {
+                path: getParentDirectory(req.path),
+              }),
+            );
+            return;
+          }
+          case 'get-base-name': {
+            const req = message as GetBaseNameRequest;
+            panel.webview.postMessage(
+              response<GetBaseNameResponse>(req, {
+                name: getBaseName(req.path),
+              }),
+            );
+            return;
+          }
+          case 'join-path': {
+            const req = message as JoinPathRequest;
+            const path = nodePath.join(...req.items);
+            panel.webview.postMessage(
+              response<JoinPathResponse>(req, {
+                path,
+              }),
+            );
+            return;
+          }
           case 'open-file': {
             const req = message as OpenFileRequest;
             await openFile(req.path);
@@ -66,7 +115,7 @@ export const startListen = (
             const req = message as CreateFileRequest;
             await createFile(req.path);
             panel.webview.postMessage(response<CreateFileResponse>(req, {}));
-            showMessage(`File created: ${req.path}`);
+            //showMessage(`File created: ${req.path}`);
             return;
           }
           case 'create-directory': {
@@ -75,29 +124,74 @@ export const startListen = (
             panel.webview.postMessage(
               response<CreateDirectoryResponse>(req, {}),
             );
-            showMessage(`Directory created: ${req.path}`);
+            //showMessage(`Directory created: ${req.path}`);
+            return;
+          }
+          case 'copy-file': {
+            const req = message as CopyFileRequest;
+            await copyFile(req.source, req.destination, req.options);
+            panel.webview.postMessage(response<CopyFileResponse>(req, {}));
+            //showMessage(`Copy file: ${req.source} -> ${req.destination}`);
+            return;
+          }
+          case 'copy-directory': {
+            const req = message as CopyDirectoryRequest;
+            await copyDirectory(req.source, req.destination, req.options);
+            panel.webview.postMessage(response<CopyDirectoryResponse>(req, {}));
+            //showMessage(`Copy directory: ${req.source} -> ${req.destination}`);
+            return;
+          }
+          case 'rename-file': {
+            const req = message as RenameFileRequest;
+            await renameFile(req.source, req.destination, req.options);
+            panel.webview.postMessage(response<RenameFileResponse>(req, {}));
+            //showMessage(`Rename file: ${req.source} -> ${req.destination}`);
+            return;
+          }
+          case 'rename-directory': {
+            const req = message as RenameDirectoryRequest;
+            await renameDirectory(req.source, req.destination, req.options);
+            panel.webview.postMessage(
+              response<RenameDirectoryResponse>(req, {}),
+            );
+            // showMessage(
+            //   `Rename directory: ${req.source} -> ${req.destination}`,
+            // );
             return;
           }
           case 'delete-file': {
             const req = message as DeleteFileRequest;
-            await deleteFile(req.path);
-            panel.webview.postMessage(response<DeleteFileResponse>(req, {}));
-            showMessage(`Delete file: ${req.path}`);
+            const { path, items } = await deleteFile(req.path);
+            panel.webview.postMessage(
+              response<DeleteFileResponse>(req, {
+                path,
+                itemType: await getItemType(path),
+                items,
+              }),
+            );
+            //showMessage(`Delete file: ${req.path}`);
             return;
           }
           case 'delete-directory': {
             const req = message as DeleteDirectoryRequest;
-            await deleteDirectory(req.path);
+            const { path, items } = await deleteDirectory(req.path);
             panel.webview.postMessage(
-              response<DeleteDirectoryResponse>(req, {}),
+              response<DeleteDirectoryResponse>(req, {
+                path,
+                itemType: await getItemType(path),
+                items,
+              }),
             );
-            showMessage(`Delete Directory: ${req.path}`);
+            //showMessage(`Delete Directory: ${req.path}`);
             return;
+          }
+          case 'close-panel': {
+            panel.dispose();
           }
         }
       } catch (e: unknown) {
         console.error(e);
-        vscode.window.showErrorMessage(`${e}`);
+        //vscode.window.showErrorMessage(`${e}`);
         panel.webview.postMessage(
           errorResponse(message as Request<MessageKey>, e),
         );

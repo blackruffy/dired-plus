@@ -1,6 +1,6 @@
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { useAction } from '@src/action';
+import { useAction } from '@src/action/use-action';
 import { Main } from '@src/components/Main';
 import { useKeyboardEvent } from '@src/events/keyboard';
 import { useNativeEvent } from '@src/events/native';

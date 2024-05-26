@@ -7,19 +7,17 @@ import { ActionPanel } from './ActionPanel';
 
 export const Main = ({
   action,
-}: Readonly<{ action?: Action }>): React.ReactElement => {
-  return (
-    <Box
-      sx={{
-        width: '100%',
-        height: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      <FilterInput />
-      <ItemList />
-      <ActionPanel action={action} />
-    </Box>
-  );
-};
+}: Readonly<{ action?: Action }>): React.ReactElement => (
+  <Box
+    sx={{
+      width: '100%',
+      height: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+    }}
+  >
+    <FilterInput />
+    <ItemList />
+    <ActionPanel action={action} />
+  </Box>
+);

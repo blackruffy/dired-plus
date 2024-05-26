@@ -66,99 +66,6 @@ const onArrowDown = (
   }
 };
 
-// const onSpace = (
-//   event: KeyboardEvent,
-//   selectedView: SelectedView,
-//   checked: Readonly<{ [key: number]: boolean }>,
-//   setChecked: (checked: Readonly<{ [key: number]: boolean }>) => void,
-// ) => {
-//   if (selectedView.name === 'list-item') {
-//     event.preventDefault();
-//     event.stopPropagation();
-//     setChecked({
-//       ...checked,
-//       [selectedView.index]:
-//         checked[selectedView.index] === undefined
-//           ? true
-//           : !checked[selectedView.index],
-//     });
-//   }
-// };
-
-// const onEnter = async (
-//   event: KeyboardEvent,
-//   shiftKey: boolean,
-//   searchWord: string,
-//   selectedView: SelectedView,
-//   itemList: ItemList | undefined,
-//   setSearchWord: (searchWord: string) => void,
-//   setItemList: (itemList: ItemList) => void,
-// ): Promise<void> => {
-//   if (isCreateFileOrDirectoryMode(selectedView, itemList)) {
-//     event.preventDefault();
-//     event.stopPropagation();
-//     if (shiftKey) {
-//       await createDirectory(searchWord);
-//     } else {
-//       await createFile(searchWord);
-//       setSearchWord('');
-//     }
-//   } else if (isFileActionMode(selectedView, itemList)) {
-//     // open a file or change a directory
-//     event.preventDefault();
-//     event.stopPropagation();
-//     const item = (itemList as ItemList).items[(selectedView as ListItem).index];
-//     await openFile(item.path);
-//     setSearchWord('');
-//   } else if (isDirectoryActionMode(selectedView, itemList)) {
-//     event.preventDefault();
-//     event.stopPropagation();
-//     const item = (itemList as ItemList).items[(selectedView as ListItem).index];
-//     await updateItemList({
-//       path: item.path,
-//       setSearchWord,
-//       setItemList,
-//     });
-//   }
-// };
-
-// const onKeyD = async (
-//   event: KeyboardEvent,
-//   selectedView: SelectedView,
-//   itemList: ItemList | undefined,
-//   setConfirm: (confirm: Confirm) => void,
-// ): Promise<void> => {
-//   if (isFileActionMode(selectedView, itemList)) {
-//     event.preventDefault();
-//     event.stopPropagation();
-//     const item = (itemList as ItemList).items[(selectedView as ListItem).index];
-//     setConfirm({ command: 'delete-file', path: item.path });
-//   } else if (isDirectoryActionMode(selectedView, itemList)) {
-//     event.preventDefault();
-//     event.stopPropagation();
-//     const item = (itemList as ItemList).items[(selectedView as ListItem).index];
-//     setConfirm({ command: 'delete-directory', path: item.path });
-//   }
-// };
-
-// const onKeyY = async (
-//   event: KeyboardEvent,
-//   confirm: Confirm | undefined,
-//   setConfirm: (confirm?: Confirm) => void,
-// ): Promise<void> => {
-//   if (confirm?.command === 'delete-file') {
-//     event.preventDefault();
-//     event.stopPropagation();
-//     setConfirm(undefined);
-//     await deleteFile(confirm.path);
-//   } else if (confirm?.command === 'delete-directory') {
-//     event.preventDefault();
-//     event.stopPropagation();
-//     setConfirm(undefined);
-//     await deleteDirectory(confirm.path);
-//   }
-// };
-
 const moveItems = (
   event: KeyboardEvent,
   { selectedView, itemList, setSelectedView }: State,
@@ -216,47 +123,36 @@ export const useKeyDownEvent = (action?: Action) => {
 
   React.useEffect(() => {
     const callback = (event: KeyboardEvent) => {
-      action?.keys
-        ?.find(
-          ({ keyEvent }) =>
-            Object.entries(keyEvent.modifierKeys ?? {}).every(
-              ([k, v]) => modifierKeys[k as keyof ModifierKeys] === v,
-            ) && keyEvent.code === event.code,
-        )
-        ?.keyEvent.run();
+      const actionKey = action?.keys?.find(
+        _ =>
+          Object.entries(_.modifierKeys).every(
+            ([k, v]) => modifierKeys[k as keyof ModifierKeys] === v,
+          ) && _.code === event.code,
+      );
+
+      console.log(`Key down: ${event.code}`);
+
+      if (actionKey !== undefined) {
+        event.preventDefault();
+        event.stopPropagation();
+        actionKey
+          .run()
+          .then(({ message }) => {
+            // state.setMode({
+            //   message: message ?? '',
+            //   type: 'info',
+            // });
+          })
+          .catch(err => {
+            state.setMode({
+              message: String(err),
+              type: 'error',
+            });
+          });
+      }
 
       moveItems(event, state);
       updateModifierDown(event.code, state);
-
-      console.log('########### KEY:', event.key, event.code);
-      //   switch (event.code) {
-      //     case 'Space':
-      //       return onSpace(event, selectedView, checked, setChecked);
-      //     case 'Enter':
-      //       return onEnter(
-      //         event,
-      //         shiftKey,
-      //         searchWord,
-      //         selectedView,
-      //         itemList,
-      //         setSearchWord,
-      //         setItemList,
-      //       );
-      //     case 'KeyD':
-      //       return onKeyD(event, selectedView, itemList, setConfirm);
-      //     case 'KeyY':
-      //       return onKeyY(event, confirm, setConfirm);
-      //     // default:
-      //     //   return scope(async () =>
-      //     //     setItemList(
-      //     //       await listItems(
-      //     //         itemList?.path === undefined
-      //     //           ? event.key
-      //     //           : `${itemList.path}${event.key}`,
-      //     //       ),
-      //     //     ),
-      //     //   );
-      //   }
     };
 
     window.addEventListener('keydown', callback);
