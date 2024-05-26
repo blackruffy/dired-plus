@@ -5,7 +5,7 @@ import {
   openItem,
   renameOverwrite,
 } from '@src/action/helpers';
-import { keyEnter, keyF, keyN, keyP, keyQ, keyX, keyY } from '@src/action/keys';
+import { keyEnter, keyF, keyP, keyQ, keyX } from '@src/action/keys';
 import { closePanel, getParentDirectory } from '@src/events/native';
 import { Action, Mode, SelectedView, ok } from '@src/store';
 

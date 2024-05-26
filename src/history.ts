@@ -3,8 +3,8 @@ import * as vscode from 'vscode';
 import { scope } from './common/scope';
 import { openFile } from './filer/helpers';
 
-const historyKey = 'editorHistory';
-const maxHistorySize = 5000;
+const historyKey = 'incremental-filer.editorHistory';
+const maxHistorySize = 100;
 
 type HistoryState = {
   context?: vscode.ExtensionContext;
@@ -35,12 +35,12 @@ export const historyState = scope(() => {
 export const initializeEditorHistory = async (
   context: vscode.ExtensionContext,
 ) => {
-  // vscode.window.showInformationMessage('Initializing editor history');
   historyState.setContext(context);
+  const history = getHistory();
   const activePath = vscode.window.activeTextEditor?.document.uri.fsPath;
-  await context.workspaceState.update(
+  await getPersistentState().update(
     historyKey,
-    activePath === undefined ? [activePath] : [],
+    activePath == null ? [activePath, ...history] : history,
   );
   context.subscriptions.push(
     vscode.window.onDidChangeActiveTextEditor(async editor => {
@@ -52,8 +52,8 @@ export const initializeEditorHistory = async (
             h.length >= maxHistorySize
               ? h.slice(historyState.get().index, -1)
               : h.slice(historyState.get().index),
-          h => [fsPath, ...h],
-          h => context.workspaceState.update(historyKey, h),
+          h => (fsPath == null || fsPath === h[0] ? h : [fsPath, ...h]),
+          h => getPersistentState().update(historyKey, h),
         );
       } else if (isHistoryOpen()) {
         historyState.update(s => ({ ...s, openedPath: undefined }));
@@ -62,8 +62,11 @@ export const initializeEditorHistory = async (
   );
 };
 
+export const getPersistentState = (): vscode.Memento =>
+  historyState.get().context!.workspaceState;
+
 export const getHistory = (): ReadonlyArray<string> =>
-  historyState.get().context!.workspaceState.get(historyKey) ?? [];
+  getPersistentState().get(historyKey) ?? [];
 
 export const getHistoryItem = (index: number): string | undefined =>
   getHistory()[index];
@@ -79,8 +82,16 @@ export const openHistoryItem = async (index: number): Promise<void> => {
   }
 };
 
+export const openCurrentHistoryItem = (): Promise<void> =>
+  openHistoryItem(historyState.get().index);
+
 export const openPrevHistoryItem = (): Promise<void> =>
   openHistoryItem(historyState.get().index + 1);
 
 export const openNextHistoryItem = (): Promise<void> =>
   openHistoryItem(historyState.get().index - 1);
+
+export const resetHistory = async (): Promise<void> => {
+  await getPersistentState().update(historyKey, []);
+  historyState.update(s => ({ ...s, index: 0 }));
+};

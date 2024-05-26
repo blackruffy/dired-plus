@@ -30,6 +30,7 @@ import {
   errorResponse,
   response,
 } from '@src/common/messages';
+import { openCurrentHistoryItem } from '@src/history';
 import * as nodePath from 'path';
 import * as vscode from 'vscode';
 import {
@@ -187,6 +188,7 @@ export const startListen = (
           }
           case 'close-panel': {
             panel.dispose();
+            await openCurrentHistoryItem();
           }
         }
       } catch (e: unknown) {

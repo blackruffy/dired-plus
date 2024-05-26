@@ -1,5 +1,9 @@
 import { filer } from '@src/filer';
-import { openNextHistoryItem, openPrevHistoryItem } from '@src/history';
+import {
+  openNextHistoryItem,
+  openPrevHistoryItem,
+  resetHistory,
+} from '@src/history';
 import * as vscode from 'vscode';
 
 export const commands = (context: vscode.ExtensionContext) => {
@@ -18,6 +22,12 @@ export const commands = (context: vscode.ExtensionContext) => {
   context.subscriptions.push(
     vscode.commands.registerCommand('incremental-filer.history:next', () => {
       openNextHistoryItem();
+    }),
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('incremental-filer.history:reset', () => {
+      resetHistory();
     }),
   );
 };

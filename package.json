@@ -2,7 +2,7 @@
   "name": "incremental-filer",
   "displayName": "incremental-filer",
   "description": "",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "engines": {
     "vscode": "^1.86.0"
   },
@@ -26,6 +26,10 @@
       {
         "command": "incremental-filer.history:next",
         "title": "Open the next file in history"
+      },
+      {
+        "command": "incremental-filer.history:reset",
+        "title": "Reset the file history"
       }
     ],
     "keybindings": [
@@ -51,7 +55,7 @@
   },
   "scripts": {
     "start:mock": "vite --mode mock --open --config vite.config.webview.dev.ts",
-    "vscode:package": "vsce package",
+    "vscode:package": "npm run build && vsce package",
     "launch": "npm run vscode:package && code --install-extension incremental-filer-0.0.1.vsix",
     "launch:debug": "npm run build && code --extensionDevelopmentPath=./",
     "build": "npm run typecheck && npm run lint && npm run build:webview && npm run build:extension",
