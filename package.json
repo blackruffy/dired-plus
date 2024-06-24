@@ -30,13 +30,17 @@
       {
         "command": "incremental-filer.history:reset",
         "title": "Reset the file history"
+      },
+      {
+        "command": "incremental-filer.history:debug",
+        "title": "Debug the file history"
       }
     ],
     "keybindings": [
       {
         "command": "incremental-filer.open",
-        "key": "ctrl+x f",
-        "mac": "ctrl+x f",
+        "key": "ctrl+x ctrl+f",
+        "mac": "ctrl+x ctrl+f",
         "when": "editorTextFocus"
       },
       {
@@ -62,7 +66,7 @@
     "build:watch": "vite build --config vite.config.webview.ts --watch & vite build --config vite.config.extension.ts --watch",
     "build:webview": "vite build --config vite.config.webview.ts",
     "build:extension": "vite build --config vite.config.extension.ts",
-    "typecheck": "npm run typecheck:webview && npm run typecheck:extension",
+    "typecheck": "npm run typecheck:webview && npm run typecheck:extension && npm run lint",
     "typecheck:webview": "cd webview && tsc -p tsconfig.json",
     "typecheck:extension": "tsc -p tsconfig.json",
     "lint": "eslint . --ext ts,tsx",

@@ -28,7 +28,7 @@ export const request = scope(() => {
             id,
             type: 'response',
             path: r.path,
-            items: Array.from({ length: 10 }).map((_, i) => {
+            items: Array.from({ length: 100 }).map((_, i) => {
               const type = i % 2 === 0 ? 'directory' : 'file';
               return identity<Item>({
                 name: `${type}${i}`,

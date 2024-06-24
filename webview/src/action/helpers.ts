@@ -10,10 +10,11 @@ import {
   isSingleFile,
   joinItemPath,
 } from '@common/item';
-import * as task2 from '@common/task';
 import {
   copyDirectory,
   copyFile,
+  deleteDirectory,
+  deleteFile,
   getParentDirectory,
   listItems,
   openFile,
@@ -36,22 +37,24 @@ export const updateItemList = async ({
   setItemList: (itemList: ItemList) => void;
 }>): Promise<void> =>
   pipe(await listItems(path), a =>
-    pipe(setSearchWord(a.path), () => setItemList(a)),
+    pipe(setSearchWord(a.parent.path), () => setItemList(a)),
   );
 
 export const goToParentDirectory = ({
   path,
+  separator,
   setSearchWord,
   setItemList,
 }: Readonly<{
   path: Promise<string>;
+  separator: string;
   setSearchWord: (searchWord: string) => void;
   setItemList: (itemList: ItemList) => void;
 }>): KeyParams => ({
   desc: 'Go to the parent directory',
   run: async () => {
     await updateItemList({
-      path: await getParentDirectory(await path),
+      path: `${await getParentDirectory(await path)}${separator}`,
       setSearchWord,
       setItemList,
     });
@@ -168,6 +171,7 @@ const confirmBeforeRun = (
 
 export const openItem = (
   item: Item,
+  separator: string,
   setSearchWord: (searchWord: string) => void,
   setItemList: (itemList: ItemList) => void,
   setSelectedView: (selectedView: SelectedView) => void,
@@ -181,7 +185,7 @@ export const openItem = (
       ? pipe(
           task.fromPromise(() =>
             updateItemList({
-              path: item.path,
+              path: `${item.path}${separator}`,
               setSearchWord,
               setItemList,
             }),
@@ -194,6 +198,7 @@ export const openItem = (
 
 const afterRun = (
   destination: Item,
+  separator: string,
   setMode: (mode?: Mode) => void,
   setSearchWord: (searchWord: string) => void,
   setItemList: (itemList: ItemList) => void,
@@ -205,8 +210,8 @@ const afterRun = (
       () => async () =>
         updateItemList({
           path: isDot(destination)
-            ? destination.path
-            : await getParentDirectory(destination.path),
+            ? `${destination.path}${separator}`
+            : `${await getParentDirectory(destination.path)}${separator}`,
           setSearchWord,
           setItemList,
         }),
@@ -216,6 +221,7 @@ const afterRun = (
 const confirmRenameBeforeRun = (
   source: ReadonlyArray<Item>,
   destination: Item,
+  separator: string,
   setMode: (mode?: Mode) => void,
   setSearchWord: (searchWord: string) => void,
   setItemList: (itemList: ItemList) => void,
@@ -229,7 +235,7 @@ const confirmRenameBeforeRun = (
     pipe(
       task.fromPromise(run),
       task.flatMap(() =>
-        afterRun(destination, setMode, setSearchWord, setItemList),
+        afterRun(destination, separator, setMode, setSearchWord, setItemList),
       ),
       task.map(() =>
         ok(`Renamed ${joinItemPath(', ')(source)} to ${destination.path}`),
@@ -240,6 +246,7 @@ const confirmRenameBeforeRun = (
 export const renameOverwrite = (
   source: ReadonlyArray<Item>,
   destination: Item,
+  separator: string,
   setMode: (mode?: Mode) => void,
   setSearchWord: (searchWord: string) => void,
   setItemList: (itemList: ItemList) => void,
@@ -248,6 +255,7 @@ export const renameOverwrite = (
     confirmRenameBeforeRun(
       source,
       destination,
+      separator,
       setMode,
       setSearchWord,
       setItemList,
@@ -258,7 +266,7 @@ export const renameOverwrite = (
     pipe(
       task.fromPromise(run),
       task.flatMap(() =>
-        afterRun(destination, setMode, setSearchWord, setItemList),
+        afterRun(destination, separator, setMode, setSearchWord, setItemList),
       ),
       task.map(() =>
         ok(`Renamed ${joinItemPath(', ')(source)} to ${destination.path}`),
@@ -321,6 +329,7 @@ export const renameOverwrite = (
 const confirmCopyBeforeRun = (
   source: ReadonlyArray<Item>,
   destination: Item,
+  separator: string,
   setMode: (mode?: Mode) => void,
   setSearchWord: (searchWord: string) => void,
   setItemList: (itemList: ItemList) => void,
@@ -334,7 +343,7 @@ const confirmCopyBeforeRun = (
     pipe(
       task.fromPromise(run),
       task.flatMap(() =>
-        afterRun(destination, setMode, setSearchWord, setItemList),
+        afterRun(destination, separator, setMode, setSearchWord, setItemList),
       ),
       task.map(() =>
         ok(`Copied ${joinItemPath(', ')(source)} to ${destination.path}`),
@@ -345,6 +354,7 @@ const confirmCopyBeforeRun = (
 export const copyOverwrite = (
   source: ReadonlyArray<Item>,
   destination: Item,
+  separator: string,
   setMode: (mode?: Mode) => void,
   setSearchWord: (searchWord: string) => void,
   setItemList: (itemList: ItemList) => void,
@@ -353,6 +363,7 @@ export const copyOverwrite = (
     confirmCopyBeforeRun(
       source,
       destination,
+      separator,
       setMode,
       setSearchWord,
       setItemList,
@@ -363,7 +374,7 @@ export const copyOverwrite = (
     pipe(
       task.fromPromise(run),
       task.flatMap(() =>
-        afterRun(destination, setMode, setSearchWord, setItemList),
+        afterRun(destination, separator, setMode, setSearchWord, setItemList),
       ),
       task.map(() =>
         ok(`Copied ${joinItemPath(', ')(source)} to ${destination.path}`),
@@ -426,3 +437,228 @@ export const copyOverwrite = (
     return task.error<Ok>(Error(`Cannot copy a directory to a file`));
   }
 };
+
+export const setCopyMode = ({
+  item,
+  itemList,
+  checked,
+  setMode,
+  setChecked,
+  setSelectedView,
+}: Readonly<{
+  item: Item;
+  itemList?: ItemList;
+  checked: Readonly<{ [key: number]: boolean }>;
+  setMode: (mode?: Mode) => void;
+  setChecked: (checked: Readonly<{ [key: number]: boolean }>) => void;
+  setSelectedView: (selectedView: SelectedView) => void;
+}>): KeyParams => ({
+  desc: 'Copy',
+  run: async () =>
+    pipe(
+      setMode({
+        type: 'copy',
+        source: getCheckedItemsOr({ checked, itemList, default: item }),
+      }),
+      () => setChecked({}),
+      async () => await goToSearchBox({ setSelectedView }).run(),
+      () => ok(),
+    ),
+});
+
+export const setRenameMode = ({
+  item,
+  itemList,
+  checked,
+  setMode,
+  setChecked,
+  setSelectedView,
+}: Readonly<{
+  item: Item;
+  itemList?: ItemList;
+  checked: Readonly<{ [key: number]: boolean }>;
+  setMode: (mode?: Mode) => void;
+  setChecked: (checked: Readonly<{ [key: number]: boolean }>) => void;
+  setSelectedView: (selectedView: SelectedView) => void;
+}>): KeyParams => ({
+  desc: 'Rename',
+  run: async () =>
+    pipe(
+      setMode({
+        type: 'rename',
+        source: getCheckedItemsOr({ checked, itemList, default: item }),
+      }),
+      () => setChecked({}),
+      async () => await goToSearchBox({ setSelectedView }).run(),
+      () => ok(),
+    ),
+});
+
+export const deleteItems = ({
+  item,
+  itemList,
+  checked,
+  separator,
+  setMode,
+  setSearchWord,
+  setItemList,
+  setChecked,
+}: Readonly<{
+  item: Item;
+  itemList?: ItemList;
+  checked: Readonly<{ [key: number]: boolean }>;
+  separator: string;
+  setMode: (mode?: Mode) => void;
+  setSearchWord: (searchWord: string) => void;
+  setItemList: (itemList: ItemList) => void;
+  setChecked: (checked: Readonly<{ [key: number]: boolean }>) => void;
+}>): KeyParams => ({
+  desc: 'Delete',
+  run: async () =>
+    pipe(
+      setMode({
+        type: 'confirm',
+        action: {
+          id: 'confirm-delete',
+          title: 'Are you sure you want to delete the file?',
+          keys: [
+            keyY({
+              desc: 'Delete the file',
+              run: async () =>
+                pipe(
+                  await sequenceItems({
+                    items: getCheckedItemsOr({
+                      checked,
+                      itemList,
+                      default: item,
+                    }),
+                    onItem: async item =>
+                      item.itemType === 'file'
+                        ? await deleteFile(item.path)
+                        : item.itemType === 'directory'
+                          ? await deleteDirectory(item.path)
+                          : null,
+                  }),
+                  async a =>
+                    a !== null
+                      ? await updateItemList({
+                          path: `${a.parent.path}${separator}`,
+                          setSearchWord,
+                          setItemList,
+                        })
+                      : //pipe(setSearchWord(a.path), () => setItemList(a))
+                        void 0,
+                  () => setChecked({}),
+                  () => setMode(),
+                  () => ok(`Deleted ${item.path}`),
+                ),
+            }),
+            keyN({
+              desc: 'Cancel',
+              run: async () => pipe(setMode(), () => ok()),
+            }),
+          ],
+        },
+      }),
+      () => ok(),
+    ),
+});
+
+export const cancel = ({
+  source,
+  separator,
+  setMode,
+  setSearchWord,
+  setItemList,
+}: Readonly<{
+  source: Item;
+  separator: string;
+  setMode: (mode?: Mode) => void;
+  setSearchWord: (searchWord: string) => void;
+  setItemList: (itemList: ItemList) => void;
+}>): KeyParams => ({
+  desc: 'Cancel',
+  run: async () => {
+    setMode(undefined);
+    await updateItemList({
+      path: `${await getParentDirectory(source.path)}${separator}`,
+      setSearchWord,
+      setItemList,
+    });
+    return ok();
+  },
+});
+
+const getCommonPrefix = (items: ReadonlyArray<Item>, i: number): string => {
+  const [item, ...rest] = items;
+  const a = item.name[i];
+  if (rest.every(item => item.name[i] === a)) {
+    return a + getCommonPrefix(items, i + 1);
+  } else {
+    return '';
+  }
+};
+
+export const completion = ({
+  path,
+  itemList,
+  selectedView,
+  separator,
+  setItemList,
+  setSearchWord,
+  setSelectedView,
+}: Readonly<{
+  path: string;
+  itemList?: ItemList;
+  selectedView: SelectedView;
+  separator: string;
+  setItemList: (itemList: ItemList) => void;
+  setSearchWord: (searchWord: string) => void;
+  setSelectedView: (selectedView: SelectedView) => void;
+}>): KeyParams => ({
+  desc: 'Completion',
+  run: async () => {
+    const matched =
+      itemList?.items.filter(item => {
+        return item.path.startsWith(path);
+      }) ?? [];
+
+    if (matched.length === 0) {
+      return ok();
+    } else if (matched.length === 1) {
+      const newPath = matched[0].path;
+      if (selectedView.name === 'search-box') {
+        setSelectedView({
+          ...selectedView,
+          selectionStart: newPath.length,
+          selectionEnd: newPath.length,
+        });
+      }
+      await updateItemList({
+        path: newPath,
+        setSearchWord,
+        setItemList,
+      });
+      return ok();
+    } else {
+      const prefix = getCommonPrefix(matched, 0);
+      const newPath =
+        itemList?.parent.path.endsWith(separator) === true
+          ? `${itemList?.parent.path}${prefix}`
+          : `${await getParentDirectory(path)}${separator}${prefix}`;
+      if (selectedView.name === 'search-box') {
+        setSelectedView({
+          ...selectedView,
+          selectionStart: newPath.length,
+          selectionEnd: newPath.length,
+        });
+      }
+      await updateItemList({
+        path: newPath,
+        setSearchWord,
+        setItemList,
+      });
+      return ok();
+    }
+  },
+});

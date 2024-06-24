@@ -16,7 +16,8 @@ const createPanel = () =>
   vscode.window.createWebviewPanel(
     'filer', // Identifies the type of the webview. Used internally
     'Filer', // Title of the panel displayed to the user
-    vscode.ViewColumn.One, // Editor column to show the new webview panel in.
+    // Editor column to show the new webview panel in.
+    vscode.window.activeTextEditor?.viewColumn ?? vscode.ViewColumn.One,
     {
       enableScripts: true,
       // localResourceRoots: [
@@ -66,12 +67,12 @@ const createWebViewManager = (
   };
 };
 
-export const getFilerPanel = scope(() => {
-  return (context: vscode.ExtensionContext): vscode.WebviewPanel => {
-    if (state.webViewManager !== undefined) {
-      state.webViewManager.panel.dispose();
-    }
-    state.webViewManager = createWebViewManager(context);
-    return state.webViewManager.panel;
-  };
-});
+export const getFilerPanel = (
+  context: vscode.ExtensionContext,
+): vscode.WebviewPanel => {
+  if (state.webViewManager !== undefined) {
+    state.webViewManager.panel.dispose();
+  }
+  state.webViewManager = createWebViewManager(context);
+  return state.webViewManager.panel;
+};

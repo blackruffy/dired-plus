@@ -1,5 +1,5 @@
 import { Task } from 'fp-ts/lib/Task';
-import * as task_ from 'fp-ts/lib/Task';
+import * as taskModule from 'fp-ts/lib/Task';
 
 export const fromPromise = <A>(p: () => Promise<A>): Task<A> => p;
 
@@ -13,7 +13,7 @@ export const run = <A>(self: Task<A>): void => {
 };
 
 export const task = {
-  ...task_,
+  ...taskModule,
   fromPromise,
   error,
   run,

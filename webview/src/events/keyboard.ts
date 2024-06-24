@@ -7,7 +7,7 @@ import {
 } from '@src/store';
 import React from 'react';
 
-const keyInterval = 50;
+const keyInterval = 30;
 
 const onArrowUp = (
   event: KeyboardEvent,
@@ -140,20 +140,12 @@ export const useKeyDownEvent = (action?: Action) => {
       } else if (actionKey !== undefined) {
         event.preventDefault();
         event.stopPropagation();
-        actionKey
-          .run()
-          .then(({ message }) => {
-            // state.setMode({
-            //   message: message ?? '',
-            //   type: 'info',
-            // });
-          })
-          .catch(err => {
-            state.setMode({
-              message: String(err),
-              type: 'error',
-            });
+        actionKey.run().catch(err => {
+          state.setMode({
+            message: String(err),
+            type: 'error',
           });
+        });
       }
 
       moveItems(event, state);

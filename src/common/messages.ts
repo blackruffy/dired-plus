@@ -5,6 +5,7 @@ export type MessageKey =
   | 'list-items'
   | 'get-parent-directory'
   | 'get-base-name'
+  | 'get-separator'
   | 'join-path'
   | 'open-file'
   | 'create-file'
@@ -51,6 +52,10 @@ export type GetBaseNameRequest = Request<'get-base-name'> &
   Readonly<{ path: string }>;
 export type GetBaseNameResponse = Response<'get-base-name'> &
   Readonly<{ name: string }>;
+
+export type GetSeparatorRequest = Request<'get-separator'>;
+export type GetSeparatorResponse = Response<'get-separator'> &
+  Readonly<{ separator: string }>;
 
 export type JoinPathRequest = Request<'join-path'> &
   Readonly<{ items: ReadonlyArray<string> }>;

@@ -15,6 +15,7 @@ export const useAction = (): Action | undefined => {
     selectedView,
     itemList,
     mode,
+    separator,
     setMode,
     setSearchWord,
     setItemList,
@@ -43,53 +44,82 @@ export const useAction = (): Action | undefined => {
   } else if (selectedView.name === 'search-box') {
     if (itemList === undefined) {
       return undefined;
-    } else if (itemList?.itemType !== 'none' && mode?.type === 'copy') {
+    } else if (itemList?.parent.itemType !== 'none' && mode?.type === 'copy') {
       return searchBoxIsItemCopy({
-        path: itemList.path,
-        itemType: itemList.itemType,
+        item: itemList.parent,
+        itemList,
         source: mode.source,
+        selectedView,
+        separator: separator ?? '/',
         setMode,
         setSearchWord,
         setItemList,
+        setSelectedView,
       });
-    } else if (itemList?.itemType !== 'none' && mode?.type === 'rename') {
+    } else if (
+      itemList?.parent.itemType !== 'none' &&
+      mode?.type === 'rename'
+    ) {
       return searchBoxIsItemRename({
-        path: itemList.path,
-        itemType: itemList.itemType,
+        item: itemList.parent,
+        itemList,
         source: mode.source,
+        selectedView,
+        separator: separator ?? '/',
         setMode,
         setSearchWord,
         setItemList,
+        setSelectedView,
       });
-    } else if (itemList?.itemType === 'none' && mode?.type === 'copy') {
+    } else if (itemList?.parent.itemType === 'none' && mode?.type === 'copy') {
       return searchBoxIsNoneCopy({
-        path: itemList.path,
+        item: itemList.parent,
+        itemList,
         source: mode.source,
+        selectedView,
+        separator: separator ?? '/',
         setMode,
         setSearchWord,
         setItemList,
+        setSelectedView,
       });
-    } else if (itemList?.itemType === 'none' && mode?.type === 'rename') {
+    } else if (
+      itemList?.parent.itemType === 'none' &&
+      mode?.type === 'rename'
+    ) {
       return searchBoxIsNoneRename({
-        path: itemList.path,
+        item: itemList.parent,
+        itemList,
         source: mode.source,
+        selectedView,
+        separator: separator ?? '/',
         setMode,
         setSearchWord,
         setItemList,
+        setSelectedView,
       });
-    } else if (itemList?.itemType === 'none' && mode === undefined) {
+    } else if (itemList?.parent.itemType === 'none' && mode === undefined) {
       return searchBoxIsNoneDefault({
-        path: itemList.path,
+        path: itemList.parent.path,
+        itemList,
+        selectedView,
+        separator: separator ?? '/',
         setItemList,
         setSearchWord,
         setSelectedView,
       });
-    } else if (itemList?.itemType !== 'none' && mode === undefined) {
+    } else if (itemList?.parent.itemType !== 'none' && mode === undefined) {
       return searchBoxIsItemDefault({
-        path: itemList.path,
+        item: itemList.parent,
+        itemList,
+        selectedView,
+        checked,
+        separator: separator ?? '/',
+        setMode,
         setItemList,
         setSearchWord,
         setSelectedView,
+        setChecked,
       });
     } else {
       return undefined;
@@ -102,6 +132,7 @@ export const useAction = (): Action | undefined => {
         index: selectedView.index,
         item,
         itemList,
+        separator: separator ?? '/',
         setMode,
         setSearchWord,
         setItemList,
@@ -117,6 +148,7 @@ export const useAction = (): Action | undefined => {
       return itemListIsItemCopy({
         destination: item,
         source: mode.source,
+        separator: separator ?? '/',
         setMode,
         setSelectedView,
         setSearchWord,
@@ -130,6 +162,7 @@ export const useAction = (): Action | undefined => {
       return itemListIsItemRename({
         destination: item,
         source: mode.source,
+        separator: separator ?? '/',
         setMode,
         setSelectedView,
         setSearchWord,

@@ -19,6 +19,8 @@ import {
   GetBaseNameResponse,
   GetParentDirectoryRequest,
   GetParentDirectoryResponse,
+  GetSeparatorRequest,
+  GetSeparatorResponse,
   JoinPathRequest,
   JoinPathResponse,
   ListItemsRequest,
@@ -30,7 +32,6 @@ import {
   RenameFileRequest,
   RenameFileResponse,
 } from '@common/messages';
-import { scope } from '@common/scope';
 import { updateItemList } from '@src/action/helpers';
 import { useStore } from '@src/store';
 import { request } from '@src/utils/request';
@@ -57,6 +58,13 @@ export const getBaseName = async (path: string): Promise<string> =>
       path,
     })
   ).name;
+
+export const getSeparator = async (): Promise<string> =>
+  (
+    await request<GetSeparatorRequest, GetSeparatorResponse>({
+      key: 'get-separator',
+    })
+  ).separator;
 
 export const joinPath = async (
   ...items: ReadonlyArray<string>
@@ -160,11 +168,18 @@ export const closePanel = async (): Promise<void> => {
 };
 
 export const useNativeEvent = () => {
-  const { itemList, setItemList, setSearchWord } = useStore();
+  const { itemList, setItemList, setSearchWord, separator, setSeparator } =
+    useStore();
 
   React.useEffect(() => {
     if (itemList === undefined) {
-      scope(() => updateItemList({ setSearchWord, setItemList }));
+      updateItemList({ setSearchWord, setItemList });
     }
   }, [itemList, setItemList, setSearchWord]);
+
+  React.useEffect(() => {
+    if (separator == null) {
+      getSeparator().then(setSeparator);
+    }
+  }, [separator, setSeparator]);
 };

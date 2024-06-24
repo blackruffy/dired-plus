@@ -16,15 +16,18 @@ export const key =
     run,
   });
 
-export const keyAlphabet = (name: string) =>
-  key(name, `Key${name.toUpperCase()}`);
+export const keyAlphabet = (
+  name: string,
+  modifierKeys?: Partial<ModifierKeys>,
+) => key(name, `Key${name.toUpperCase()}`, modifierKeys);
 
 export const keyEscape = key('ESC', 'Escape');
 export const keyEnter = key('⏎', 'Enter');
 export const keyShiftEnter = key('⇧ + ↩︎', 'Enter', { shiftKey: true });
 export const keySpace = key('␣', 'Space');
-export const keyBackspace = key('⇦', 'Backspace');
-export const keyCtrlBackspace = key('^ + ⇦', 'Backspace', {
+export const keyBackspace = key('BS', 'Backspace');
+export const keyTab = key('TAB', 'Tab');
+export const keyCtrlBackspace = key('^ + BS', 'Backspace', {
   controlKey: true,
 });
 export const keyC = keyAlphabet('c');
@@ -40,3 +43,8 @@ export const keyR = keyAlphabet('r');
 export const keyX = keyAlphabet('x');
 export const keyY = keyAlphabet('y');
 export const keyZ = keyAlphabet('z');
+
+export const keyCtrlC = key('^ + c', 'KeyC', { controlKey: true });
+export const keyCtrlD = key('^ + d', 'KeyD', { controlKey: true });
+export const keyCtrlG = key('^ + g', 'KeyG', { controlKey: true });
+export const keyCtrlR = key('^ + r', 'KeyR', { controlKey: true });

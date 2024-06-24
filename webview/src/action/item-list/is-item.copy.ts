@@ -1,17 +1,27 @@
 import { Item, ItemList } from '@common/item';
 import {
+  cancel,
   copyOverwrite,
   goToParentDirectory,
   goToSearchBox,
   openItem,
 } from '@src/action/helpers';
-import { keyEnter, keyF, keyP, keyQ, keyX } from '@src/action/keys';
+import {
+  keyC,
+  keyEnter,
+  keyEscape,
+  keyF,
+  keyP,
+  keyQ,
+  keyX,
+} from '@src/action/keys';
 import { closePanel, getParentDirectory } from '@src/events/native';
 import { Action, Mode, SelectedView, ok } from '@src/store';
 
 export const itemListIsItemCopy = ({
   destination,
   source,
+  separator,
   setMode,
   setSelectedView,
   setSearchWord,
@@ -19,6 +29,7 @@ export const itemListIsItemCopy = ({
 }: Readonly<{
   destination: Item;
   source: ReadonlyArray<Item>;
+  separator: string;
   setMode: (mode?: Mode) => void;
   setSelectedView: (selectedView: SelectedView) => void;
   setSearchWord: (searchWord: string) => void;
@@ -29,12 +40,19 @@ export const itemListIsItemCopy = ({
   keys: [
     keyEnter({
       desc: 'Open',
-      run: openItem(destination, setSearchWord, setItemList, setSelectedView),
+      run: openItem(
+        destination,
+        separator,
+        setSearchWord,
+        setItemList,
+        setSelectedView,
+      ),
     }),
 
     keyP(
       goToParentDirectory({
         path: getParentDirectory(destination.path),
+        separator,
         setSearchWord,
         setItemList,
       }),
@@ -45,6 +63,7 @@ export const itemListIsItemCopy = ({
       run: copyOverwrite(
         source,
         destination,
+        separator,
         setMode,
         setSearchWord,
         setItemList,
@@ -53,7 +72,25 @@ export const itemListIsItemCopy = ({
 
     keyF(goToSearchBox({ setSelectedView })),
 
+    keyC(
+      cancel({
+        source: source[0],
+        separator,
+        setMode,
+        setSearchWord,
+        setItemList,
+      }),
+    ),
+
     keyQ({
+      desc: 'Quit',
+      run: async () => {
+        await closePanel();
+        return ok();
+      },
+    }),
+
+    keyEscape({
       desc: 'Quit',
       run: async () => {
         await closePanel();

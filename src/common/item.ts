@@ -2,14 +2,20 @@ import { readonlyArray } from 'fp-ts';
 import { pipe } from 'fp-ts/lib/function';
 
 export type ItemType = 'file' | 'directory' | 'none';
+export type ItemStat = Readonly<{
+  type: ItemType;
+  size?: number;
+  lastUpdated?: number; // Epoch time in milliseconds
+}>;
 export type Item = Readonly<{
   name: string;
   path: string;
   itemType: ItemType;
+  size?: number; // in bytes
+  lastUpdated?: number; // Epoch time in milliseconds
 }>;
 export type ItemList = Readonly<{
-  path: string;
-  itemType: ItemType;
+  parent: Item;
   items: ReadonlyArray<Item>;
 }>;
 

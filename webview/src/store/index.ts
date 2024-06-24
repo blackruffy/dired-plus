@@ -9,6 +9,7 @@ export type State = Readonly<{
   checked: Readonly<{ [key: number]: boolean }>;
   mode?: Mode;
   modifierKeys: ModifierKeys;
+  separator?: string;
   // setStatus: (status?: Status) => void;
   setSearchWord: (searchWord: string) => void;
   setItemList: (itemList: ItemList) => void;
@@ -16,6 +17,7 @@ export type State = Readonly<{
   setChecked: (checked: Readonly<{ [key: number]: boolean }>) => void;
   setMode: (mode?: Mode) => void;
   setModifierKeys: (modifierKeys: Partial<ModifierKeys>) => void;
+  setSeparator: (separator: string) => void;
 }>;
 
 // export type Status = Readonly<{
@@ -25,7 +27,13 @@ export type State = Readonly<{
 
 export type SelectedView = SearchBox | ListItem;
 
-export type SearchBox = Readonly<{ name: 'search-box'; updatedAt: number }>;
+export type SearchBox = Readonly<{
+  name: 'search-box';
+  selectionStart?: number;
+  selectionEnd?: number;
+  itemIndex?: number;
+  updatedAt: number;
+}>;
 export type ListItem = Readonly<{
   name: 'list-item';
   index: number;
@@ -92,7 +100,10 @@ export const ok = (message?: string): Ok => ({ message });
 
 export const useStore = create<State>(set => ({
   searchWord: '',
-  selectedView: { name: 'search-box', updatedAt: 0 },
+  selectedView: {
+    name: 'search-box',
+    updatedAt: 0,
+  },
   checked: {},
   modifierKeys: toModifierKeys(),
   // setStatus: status => set(() => ({ status })),
@@ -103,4 +114,5 @@ export const useStore = create<State>(set => ({
   setMode: mode => set(() => ({ mode })),
   setModifierKeys: modifierKeys =>
     set(() => ({ modifierKeys: toModifierKeys(modifierKeys) })),
+  setSeparator: separator => set(() => ({ separator })),
 }));

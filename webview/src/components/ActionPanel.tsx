@@ -1,4 +1,4 @@
-import { Box, Theme, useTheme } from '@mui/material';
+import { Box, Divider, Theme, useTheme } from '@mui/material';
 import { Action } from '@src/store';
 import React from 'react';
 
@@ -16,8 +16,13 @@ const getStyles = (theme: Theme) => ({
     fontSize: '0.8rem',
   },
   listContainer: {
-    display: 'grid',
-    gridTemplateColumns: `auto 1fr auto 1fr`,
+    //display: 'grid',
+    //gridTemplateColumns: `auto 1fr auto 1fr`,
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    flexWrap: 'wrap',
     fontSize: '0.7rem',
   },
   row: {
@@ -62,44 +67,51 @@ export const ActionPanel = ({
     return <></>;
   } else {
     return (
-      <Box
-        sx={[
-          styles.container,
-          {
-            border: `1px solid ${colorStyle.backgroundColor}`,
-          },
-        ]}
-      >
+      <Box sx={[styles.container]}>
         <Box sx={[styles.header, colorStyle]}>{action.title}</Box>
+        <Divider />
         <Box sx={styles.listContainer}>
-          {action.keys.flatMap(({ name, desc }, i) => [
+          {action.keys.map(({ name, desc }, i) => (
             <Box
+              key={i}
               sx={{
-                gridRow: `${Math.floor(i / 2) + 1}`,
-                gridColumn: i % 2 === 0 ? `1` : `3`,
-                padding: `4px 16px 4px 16px`,
-                display: `flex`,
-                justifyContent: `flex-start`,
-                alignItems: `center`,
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: `4px`,
               }}
             >
-              {name}
-            </Box>,
-            <Box
-              sx={{
-                gridRow: `${Math.floor(i / 2) + 1}`,
-                gridColumn: i % 2 === 0 ? `2` : `4`,
-                padding: `4px 4px 4px 4px`,
-                borderRight:
-                  i % 2 === 0 ? `1px solid ${theme.palette.divider}` : `none`,
-                display: `flex`,
-                justifyContent: `flex-start`,
-                alignItems: `center`,
-              }}
-            >
-              {desc}
-            </Box>,
-          ])}
+              <Box
+                sx={{
+                  //gridRow: `${Math.floor(i / 2) + 1}`,
+                  //gridColumn: i % 2 === 0 ? `1` : `3`,
+                  backgroundColor: theme.palette.text.primary,
+                  color: theme.palette.background.default,
+                  fontWeight: `bold`,
+                  borderRadius: `0.5em`,
+                  padding: `2px 8px 2px 8px`,
+                  display: `flex`,
+                  justifyContent: `flex-start`,
+                  alignItems: `center`,
+                }}
+              >
+                {name}
+              </Box>
+              <Box
+                sx={{
+                  //gridRow: `${Math.floor(i / 2) + 1}`,
+                  //gridColumn: i % 2 === 0 ? `2` : `4`,
+                  padding: `4px 4px 4px 4px`,
+                  display: `flex`,
+                  justifyContent: `flex-start`,
+                  alignItems: `center`,
+                }}
+              >
+                {desc}
+              </Box>
+            </Box>
+          ))}
         </Box>
       </Box>
     );

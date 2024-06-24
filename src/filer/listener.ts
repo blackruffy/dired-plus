@@ -15,6 +15,8 @@ import {
   GetBaseNameResponse,
   GetParentDirectoryRequest,
   GetParentDirectoryResponse,
+  GetSeparatorRequest,
+  GetSeparatorResponse,
   JoinPathRequest,
   JoinPathResponse,
   ListItemsRequest,
@@ -30,7 +32,6 @@ import {
   errorResponse,
   response,
 } from '@src/common/messages';
-import { openCurrentHistoryItem } from '@src/history';
 import * as nodePath from 'path';
 import * as vscode from 'vscode';
 import {
@@ -42,23 +43,25 @@ import {
   deleteFile,
   getBaseName,
   getCurrentDirectory,
-  getItemType,
+  getItemStat,
   getItems,
   getParentDirectory,
+  getSeparator,
   openFile,
   renameDirectory,
   renameFile,
 } from './helpers';
 
-const showMessage = (msg: string) => {
-  console.log(msg);
-  vscode.window.showInformationMessage(msg);
-};
+// const showMessage = (msg: string) => {
+//   console.log(msg);
+//   vscode.window.showInformationMessage(msg);
+// };
 
 export const startListen = (
   context: vscode.ExtensionContext,
   panel: vscode.WebviewPanel,
 ): vscode.Disposable => {
+  const active = vscode.window.activeTextEditor;
   const currentDirectory = getCurrentDirectory();
   return panel.webview.onDidReceiveMessage(
     async (message: Request<MessageKey>) => {
@@ -66,13 +69,18 @@ export const startListen = (
         switch (message.key) {
           case 'list-items': {
             const req = message as ListItemsRequest;
-            const searchPath = req.path ?? currentDirectory;
-            const itemType = await getItemType(searchPath);
+            const searchPath = req.path ?? `${currentDirectory}${nodePath.sep}`;
+            const itemStat = await getItemStat(searchPath);
             const itemList = await getItems(searchPath);
             panel.webview.postMessage(
               response<ListItemsResponnse>(req, {
-                path: searchPath,
-                itemType: itemType,
+                parent: {
+                  name: nodePath.basename(searchPath),
+                  path: searchPath,
+                  itemType: itemStat.type,
+                  size: itemStat.size,
+                  lastUpdated: itemStat.lastUpdated,
+                },
                 items: itemList,
               }),
             );
@@ -92,6 +100,15 @@ export const startListen = (
             panel.webview.postMessage(
               response<GetBaseNameResponse>(req, {
                 name: getBaseName(req.path),
+              }),
+            );
+            return;
+          }
+          case 'get-separator': {
+            const req = message as GetSeparatorRequest;
+            panel.webview.postMessage(
+              response<GetSeparatorResponse>(req, {
+                separator: getSeparator(),
               }),
             );
             return;
@@ -163,10 +180,16 @@ export const startListen = (
           case 'delete-file': {
             const req = message as DeleteFileRequest;
             const { path, items } = await deleteFile(req.path);
+            const stat = await getItemStat(path);
             panel.webview.postMessage(
               response<DeleteFileResponse>(req, {
-                path,
-                itemType: await getItemType(path),
+                parent: {
+                  name: nodePath.basename(path),
+                  path,
+                  itemType: stat.type,
+                  size: stat.size,
+                  lastUpdated: stat.lastUpdated,
+                },
                 items,
               }),
             );
@@ -176,10 +199,16 @@ export const startListen = (
           case 'delete-directory': {
             const req = message as DeleteDirectoryRequest;
             const { path, items } = await deleteDirectory(req.path);
+            const stat = await getItemStat(path);
             panel.webview.postMessage(
               response<DeleteDirectoryResponse>(req, {
-                path,
-                itemType: await getItemType(path),
+                parent: {
+                  name: nodePath.basename(path),
+                  path,
+                  itemType: stat.type,
+                  size: stat.size,
+                  lastUpdated: stat.lastUpdated,
+                },
                 items,
               }),
             );
@@ -188,7 +217,12 @@ export const startListen = (
           }
           case 'close-panel': {
             panel.dispose();
-            await openCurrentHistoryItem();
+            if (active) {
+              vscode.window.showTextDocument(
+                active.document,
+                active.viewColumn,
+              );
+            }
           }
         }
       } catch (e: unknown) {

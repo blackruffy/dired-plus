@@ -1,5 +1,5 @@
 import { FileOptions } from '@src/common/file-options';
-import { Item, ItemType } from '@src/common/item';
+import { Item, ItemStat } from '@src/common/item';
 import * as fs from 'fs';
 import * as fsExtra from 'fs-extra';
 import * as os from 'os';
@@ -25,12 +25,19 @@ export const getParentDirectory = (path: string): string =>
 
 export const getBaseName = (path: string): string => nodePath.basename(path);
 
-export const getItemType = async (path: string): Promise<ItemType> => {
+export const getSeparator = (): string => nodePath.sep;
+
+export const getItemStat = async (path: string): Promise<ItemStat> => {
   try {
-    return (await fs.promises.stat(path)).isDirectory() ? 'directory' : 'file';
+    const stat = await fs.promises.stat(path);
+    return {
+      type: stat.isDirectory() ? 'directory' : 'file',
+      size: stat.size,
+      lastUpdated: stat.mtime.getTime(),
+    };
   } catch (e: unknown) {
     if ((e as { code: string }).code === 'ENOENT') {
-      return 'none';
+      return { type: 'none' };
     } else {
       return Promise.reject(e);
     }
@@ -38,35 +45,53 @@ export const getItemType = async (path: string): Promise<ItemType> => {
 };
 
 export const getItems = async (item: string): Promise<ReadonlyArray<Item>> => {
-  const type = await getItemType(item);
-  const [dir, prefix] =
-    type === 'directory'
+  const stat = await getItemStat(item);
+  const isSep = item.endsWith(nodePath.sep);
+  const isDir = stat.type === 'directory';
+  if (!isDir && isSep) {
+    return [];
+  } else {
+    const isDirSep = isDir && isSep;
+    const [dir, prefix] = isDirSep
       ? [item, null]
       : [nodePath.dirname(item), nodePath.basename(item)];
-  return (await fs.promises.readdir(dir)).reduce(
-    async (fitems, fname) => {
+    const defaultItems: ReadonlyArray<Item> = isDirSep
+      ? [
+          {
+            name: '.',
+            path: nodePath.join(dir, '.'),
+            itemType: 'directory',
+          },
+          {
+            name: '..',
+            path: getParentDirectory(dir),
+            itemType: 'directory',
+          },
+        ]
+      : [];
+    return (await fs.promises.readdir(dir)).reduce(async (fitems, fname) => {
       const items = await fitems;
-      if (prefix === null || fname.startsWith(prefix)) {
+      if (
+        prefix === null ||
+        fname.toLocaleLowerCase().startsWith(prefix.toLowerCase())
+      ) {
         const fpath = nodePath.join(dir, fname);
-        const ftype = await getItemType(fpath);
-        return [...items, { name: fname, path: fpath, itemType: ftype }];
+        const fstat = await getItemStat(fpath);
+        return [
+          ...items,
+          {
+            name: fname,
+            path: fpath,
+            itemType: fstat.type,
+            size: fstat.size,
+            lastUpdated: fstat.lastUpdated,
+          },
+        ];
       } else {
         return items;
       }
-    },
-    Promise.resolve<ReadonlyArray<Item>>([
-      {
-        name: '.',
-        path: nodePath.join(dir, '.'),
-        itemType: 'directory',
-      },
-      {
-        name: '..',
-        path: getParentDirectory(dir),
-        itemType: 'directory',
-      },
-    ]),
-  );
+    }, Promise.resolve<ReadonlyArray<Item>>(defaultItems));
+  }
 };
 
 export const openFile = async (path: string): Promise<void> => {

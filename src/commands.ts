@@ -1,5 +1,6 @@
 import { filer } from '@src/filer';
 import {
+  debugHistory,
   openNextHistoryItem,
   openPrevHistoryItem,
   resetHistory,
@@ -28,6 +29,12 @@ export const commands = (context: vscode.ExtensionContext) => {
   context.subscriptions.push(
     vscode.commands.registerCommand('incremental-filer.history:reset', () => {
       resetHistory();
+    }),
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('incremental-filer.history:debug', () => {
+      debugHistory();
     }),
   );
 };

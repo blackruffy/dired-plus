@@ -1,21 +1,32 @@
 import { ItemList } from '@common/item';
-import { goToParentDirectory, updateItemList } from '@src/action/helpers';
+import {
+  completion,
+  goToParentDirectory,
+  updateItemList,
+} from '@src/action/helpers';
 import {
   keyCtrlBackspace,
   keyEnter,
   keyEscape,
   keyShiftEnter,
+  keyTab,
 } from '@src/action/keys';
-import { createDirectory, createFile } from '@src/events/native';
+import { closePanel, createDirectory, createFile } from '@src/events/native';
 import { Action, SelectedView, ok } from '@src/store';
 
 export const searchBoxIsNoneDefault = ({
   path,
+  itemList,
+  selectedView,
+  separator,
   setItemList,
   setSearchWord,
   setSelectedView,
 }: Readonly<{
   path: string;
+  itemList?: ItemList;
+  selectedView: SelectedView;
+  separator: string;
   setItemList: (itemList: ItemList) => void;
   setSearchWord: (searchWord: string) => void;
   setSelectedView: (selectedView: SelectedView) => void;
@@ -47,19 +58,28 @@ export const searchBoxIsNoneDefault = ({
     keyCtrlBackspace(
       goToParentDirectory({
         path: Promise.resolve(path),
+        separator,
         setItemList,
         setSearchWord,
       }),
     ),
 
+    keyTab(
+      completion({
+        path,
+        itemList,
+        selectedView,
+        separator,
+        setItemList,
+        setSearchWord,
+        setSelectedView,
+      }),
+    ),
+
     keyEscape({
-      desc: 'Command mode',
+      desc: 'Quit',
       run: async () => {
-        setSelectedView({
-          name: 'list-item',
-          index: 0,
-          updatedAt: Date.now(),
-        });
+        await closePanel();
         return ok();
       },
     }),
