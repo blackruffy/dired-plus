@@ -1,8 +1,10 @@
 import { Item, ItemList } from '@common/item';
+import { ColorTheme } from '@common/theme-color';
+import { IntlMessage } from '@src/i18n';
 import { create } from 'zustand';
 
 export type State = Readonly<{
-  // status?: Status;
+  status?: Status;
   searchWord: string;
   itemList?: ItemList;
   selectedView: SelectedView;
@@ -10,7 +12,11 @@ export type State = Readonly<{
   mode?: Mode;
   modifierKeys: ModifierKeys;
   separator?: string;
-  // setStatus: (status?: Status) => void;
+  dialog?: Dialog;
+  colorTheme: ColorTheme;
+  locale: string;
+  setState: (state: Partial<State>) => void;
+  setStatus: (status?: Status) => void;
   setSearchWord: (searchWord: string) => void;
   setItemList: (itemList: ItemList) => void;
   setSelectedView: (selectedView: SelectedView) => void;
@@ -18,12 +24,23 @@ export type State = Readonly<{
   setMode: (mode?: Mode) => void;
   setModifierKeys: (modifierKeys: Partial<ModifierKeys>) => void;
   setSeparator: (separator: string) => void;
+  setDialog: (dialog?: Dialog) => void;
+  setColorTheme: (colorTheme: ColorTheme) => void;
+  setLocale: (locale: string) => void;
 }>;
 
-// export type Status = Readonly<{
-//   message: string;
-//   type: 'none' | 'info' | 'success' | 'warning' | 'error';
-// }>;
+export type StatusType =
+  | 'none'
+  | 'info'
+  | 'confirm'
+  | 'success'
+  | 'warning'
+  | 'error';
+
+export type Status = Readonly<{
+  message: IntlMessage;
+  type: StatusType;
+}>;
 
 export type SelectedView = SearchBox | ListItem;
 
@@ -49,20 +66,18 @@ export type ModifierKeys = Readonly<{
 
 export type ActionKey = Readonly<{
   name: string;
-  desc: string;
+  desc: IntlMessage;
   modifierKeys: ModifierKeys;
   code: string;
-  run: () => Promise<Ok>;
+  run: () => Promise<Partial<State>>;
 }>;
 
-export type Ok = Readonly<{ message?: string }>;
+export type Mode = CopyMode | RenameMode;
 
-export type Mode = ConfirmMode | CopyMode | RenameMode | ErrorMode;
-
-export type ConfirmMode = Readonly<{
-  type: 'confirm';
-  action: Action;
-}>;
+// export type ConfirmMode = Readonly<{
+//   type: 'confirm';
+//   action: Action;
+// }>;
 
 export type CopyMode = Readonly<{
   type: 'copy';
@@ -74,16 +89,28 @@ export type RenameMode = Readonly<{
   source: ReadonlyArray<Item>;
 }>;
 
-export type ErrorMode = Readonly<{
-  type: 'error';
-  message: string;
-}>;
+// export type ErrorMode = Readonly<{
+//   type: 'error';
+//   message: string;
+// }>;
 
 export type Action = Readonly<{
   id: string;
-  title: string;
-  themeColor?: 'normal' | 'warning';
+  // title: string;
+  // themeColor?: 'normal' | 'warning';
   keys: ReadonlyArray<ActionKey>;
+}>;
+
+export type Dialog = Readonly<{
+  type: StatusType;
+  title: string | IntlMessage;
+  lines?: ReadonlyArray<string | IntlMessage>;
+  keys: ReadonlyArray<ActionKey>;
+}>;
+
+export type DialogButton = Readonly<{
+  title: IntlMessage;
+  onClick: () => Promise<Partial<State>>;
 }>;
 
 export const toModifierKeys = (
@@ -96,9 +123,21 @@ export const toModifierKeys = (
   ...params,
 });
 
-export const ok = (message?: string): Ok => ({ message });
+export const statusState = (
+  message: IntlMessage,
+  type: StatusType = 'info',
+): Partial<State> => ({
+  status: {
+    message,
+    type,
+  },
+});
 
 export const useStore = create<State>(set => ({
+  status: {
+    message: { id: 'none' },
+    type: 'none',
+  },
   searchWord: '',
   selectedView: {
     name: 'search-box',
@@ -106,7 +145,10 @@ export const useStore = create<State>(set => ({
   },
   checked: {},
   modifierKeys: toModifierKeys(),
-  // setStatus: status => set(() => ({ status })),
+  colorTheme: 'Dark',
+  locale: 'en-US',
+  setState: state => set(state),
+  setStatus: status => set(() => ({ status })),
   setSearchWord: searchWord => set(() => ({ searchWord })),
   setItemList: itemList => set(() => ({ itemList })),
   setSelectedView: selectedView => set(() => ({ selectedView })),
@@ -115,4 +157,7 @@ export const useStore = create<State>(set => ({
   setModifierKeys: modifierKeys =>
     set(() => ({ modifierKeys: toModifierKeys(modifierKeys) })),
   setSeparator: separator => set(() => ({ separator })),
+  setDialog: dialog => set(() => ({ dialog })),
+  setColorTheme: colorTheme => set(() => ({ colorTheme })),
+  setLocale: locale => set(() => ({ locale })),
 }));

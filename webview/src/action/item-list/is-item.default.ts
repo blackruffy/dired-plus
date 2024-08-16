@@ -10,19 +10,18 @@ import {
   updateItemList,
 } from '@src/action/helpers';
 import {
-  keyC,
-  keyD,
+  keyCtrlC,
+  keyCtrlD,
+  keyCtrlG,
+  keyCtrlI,
+  keyCtrlP,
+  keyCtrlR,
+  keyCtrlSpace,
   keyEnter,
-  keyEscape,
-  keyG,
-  keyI,
-  keyP,
-  keyQ,
-  keyR,
-  keySpace,
 } from '@src/action/keys';
-import { closePanel, getParentDirectory } from '@src/events/native';
-import { Action, Mode, SelectedView, ok } from '@src/store';
+import { getParentDirectory } from '@src/events/native';
+import { messageId } from '@src/i18n/ja';
+import { Action, Mode, SelectedView } from '@src/store';
 
 export const itemListIsItemDefault = ({
   index,
@@ -48,10 +47,9 @@ export const itemListIsItemDefault = ({
   setSelectedView: (selectedView: SelectedView) => void;
 }>): Action => ({
   id: 'item-list-is-item-default',
-  title: 'Available actions',
   keys: [
     keyEnter({
-      desc: 'Open',
+      desc: { id: messageId.open },
       run: openItem(
         item,
         separator,
@@ -61,8 +59,8 @@ export const itemListIsItemDefault = ({
       ),
     }),
 
-    keySpace({
-      desc: 'Select',
+    keyCtrlSpace({
+      desc: { id: messageId.select },
       run: async () => {
         const isDot = item.name === '.' || item.name === '..';
         setChecked({
@@ -73,11 +71,11 @@ export const itemListIsItemDefault = ({
               ? true
               : !checked[index],
         });
-        return ok();
+        return {};
       },
     }),
 
-    keyP(
+    keyCtrlP(
       goToParentDirectory({
         path: scope(async () => {
           return itemList?.parent.path ?? (await getParentDirectory(item.path));
@@ -88,37 +86,21 @@ export const itemListIsItemDefault = ({
       }),
     ),
 
-    keyI(goToSearchBox({ setSelectedView })),
+    keyCtrlI(goToSearchBox({ setSelectedView })),
 
-    keyG({
-      desc: 'Reload',
+    keyCtrlG({
+      desc: { id: messageId.reload },
       run: async () => {
         await updateItemList({
           path: itemList?.parent.path,
           setSearchWord,
           setItemList,
         });
-        return ok();
+        return {};
       },
     }),
 
-    keyQ({
-      desc: 'Quit',
-      run: async () => {
-        await closePanel();
-        return ok();
-      },
-    }),
-
-    keyEscape({
-      desc: 'Quit',
-      run: async () => {
-        await closePanel();
-        return ok();
-      },
-    }),
-
-    keyC(
+    keyCtrlC(
       setCopyMode({
         item,
         itemList,
@@ -129,7 +111,7 @@ export const itemListIsItemDefault = ({
       }),
     ),
 
-    keyR(
+    keyCtrlR(
       setRenameMode({
         item,
         itemList,
@@ -140,16 +122,14 @@ export const itemListIsItemDefault = ({
       }),
     ),
 
-    keyD(
+    keyCtrlD(
       deleteItems({
         item,
         itemList,
         checked,
         separator,
-        setMode,
         setSearchWord,
         setItemList,
-        setChecked,
       }),
     ),
   ],

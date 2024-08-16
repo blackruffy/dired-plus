@@ -7,12 +7,12 @@ import {
 import {
   keyCtrlBackspace,
   keyEnter,
-  keyEscape,
   keyShiftEnter,
   keyTab,
 } from '@src/action/keys';
-import { closePanel, createDirectory, createFile } from '@src/events/native';
-import { Action, SelectedView, ok } from '@src/store';
+import { createDirectory, createFile } from '@src/events/native';
+import { messageId } from '@src/i18n/ja';
+import { Action, SelectedView, statusState } from '@src/store';
 
 export const searchBoxIsNoneDefault = ({
   path,
@@ -32,18 +32,20 @@ export const searchBoxIsNoneDefault = ({
   setSelectedView: (selectedView: SelectedView) => void;
 }>): Action => ({
   id: 'search-box-is-none-default',
-  title: 'Available actions',
   keys: [
     keyEnter({
-      desc: 'Create a new file',
+      desc: { id: messageId.createFile },
       run: async () => {
         await createFile(path);
-        return ok(`Created a new file at ${path}`);
+        return statusState({
+          id: messageId.createdFile,
+          values: { src: path },
+        });
       },
     }),
 
     keyShiftEnter({
-      desc: 'Create a new directory',
+      desc: { id: messageId.createDir },
       run: async () => {
         await createDirectory(path);
         await updateItemList({
@@ -51,7 +53,10 @@ export const searchBoxIsNoneDefault = ({
           setItemList,
           setSearchWord,
         });
-        return ok(`Created a new directory at ${path}`);
+        return statusState({
+          id: messageId.createdDir,
+          values: { src: path },
+        });
       },
     }),
 
@@ -75,13 +80,5 @@ export const searchBoxIsNoneDefault = ({
         setSelectedView,
       }),
     ),
-
-    keyEscape({
-      desc: 'Quit',
-      run: async () => {
-        await closePanel();
-        return ok();
-      },
-    }),
   ],
 });

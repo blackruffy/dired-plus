@@ -17,6 +17,10 @@ import {
   DeleteFileResponse,
   GetBaseNameRequest,
   GetBaseNameResponse,
+  GetColorThemeRequest,
+  GetColorThemeResponse,
+  GetLocaleRequest,
+  GetLocaleResponse,
   GetParentDirectoryRequest,
   GetParentDirectoryResponse,
   GetSeparatorRequest,
@@ -32,6 +36,7 @@ import {
   RenameFileRequest,
   RenameFileResponse,
 } from '@common/messages';
+import { ColorTheme } from '@common/theme-color';
 import { updateItemList } from '@src/action/helpers';
 import { useStore } from '@src/store';
 import { request } from '@src/utils/request';
@@ -167,9 +172,38 @@ export const closePanel = async (): Promise<void> => {
   });
 };
 
+export const getColorTheme = async (): Promise<ColorTheme> =>
+  (
+    await request<GetColorThemeRequest, GetColorThemeResponse>({
+      key: 'get-color-theme',
+    })
+  ).colorTheme;
+
+export const getLocale = async (): Promise<string> =>
+  (
+    await request<GetLocaleRequest, GetLocaleResponse>({
+      key: 'get-locale',
+    })
+  ).locale;
+
 export const useNativeEvent = () => {
-  const { itemList, setItemList, setSearchWord, separator, setSeparator } =
-    useStore();
+  const {
+    itemList,
+    setItemList,
+    setSearchWord,
+    separator,
+    setSeparator,
+    setColorTheme,
+    setLocale,
+  } = useStore();
+
+  React.useEffect(() => {
+    getColorTheme().then(setColorTheme);
+  }, [setColorTheme]);
+
+  React.useEffect(() => {
+    getLocale().then(setLocale);
+  }, [setLocale]);
 
   React.useEffect(() => {
     if (itemList === undefined) {

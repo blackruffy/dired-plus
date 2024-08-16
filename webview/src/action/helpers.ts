@@ -21,7 +21,9 @@ import {
   renameDirectory,
   renameFile,
 } from '@src/events/native';
-import { Mode, Ok, SelectedView, ok } from '@src/store';
+import { IntlMessage } from '@src/i18n';
+import { messageId } from '@src/i18n/ja';
+import { Mode, SelectedView, State } from '@src/store';
 import { readonlyArray } from 'fp-ts';
 import { Task } from 'fp-ts/lib/Task';
 import { pipe } from 'fp-ts/lib/function';
@@ -51,14 +53,14 @@ export const goToParentDirectory = ({
   setSearchWord: (searchWord: string) => void;
   setItemList: (itemList: ItemList) => void;
 }>): KeyParams => ({
-  desc: 'Go to the parent directory',
+  desc: { id: messageId.toParentDir },
   run: async () => {
     await updateItemList({
       path: `${await getParentDirectory(await path)}${separator}`,
       setSearchWord,
       setItemList,
     });
-    return ok();
+    return {};
   },
 });
 
@@ -67,13 +69,13 @@ export const goToSearchBox = ({
 }: Readonly<{
   setSelectedView: (selectedView: SelectedView) => void;
 }>): KeyParams => ({
-  desc: 'Go to the search box',
+  desc: { id: messageId.toSearchBox },
   run: async () => {
     setSelectedView({
       name: 'search-box',
       updatedAt: Date.now(),
     });
-    return ok();
+    return {};
   },
 });
 
@@ -137,36 +139,35 @@ const runner = {
 
 const confirmBeforeRun = (
   id: string,
-  title: string,
-  descYes: string,
-  setMode: (mode?: Mode) => void,
-  run: Task<Ok>,
-): Task<Ok> =>
+  title: IntlMessage,
+  descYes: IntlMessage,
+  run: Task<Partial<State>>,
+): Task<Partial<State>> =>
   pipe(
     task.Do,
-    task.map(() =>
-      setMode({
+    task.map(() => ({
+      dialog: {
         type: 'confirm',
-        action: {
-          id,
-          title,
-          keys: [
-            keyY({
-              desc: descYes,
-              run,
-            }),
-            keyN({
-              desc: 'Cancel',
-              run: async () => {
-                setMode();
-                return ok();
+        title,
+        keys: [
+          keyY({
+            desc: descYes,
+            run,
+          }),
+          keyN({
+            desc: { id: messageId.cancel },
+            run: async () => ({
+              mode: undefined,
+              dialog: undefined,
+              status: {
+                type: 'info',
+                message: { id: messageId.canceled },
               },
             }),
-          ],
-        },
-      }),
-    ),
-    task.map(() => ok()),
+          }),
+        ],
+      },
+    })),
   );
 
 export const openItem = (
@@ -175,11 +176,11 @@ export const openItem = (
   setSearchWord: (searchWord: string) => void,
   setItemList: (itemList: ItemList) => void,
   setSelectedView: (selectedView: SelectedView) => void,
-): Task<Ok> =>
+): Task<Partial<State>> =>
   item.itemType === 'file'
     ? pipe(
         task.fromPromise(() => openFile(item.path)),
-        task.map(() => ok()),
+        task.map(() => ({})),
       )
     : item.itemType === 'directory'
       ? pipe(
@@ -194,18 +195,16 @@ export const openItem = (
             task.fromPromise(() => goToSearchBox({ setSelectedView }).run()),
           ),
         )
-      : task.error<Ok>(Error(`Cannot open a item`));
+      : task.error<Partial<State>>(Error(`Cannot open a item`));
 
 const afterRun = (
   destination: Item,
   separator: string,
-  setMode: (mode?: Mode) => void,
   setSearchWord: (searchWord: string) => void,
   setItemList: (itemList: ItemList) => void,
-): Task<void> =>
+): Task<Partial<State>> =>
   pipe(
     task.Do,
-    task.map(() => setMode()),
     task.chain(
       () => async () =>
         updateItemList({
@@ -216,30 +215,43 @@ const afterRun = (
           setItemList,
         }),
     ),
+    task.map(() => ({
+      mode: undefined,
+    })),
   );
 
 const confirmRenameBeforeRun = (
   source: ReadonlyArray<Item>,
   destination: Item,
   separator: string,
-  setMode: (mode?: Mode) => void,
   setSearchWord: (searchWord: string) => void,
   setItemList: (itemList: ItemList) => void,
-  run: () => Promise<void>,
-): Task<Ok> =>
+  run: () => Promise<Partial<State>>,
+): Task<Partial<State>> =>
   confirmBeforeRun(
     'confirm-rename',
-    `The ${destination.itemType} already exists. Do you want to overwrite it?`,
-    `Overwrite the ${destination.itemType}`,
-    setMode,
+    { id: messageId.confirmOverwrite, values: { dst: destination.itemType } },
+    { id: messageId.overwrite },
     pipe(
-      task.fromPromise(run),
-      task.flatMap(() =>
-        afterRun(destination, separator, setMode, setSearchWord, setItemList),
+      task.Do,
+      task.bind('s1', () => task.fromPromise(run)),
+      task.bind('s2', () =>
+        afterRun(destination, separator, setSearchWord, setItemList),
       ),
-      task.map(() =>
-        ok(`Renamed ${joinItemPath(', ')(source)} to ${destination.path}`),
-      ),
+      task.map(({ s1, s2 }) => ({
+        ...s1,
+        ...s2,
+        status: {
+          message: {
+            id: messageId.renamed,
+            values: {
+              src: joinItemPath(', ')(source),
+              dst: destination.path,
+            },
+          },
+          type: 'info',
+        },
+      })),
     ),
   );
 
@@ -247,50 +259,70 @@ export const renameOverwrite = (
   source: ReadonlyArray<Item>,
   destination: Item,
   separator: string,
-  setMode: (mode?: Mode) => void,
   setSearchWord: (searchWord: string) => void,
   setItemList: (itemList: ItemList) => void,
-): Task<Ok> => {
-  const confirm = (run: () => Promise<void>): Task<Ok> =>
+): Task<Partial<State>> => {
+  const confirm = (run: () => Promise<Partial<State>>): Task<Partial<State>> =>
     confirmRenameBeforeRun(
       source,
       destination,
       separator,
-      setMode,
       setSearchWord,
       setItemList,
       run,
     );
 
-  const exec = (run: () => Promise<void>): Task<Ok> =>
+  const exec = (run: () => Promise<Partial<State>>): Task<Partial<State>> =>
     pipe(
-      task.fromPromise(run),
-      task.flatMap(() =>
-        afterRun(destination, separator, setMode, setSearchWord, setItemList),
+      task.Do,
+      task.bind('s1', () => task.fromPromise(run)),
+      task.bind('s2', () =>
+        afterRun(destination, separator, setSearchWord, setItemList),
       ),
-      task.map(() =>
-        ok(`Renamed ${joinItemPath(', ')(source)} to ${destination.path}`),
-      ),
+      task.map(({ s1, s2 }) => ({
+        ...s1,
+        ...s2,
+        status: {
+          message: {
+            id: messageId.renamed,
+            values: {
+              src: joinItemPath(', ')(source),
+              dst: destination.path,
+            },
+          },
+          type: 'info',
+        },
+      })),
     );
 
   if (isSingleFile(source) && isFile(destination)) {
-    return confirm(() => renameFile(source[0].path, destination.path));
+    return confirm(() =>
+      renameFile(source[0].path, destination.path).then(() => ({})),
+    );
   } else if (isSingleFile(source) && isDot(destination)) {
     return exec(() =>
-      renameFile(source[0].path, destination.path, { intoDirectory: true }),
+      renameFile(source[0].path, destination.path, {
+        intoDirectory: true,
+      }).then(() => ({})),
     );
   } else if (isSingleFile(source) && isDirectory(destination)) {
-    return task.error<Ok>(Error(`Cannot rename a file to a directory`));
+    return task.error<Partial<State>>(
+      Error(`Cannot rename a file to a directory`),
+    );
   } else if (isSingleDirectory(source) && isFile(destination)) {
-    return task.error<Ok>(Error(`Cannot rename a directory to a file`));
+    return task.error<Partial<State>>(
+      Error(`Cannot rename a directory to a file`),
+    );
   } else if (isSingleDirectory(source) && isDot(destination)) {
     return exec(() =>
       renameDirectory(source[0].path, destination.path, {
         intoDirectory: true,
-      }),
+      }).then(() => ({})),
     );
   } else if (isSingleDirectory(source) && isDirectory(destination)) {
-    return task.error<Ok>(Error(`Cannot rename a directory to a directory`));
+    return task.error<Partial<State>>(
+      Error(`Cannot rename a directory to a directory`),
+    );
   } else if (isMultipleItems(source) && isDot(destination)) {
     return exec(
       pipe(
@@ -313,16 +345,20 @@ export const renameOverwrite = (
               : [],
         ),
         task.sequenceArray,
-        task.map(() => void 0),
+        task.map(() => ({})),
       ),
     );
   } else if (
     isMultipleItems(source) &&
     (isFile(destination) || isDirectory(destination))
   ) {
-    return task.error<Ok>(Error(`Cannot rename multiple items to a file`));
+    return task.error<Partial<State>>(
+      Error(`Cannot rename multiple items to a file`),
+    );
   } else {
-    return task.error<Ok>(Error(`Cannot copy a directory to a file`));
+    return task.error<Partial<State>>(
+      Error(`Cannot copy a directory to a file`),
+    );
   }
 };
 
@@ -330,24 +366,31 @@ const confirmCopyBeforeRun = (
   source: ReadonlyArray<Item>,
   destination: Item,
   separator: string,
-  setMode: (mode?: Mode) => void,
   setSearchWord: (searchWord: string) => void,
   setItemList: (itemList: ItemList) => void,
-  run: () => Promise<void>,
-): Task<Ok> =>
+  run: () => Promise<Partial<State>>,
+): Task<Partial<State>> =>
   confirmBeforeRun(
     'confirm-copy',
-    `The ${destination.itemType} already exists. Do you want to overwrite it?`,
-    `Overwrite the ${destination.itemType}`,
-    setMode,
+    { id: messageId.confirmOverwrite, values: { dst: destination.itemType } },
+    { id: messageId.overwrite },
     pipe(
-      task.fromPromise(run),
-      task.flatMap(() =>
-        afterRun(destination, separator, setMode, setSearchWord, setItemList),
+      task.Do,
+      task.bind('s1', () => task.fromPromise(run)),
+      task.bind('s2', () =>
+        afterRun(destination, separator, setSearchWord, setItemList),
       ),
-      task.map(() =>
-        ok(`Copied ${joinItemPath(', ')(source)} to ${destination.path}`),
-      ),
+      task.map(({ s1, s2 }) => ({
+        ...s1,
+        ...s2,
+        status: {
+          message: {
+            id: messageId.copied,
+            values: { src: joinItemPath(', ')(source), dst: destination.path },
+          },
+          type: 'info',
+        },
+      })),
     ),
   );
 
@@ -355,52 +398,65 @@ export const copyOverwrite = (
   source: ReadonlyArray<Item>,
   destination: Item,
   separator: string,
-  setMode: (mode?: Mode) => void,
   setSearchWord: (searchWord: string) => void,
   setItemList: (itemList: ItemList) => void,
-): Task<Ok> => {
-  const confirm = (run: () => Promise<void>): Task<Ok> =>
+): Task<Partial<State>> => {
+  const confirm = (run: () => Promise<Partial<State>>): Task<Partial<State>> =>
     confirmCopyBeforeRun(
       source,
       destination,
       separator,
-      setMode,
       setSearchWord,
       setItemList,
       run,
     );
 
-  const exec = (run: () => Promise<void>): Task<Ok> =>
+  const exec = (run: () => Promise<Partial<State>>): Task<Partial<State>> =>
     pipe(
-      task.fromPromise(run),
-      task.flatMap(() =>
-        afterRun(destination, separator, setMode, setSearchWord, setItemList),
+      task.Do,
+      task.bind('s1', () => task.fromPromise(run)),
+      task.bind('s2', () =>
+        afterRun(destination, separator, setSearchWord, setItemList),
       ),
-      task.map(() =>
-        ok(`Copied ${joinItemPath(', ')(source)} to ${destination.path}`),
-      ),
+      task.map(({ s1, s2 }) => ({
+        ...s1,
+        ...s2,
+        status: {
+          message: {
+            id: messageId.copied,
+            values: { src: joinItemPath(', ')(source), dst: destination.path },
+          },
+          type: 'info',
+        },
+      })),
     );
 
   if (isSingleFile(source) && isFile(destination)) {
-    return confirm(() => copyFile(source[0].path, destination.path));
+    return confirm(() =>
+      copyFile(source[0].path, destination.path).then(() => ({})),
+    );
   } else if (isSingleFile(source) && isDot(destination)) {
     return exec(() =>
-      copyFile(source[0].path, destination.path, { intoDirectory: true }),
+      copyFile(source[0].path, destination.path, { intoDirectory: true }).then(
+        () => ({}),
+      ),
     );
   } else if (isSingleFile(source) && isDirectory(destination)) {
-    return task.error<Ok>(
+    return task.error<Partial<State>>(
       Error(`Cannot copy a file to a directory ${destination.path}`),
     );
   } else if (isSingleDirectory(source) && isFile(destination)) {
-    return task.error<Ok>(
+    return task.error<Partial<State>>(
       Error(`Cannot copy a directory to a file ${destination.path}`),
     );
   } else if (isSingleDirectory(source) && isDot(destination)) {
     return exec(() =>
-      copyDirectory(source[0].path, destination.path, { intoDirectory: true }),
+      copyDirectory(source[0].path, destination.path, {
+        intoDirectory: true,
+      }).then(() => ({})),
     );
   } else if (isSingleDirectory(source) && isDirectory(destination)) {
-    return task.error<Ok>(
+    return task.error<Partial<State>>(
       Error(`Cannot copy a directory to a directory ${destination.path}`),
     );
   } else if (isMultipleItems(source) && isDot(destination)) {
@@ -425,16 +481,20 @@ export const copyOverwrite = (
               : [],
         ),
         task.sequenceArray,
-        task.map(() => void 0),
+        task.map(() => ({})),
       ),
     );
   } else if (
     isMultipleItems(source) &&
     (isFile(destination) || isDirectory(destination))
   ) {
-    return task.error<Ok>(Error(`Cannot copy multiple items to a file`));
+    return task.error<Partial<State>>(
+      Error(`Cannot copy multiple items to a file`),
+    );
   } else {
-    return task.error<Ok>(Error(`Cannot copy a directory to a file`));
+    return task.error<Partial<State>>(
+      Error(`Cannot copy a directory to a file`),
+    );
   }
 };
 
@@ -453,7 +513,7 @@ export const setCopyMode = ({
   setChecked: (checked: Readonly<{ [key: number]: boolean }>) => void;
   setSelectedView: (selectedView: SelectedView) => void;
 }>): KeyParams => ({
-  desc: 'Copy',
+  desc: { id: messageId.copy },
   run: async () =>
     pipe(
       setMode({
@@ -462,7 +522,7 @@ export const setCopyMode = ({
       }),
       () => setChecked({}),
       async () => await goToSearchBox({ setSelectedView }).run(),
-      () => ok(),
+      () => ({}),
     ),
 });
 
@@ -481,7 +541,7 @@ export const setRenameMode = ({
   setChecked: (checked: Readonly<{ [key: number]: boolean }>) => void;
   setSelectedView: (selectedView: SelectedView) => void;
 }>): KeyParams => ({
-  desc: 'Rename',
+  desc: { id: messageId.rename },
   run: async () =>
     pipe(
       setMode({
@@ -490,7 +550,7 @@ export const setRenameMode = ({
       }),
       () => setChecked({}),
       async () => await goToSearchBox({ setSelectedView }).run(),
-      () => ok(),
+      () => ({}),
     ),
 });
 
@@ -499,69 +559,81 @@ export const deleteItems = ({
   itemList,
   checked,
   separator,
-  setMode,
   setSearchWord,
   setItemList,
-  setChecked,
 }: Readonly<{
   item: Item;
   itemList?: ItemList;
   checked: Readonly<{ [key: number]: boolean }>;
   separator: string;
-  setMode: (mode?: Mode) => void;
   setSearchWord: (searchWord: string) => void;
   setItemList: (itemList: ItemList) => void;
-  setChecked: (checked: Readonly<{ [key: number]: boolean }>) => void;
 }>): KeyParams => ({
-  desc: 'Delete',
-  run: async () =>
-    pipe(
-      setMode({
-        type: 'confirm',
-        action: {
-          id: 'confirm-delete',
-          title: 'Are you sure you want to delete the file?',
-          keys: [
-            keyY({
-              desc: 'Delete the file',
-              run: async () =>
-                pipe(
-                  await sequenceItems({
-                    items: getCheckedItemsOr({
-                      checked,
-                      itemList,
-                      default: item,
-                    }),
-                    onItem: async item =>
-                      item.itemType === 'file'
-                        ? await deleteFile(item.path)
-                        : item.itemType === 'directory'
-                          ? await deleteDirectory(item.path)
-                          : null,
-                  }),
-                  async a =>
-                    a !== null
-                      ? await updateItemList({
-                          path: `${a.parent.path}${separator}`,
-                          setSearchWord,
-                          setItemList,
-                        })
-                      : //pipe(setSearchWord(a.path), () => setItemList(a))
-                        void 0,
-                  () => setChecked({}),
-                  () => setMode(),
-                  () => ok(`Deleted ${item.path}`),
-                ),
-            }),
-            keyN({
-              desc: 'Cancel',
-              run: async () => pipe(setMode(), () => ok()),
-            }),
-          ],
-        },
-      }),
-      () => ok(),
-    ),
+  desc: { id: messageId.delete },
+  run: async () => ({
+    dialog: {
+      type: 'confirm',
+      title: { id: messageId.confirmDelete },
+      lines: getCheckedItemsOr({
+        checked,
+        itemList,
+        default: item,
+      }).map(item => item.path),
+      keys: [
+        keyY({
+          desc: { id: messageId.delete },
+          run: async () =>
+            pipe(
+              await sequenceItems({
+                items: getCheckedItemsOr({
+                  checked,
+                  itemList,
+                  default: item,
+                }),
+                onItem: async item =>
+                  item.itemType === 'file'
+                    ? await deleteFile(item.path)
+                    : item.itemType === 'directory'
+                      ? await deleteDirectory(item.path)
+                      : null,
+              }),
+              async a =>
+                a !== null
+                  ? await updateItemList({
+                      path: `${a.parent.path}${separator}`,
+                      setSearchWord,
+                      setItemList,
+                    })
+                  : //pipe(setSearchWord(a.path), () => setItemList(a))
+                    void 0,
+              () => ({
+                checked: {},
+                mode: undefined,
+                dialog: undefined,
+                status: {
+                  message: {
+                    id: messageId.deleted,
+                    values: { src: item.path },
+                  },
+                  type: 'info',
+                },
+              }),
+            ),
+        }),
+        keyN({
+          desc: { id: messageId.cancel },
+          run: async () => ({
+            mode: undefined,
+            dialog: undefined,
+            status: {
+              message: { id: messageId.canceled },
+              type: `info`,
+            },
+          }),
+        }),
+      ],
+    },
+  }),
 });
 
 export const cancel = ({
@@ -577,7 +649,7 @@ export const cancel = ({
   setSearchWord: (searchWord: string) => void;
   setItemList: (itemList: ItemList) => void;
 }>): KeyParams => ({
-  desc: 'Cancel',
+  desc: { id: messageId.cancel },
   run: async () => {
     setMode(undefined);
     await updateItemList({
@@ -585,7 +657,7 @@ export const cancel = ({
       setSearchWord,
       setItemList,
     });
-    return ok();
+    return {};
   },
 });
 
@@ -616,15 +688,16 @@ export const completion = ({
   setSearchWord: (searchWord: string) => void;
   setSelectedView: (selectedView: SelectedView) => void;
 }>): KeyParams => ({
-  desc: 'Completion',
+  desc: { id: messageId.completion },
   run: async () => {
+    const lpath = path.toLocaleLowerCase();
     const matched =
       itemList?.items.filter(item => {
-        return item.path.startsWith(path);
+        return item.path.toLocaleLowerCase().startsWith(lpath);
       }) ?? [];
 
     if (matched.length === 0) {
-      return ok();
+      return {};
     } else if (matched.length === 1) {
       const newPath = matched[0].path;
       if (selectedView.name === 'search-box') {
@@ -639,7 +712,7 @@ export const completion = ({
         setSearchWord,
         setItemList,
       });
-      return ok();
+      return {};
     } else {
       const prefix = getCommonPrefix(matched, 0);
       const newPath =
@@ -658,7 +731,7 @@ export const completion = ({
         setSearchWord,
         setItemList,
       });
-      return ok();
+      return {};
     }
   },
 });

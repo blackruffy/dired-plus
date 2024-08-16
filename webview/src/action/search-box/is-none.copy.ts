@@ -5,20 +5,14 @@ import {
   goToParentDirectory,
   updateItemList,
 } from '@src/action/helpers';
+import { keyCtrlBackspace, keyCtrlC, keyEnter, keyTab } from '@src/action/keys';
 import {
-  keyCtrlBackspace,
-  keyCtrlC,
-  keyEnter,
-  keyEscape,
-  keyTab,
-} from '@src/action/keys';
-import {
-  closePanel,
   copyDirectory,
   copyFile,
   getParentDirectory,
 } from '@src/events/native';
-import { Action, Mode, SelectedView, ok } from '@src/store';
+import { messageId } from '@src/i18n/ja';
+import { Action, Mode, SelectedView } from '@src/store';
 import { pipe } from 'fp-ts/lib/function';
 
 export const searchBoxIsNoneCopy = ({
@@ -43,10 +37,9 @@ export const searchBoxIsNoneCopy = ({
   setSelectedView: (selectedView: SelectedView) => void;
 }>): Action => ({
   id: 'search-box-is-none-copy',
-  title: 'Available actions',
   keys: [
     keyEnter({
-      desc: 'Copy',
+      desc: { id: messageId.copy },
       run: async () =>
         source.length === 1
           ? pipe(source[0], async s =>
@@ -63,7 +56,15 @@ export const searchBoxIsNoneCopy = ({
                     setSearchWord,
                     setItemList,
                   }),
-                () => ok(`Copied ${s.path} to ${item.path}`),
+                () => ({
+                  status: {
+                    message: {
+                      id: messageId.copied,
+                      values: { src: s.path, dst: item.path },
+                    },
+                    type: 'info',
+                  },
+                }),
               ),
             )
           : Promise.reject('Multiple items cannot be copied at once'),
@@ -99,13 +100,5 @@ export const searchBoxIsNoneCopy = ({
         setItemList,
       }),
     ),
-
-    keyEscape({
-      desc: 'Quit',
-      run: async () => {
-        await closePanel();
-        return ok();
-      },
-    }),
   ],
 });

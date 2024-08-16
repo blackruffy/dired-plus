@@ -1,8 +1,8 @@
-import { Action, ok, useStore } from '@src/store';
+import { Action, State, useStore } from '@src/store';
 import { itemListIsItemCopy } from './item-list/is-item.copy';
 import { itemListIsItemDefault } from './item-list/is-item.default';
 import { itemListIsItemRename } from './item-list/is-item.rename';
-import { keyO } from './keys';
+import { defaultKeys } from './keys';
 import { searchBoxIsItemCopy } from './search-box/is-item.copy';
 import { searchBoxIsItemDefault } from './search-box/is-item.default';
 import { searchBoxIsItemRename } from './search-box/is-item.rename';
@@ -10,38 +10,19 @@ import { searchBoxIsNoneCopy } from './search-box/is-none.copy';
 import { searchBoxIsNoneDefault } from './search-box/is-none.default';
 import { searchBoxIsNoneRename } from './search-box/is-none.rename';
 
-export const useAction = (): Action | undefined => {
-  const {
-    selectedView,
-    itemList,
-    mode,
-    separator,
-    setMode,
-    setSearchWord,
-    setItemList,
-    checked,
-    setChecked,
-    setSelectedView,
-  } = useStore();
-
-  if (mode?.type === 'error') {
-    return {
-      id: 'error',
-      title: mode.message,
-      themeColor: 'warning',
-      keys: [
-        keyO({
-          desc: 'OK',
-          run: async () => {
-            setMode();
-            return ok();
-          },
-        }),
-      ],
-    };
-  } else if (mode?.type === 'confirm') {
-    return mode.action;
-  } else if (selectedView.name === 'search-box') {
+const createAction = ({
+  selectedView,
+  itemList,
+  mode,
+  separator,
+  setMode,
+  setSearchWord,
+  setItemList,
+  checked,
+  setChecked,
+  setSelectedView,
+}: State): Action | undefined => {
+  if (selectedView.name === 'search-box') {
     if (itemList === undefined) {
       return undefined;
     } else if (itemList?.parent.itemType !== 'none' && mode?.type === 'copy') {
@@ -174,4 +155,15 @@ export const useAction = (): Action | undefined => {
   } else {
     return undefined;
   }
+};
+
+export const useAction = (): Action | undefined => {
+  const action = createAction(useStore());
+
+  return action === undefined
+    ? undefined
+    : {
+        ...action,
+        keys: [...action.keys, ...defaultKeys],
+      };
 };

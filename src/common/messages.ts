@@ -1,4 +1,5 @@
 import { FileOptions } from '../common/file-options';
+import { ColorTheme } from '../common/theme-color';
 import { ItemList } from './item';
 
 export type MessageKey =
@@ -16,7 +17,10 @@ export type MessageKey =
   | 'rename-directory'
   | 'delete-file'
   | 'delete-directory'
-  | 'close-panel';
+  | 'close-panel'
+  | 'get-color-theme'
+  | 'set-color-theme'
+  | 'get-locale';
 
 export type MessageType = 'request' | 'response';
 
@@ -99,6 +103,18 @@ export type DeleteDirectoryResponse = Response<'delete-directory'> & ItemList;
 
 export type ClosePanelRequest = Request<'close-panel'>;
 export type ClosePanelResponse = Response<'close-panel'>;
+
+export type GetColorThemeRequest = Request<'get-color-theme'>;
+export type GetColorThemeResponse = Response<'get-color-theme'> &
+  Readonly<{ colorTheme: ColorTheme }>;
+
+export type SetColorThemeRequest = Request<'set-color-theme'> &
+  Readonly<{ colorTheme: ColorTheme }>;
+export type SetColorThemeResponse = Response<'set-color-theme'>;
+
+export type GetLocaleRequest = Request<'get-locale'>;
+export type GetLocaleResponse = Response<'get-locale'> &
+  Readonly<{ locale: string }>;
 
 export const response = <Res extends Response<MessageKey>>(
   req: Request<MessageKey>,

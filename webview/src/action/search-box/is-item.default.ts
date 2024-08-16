@@ -13,11 +13,10 @@ import {
   keyCtrlD,
   keyCtrlR,
   keyEnter,
-  keyEscape,
   keyTab,
 } from '@src/action/keys';
-import { closePanel } from '@src/events/native';
-import { Action, Mode, SelectedView, ok } from '@src/store';
+import { messageId } from '@src/i18n/ja';
+import { Action, Mode, SelectedView } from '@src/store';
 
 export const searchBoxIsItemDefault = ({
   item,
@@ -43,10 +42,9 @@ export const searchBoxIsItemDefault = ({
   setChecked: (checked: Readonly<{ [key: number]: boolean }>) => void;
 }>): Action => ({
   id: 'search-box-is-item-default',
-  title: 'Available actions',
   keys: [
     keyEnter({
-      desc: 'Open',
+      desc: { id: messageId.open },
       run: openItem(
         item,
         separator,
@@ -84,10 +82,8 @@ export const searchBoxIsItemDefault = ({
         itemList,
         checked,
         separator,
-        setMode,
         setSearchWord,
         setItemList,
-        setChecked,
       }),
     ),
 
@@ -111,13 +107,5 @@ export const searchBoxIsItemDefault = ({
         setSelectedView,
       }),
     ),
-
-    keyEscape({
-      desc: 'Quit',
-      run: async () => {
-        await closePanel();
-        return ok();
-      },
-    }),
   ],
 });

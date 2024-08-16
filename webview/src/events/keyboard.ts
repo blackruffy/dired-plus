@@ -1,81 +1,122 @@
+import { ItemList } from '@common/item';
+import { defaultKeys, keyY } from '@src/action/keys';
+import { IntlError } from '@src/i18n/error';
+import { messageId } from '@src/i18n/ja';
 import {
   Action,
+  ActionKey,
   ModifierKeys,
   SelectedView,
   State,
   useStore,
 } from '@src/store';
+import { identity } from 'fp-ts/lib/function';
 import React from 'react';
 
 const keyInterval = 30;
 
 const onArrowUp = (
   event: KeyboardEvent,
-  nitems: number,
+  itemList: ItemList | undefined,
   selectedView: SelectedView,
   setSelectedView: (selectedView: SelectedView) => void,
+  setSearchWord: (searchWord: string) => void,
 ): void => {
   event.preventDefault();
   event.stopPropagation();
+  const nitems = itemList === undefined ? 0 : itemList.items.length;
+
   if (Date.now() - selectedView.updatedAt > keyInterval) {
-    setSelectedView(
+    const nextSelectedView =
       selectedView.name === 'list-item' && selectedView.index > 0
-        ? {
+        ? identity<SelectedView>({
             name: 'list-item',
             index: selectedView.index - 1,
             updatedAt: Date.now(),
-          }
+          })
         : selectedView.name === 'list-item'
-          ? {
+          ? identity<SelectedView>({
               name: 'search-box',
               updatedAt: Date.now(),
-            }
-          : { name: 'list-item', index: nitems - 1, updatedAt: Date.now() },
-    );
+            })
+          : identity<SelectedView>({
+              name: 'list-item',
+              index: nitems - 1,
+              updatedAt: Date.now(),
+            });
+
+    setSelectedView(nextSelectedView);
+
+    if (nextSelectedView.name === 'list-item') {
+      const nextSearchWord = itemList?.items[nextSelectedView.index].path;
+      if (nextSearchWord != null) {
+        setSearchWord(nextSearchWord);
+      }
+    }
   }
 };
 
 const onArrowDown = (
   event: KeyboardEvent,
-  nitems: number,
+  itemList: ItemList | undefined,
   selectedView: SelectedView,
   setSelectedView: (selectedView: SelectedView) => void,
+  setSearchWord: (searchWord: string) => void,
 ): void => {
   event.preventDefault();
   event.stopPropagation();
+  const nitems = itemList === undefined ? 0 : itemList.items.length;
 
   if (Date.now() - selectedView.updatedAt > keyInterval) {
-    setSelectedView(
+    const nextSelectedView =
       selectedView.name === 'list-item' && selectedView.index < nitems - 1
-        ? {
+        ? identity<SelectedView>({
             name: 'list-item',
             index: selectedView.index + 1,
             updatedAt: Date.now(),
-          }
+          })
         : selectedView.name === 'list-item'
-          ? {
+          ? identity<SelectedView>({
               name: 'search-box',
               updatedAt: Date.now(),
-            }
-          : {
+            })
+          : identity<SelectedView>({
               name: 'list-item',
               index: 0,
               updatedAt: Date.now(),
-            },
-    );
+            });
+    setSelectedView(nextSelectedView);
+
+    if (nextSelectedView.name === 'list-item') {
+      const nextSearchWord = itemList?.items[nextSelectedView.index].path;
+      if (nextSearchWord != null) {
+        setSearchWord(nextSearchWord);
+      }
+    }
   }
 };
 
 const moveItems = (
   event: KeyboardEvent,
-  { selectedView, itemList, setSelectedView }: State,
+  { selectedView, itemList, setSelectedView, setSearchWord }: State,
 ): void => {
-  const nitems = itemList === undefined ? 0 : itemList.items.length;
   switch (event.code) {
     case 'ArrowUp':
-      return onArrowUp(event, nitems, selectedView, setSelectedView);
+      return onArrowUp(
+        event,
+        itemList,
+        selectedView,
+        setSelectedView,
+        setSearchWord,
+      );
     case 'ArrowDown':
-      return onArrowDown(event, nitems, selectedView, setSelectedView);
+      return onArrowDown(
+        event,
+        itemList,
+        selectedView,
+        setSelectedView,
+        setSearchWord,
+      );
     default:
       return;
   }
@@ -117,34 +158,104 @@ const updateModifierUp = (code: string, { setModifierKeys }: State) => {
   }
 };
 
-export const useKeyDownEvent = (action?: Action) => {
+const getMatchedActionKey = ({
+  actionKeys,
+  modifierKeys,
+  keyCode,
+}: Readonly<{
+  actionKeys?: ReadonlyArray<ActionKey>;
+  modifierKeys: ModifierKeys;
+  keyCode: string;
+}>): ActionKey | undefined =>
+  actionKeys?.find(
+    _ =>
+      Object.entries(_.modifierKeys).every(
+        ([k, v]) => modifierKeys[k as keyof ModifierKeys] === v,
+      ) && _.code === keyCode,
+  );
+
+const runAction = ({
+  event,
+  actionKeys,
+  modifierKeys,
+  state,
+}: Readonly<{
+  event: KeyboardEvent;
+  actionKeys?: ReadonlyArray<ActionKey>;
+  modifierKeys: ModifierKeys;
+  state: State;
+}>): void => {
+  const actionKey = getMatchedActionKey({
+    actionKeys,
+    modifierKeys,
+    keyCode: event.code,
+  });
+
+  console.log(
+    `Key down: ${event.code}, ${JSON.stringify(modifierKeys)}, actionKey: ${actionKey?.desc}`,
+  );
+
+  if (actionKey === undefined) {
+    return;
+  } else {
+    event.preventDefault();
+    event.stopPropagation();
+    actionKey
+      .run()
+      .then(_ => {
+        state.setState(
+          _.dialog !== undefined
+            ? {
+                ..._,
+                dialog: {
+                  ..._.dialog,
+                  keys: [..._.dialog.keys, ...defaultKeys],
+                },
+              }
+            : _,
+        );
+      })
+      .catch(err => {
+        console.error(err);
+        state.setDialog({
+          type: 'error',
+          title: err instanceof IntlError ? err.formattedMessage : String(err),
+          lines: [],
+          keys: [
+            keyY({
+              desc: { id: messageId.dismiss },
+              run: async () => ({
+                dialog: undefined,
+              }),
+            }),
+          ],
+        });
+      });
+  }
+};
+
+export const useKeyDownEvent = ({ action }: Readonly<{ action?: Action }>) => {
   const state = useStore();
   const { modifierKeys, setModifierKeys } = state;
 
   React.useEffect(() => {
     const callback = (event: KeyboardEvent) => {
-      const actionKey = action?.keys?.find(
-        _ =>
-          Object.entries(_.modifierKeys).every(
-            ([k, v]) => modifierKeys[k as keyof ModifierKeys] === v,
-          ) && _.code === event.code,
-      );
-
-      console.log(
-        `Key down: ${event.code}, ${JSON.stringify(modifierKeys)}, actionKey: ${actionKey?.desc}`,
-      );
-
       if (modifierKeys.metaKey && event.code === 'KeyX') {
         updateModifierUp('MetaLeft', state);
         updateModifierUp('MetaRight', state);
-      } else if (actionKey !== undefined) {
-        event.preventDefault();
-        event.stopPropagation();
-        actionKey.run().catch(err => {
-          state.setMode({
-            message: String(err),
-            type: 'error',
-          });
+      } else if (state.dialog !== undefined) {
+        runAction({
+          event,
+          actionKeys: state.dialog.keys,
+          modifierKeys,
+          state,
+        });
+      } else if (action !== undefined) {
+        runAction({
+          event,
+          actionKeys: action.keys,
+          modifierKeys,
+          state,
         });
       }
 
@@ -174,7 +285,7 @@ export const useKeyUpEvent = () => {
   }, [state]);
 };
 
-export const useKeyboardEvent = (action?: Action) => {
-  useKeyDownEvent(action);
+export const useKeyboardEvent = (params: Readonly<{ action?: Action }>) => {
+  useKeyDownEvent(params);
   useKeyUpEvent();
 };

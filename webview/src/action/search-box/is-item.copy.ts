@@ -5,15 +5,9 @@ import {
   copyOverwrite,
   goToParentDirectory,
 } from '@src/action/helpers';
-import {
-  keyCtrlBackspace,
-  keyCtrlC,
-  keyEnter,
-  keyEscape,
-  keyTab,
-} from '@src/action/keys';
-import { closePanel } from '@src/events/native';
-import { Action, Mode, SelectedView, ok } from '@src/store';
+import { keyCtrlBackspace, keyCtrlC, keyEnter, keyTab } from '@src/action/keys';
+import { messageId } from '@src/i18n/ja';
+import { Action, Mode, SelectedView } from '@src/store';
 import { pipe } from 'fp-ts/lib/function';
 
 export const searchBoxIsItemCopy = ({
@@ -38,19 +32,11 @@ export const searchBoxIsItemCopy = ({
   setSelectedView: (selectedView: SelectedView) => void;
 }>): Action => ({
   id: 'search-box-is-item-copy',
-  title: 'Available actions',
   keys: [
     keyEnter({
-      desc: `Copy`,
+      desc: { id: messageId.copy },
       run: pipe(
-        copyOverwrite(
-          source,
-          item,
-          separator,
-          setMode,
-          setSearchWord,
-          setItemList,
-        ),
+        copyOverwrite(source, item, separator, setSearchWord, setItemList),
       ),
     }),
 
@@ -84,13 +70,5 @@ export const searchBoxIsItemCopy = ({
         setItemList,
       }),
     ),
-
-    keyEscape({
-      desc: 'Quit',
-      run: async () => {
-        await closePanel();
-        return ok();
-      },
-    }),
   ],
 });

@@ -1,4 +1,4 @@
-import { scope } from '@src/common/scope';
+import { initializeTheme } from '@src/theme';
 import * as vscode from 'vscode';
 import { startListen } from './listener';
 
@@ -74,5 +74,6 @@ export const getFilerPanel = (
     state.webViewManager.panel.dispose();
   }
   state.webViewManager = createWebViewManager(context);
+  initializeTheme(state.webViewManager.panel);
   return state.webViewManager.panel;
 };

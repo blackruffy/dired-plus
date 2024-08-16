@@ -1,6 +1,7 @@
 import { Box, Divider, Theme, useTheme } from '@mui/material';
-import { Action } from '@src/store';
+import { Action, useStore } from '@src/store';
 import React from 'react';
+import { FormattedMessage } from 'react-intl';
 
 const getStyles = (theme: Theme) => ({
   container: {
@@ -18,6 +19,7 @@ const getStyles = (theme: Theme) => ({
   listContainer: {
     //display: 'grid',
     //gridTemplateColumns: `auto 1fr auto 1fr`,
+    paddingTop: `4px`,
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'flex-start',
@@ -46,32 +48,21 @@ const getStyles = (theme: Theme) => ({
 export const ActionPanel = ({
   action,
 }: Readonly<{ action?: Action }>): React.ReactElement => {
+  const { dialog } = useStore();
   const theme = useTheme();
   const styles = React.useMemo(() => getStyles(theme), [theme]);
 
-  const colorStyle = React.useMemo(
-    () =>
-      action?.themeColor === 'warning'
-        ? {
-            color: theme.palette.getContrastText(theme.palette.warning.light),
-            backgroundColor: theme.palette.warning.light,
-          }
-        : {
-            color: theme.palette.getContrastText(theme.palette.info.dark),
-            backgroundColor: theme.palette.info.dark,
-          },
-    [action, theme],
-  );
+  const actionKeys = dialog?.keys ?? action?.keys;
 
-  if (action === undefined) {
+  if (actionKeys == null) {
     return <></>;
   } else {
     return (
       <Box sx={[styles.container]}>
-        <Box sx={[styles.header, colorStyle]}>{action.title}</Box>
+        {/* <Box sx={[styles.header, colorStyle]}>{action.title}</Box> */}
         <Divider />
         <Box sx={styles.listContainer}>
-          {action.keys.map(({ name, desc }, i) => (
+          {actionKeys.map(({ name, desc }, i) => (
             <Box
               key={i}
               sx={{
@@ -108,7 +99,7 @@ export const ActionPanel = ({
                   alignItems: `center`,
                 }}
               >
-                {desc}
+                <FormattedMessage {...desc} />
               </Box>
             </Box>
           ))}

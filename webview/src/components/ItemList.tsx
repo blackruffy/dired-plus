@@ -65,7 +65,7 @@ const CheckButton = ({
 
 export const ItemList = (): React.ReactElement => {
   const theme = useTheme();
-  const { itemList, selectedView, setSelectedView } = useStore();
+  const { itemList, setSearchWord, selectedView, setSelectedView } = useStore();
   const scrollRef = React.useRef<HTMLUListElement>(null);
   const selectedRef = React.useRef<HTMLDivElement>(null);
 
@@ -130,6 +130,7 @@ export const ItemList = (): React.ReactElement => {
                 index,
                 updatedAt: selectedView.updatedAt,
               });
+              setSearchWord(item.path);
             }}
           >
             <Box

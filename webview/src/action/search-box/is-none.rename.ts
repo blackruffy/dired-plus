@@ -1,13 +1,13 @@
 import { Item, ItemList } from '@common/item';
 import { cancel, completion, updateItemList } from '@src/action/helpers';
-import { keyCtrlC, keyEnter, keyEscape, keyTab } from '@src/action/keys';
+import { keyCtrlC, keyEnter, keyTab } from '@src/action/keys';
 import {
-  closePanel,
   getParentDirectory,
   renameDirectory,
   renameFile,
 } from '@src/events/native';
-import { Action, Mode, SelectedView, ok } from '@src/store';
+import { messageId } from '@src/i18n/ja';
+import { Action, Mode, SelectedView, statusState } from '@src/store';
 import { pipe } from 'fp-ts/lib/function';
 
 export const searchBoxIsNoneRename = ({
@@ -32,10 +32,9 @@ export const searchBoxIsNoneRename = ({
   setSelectedView: (selectedView: SelectedView) => void;
 }>): Action => ({
   id: 'search-box-is-none-rename',
-  title: 'Available actions',
   keys: [
     keyEnter({
-      desc: 'Rename',
+      desc: { id: messageId.rename },
       run: async () =>
         source.length === 1
           ? pipe(source[0], async s =>
@@ -52,7 +51,11 @@ export const searchBoxIsNoneRename = ({
                     setSearchWord,
                     setItemList,
                   }),
-                () => ok(`Copied ${s.path} to ${item.path}`),
+                () =>
+                  statusState({
+                    id: messageId.copied,
+                    values: { src: s.path, dest: item.path },
+                  }),
               ),
             )
           : Promise.reject('Multiple items cannot be copied at once'),
@@ -94,13 +97,5 @@ export const searchBoxIsNoneRename = ({
         setItemList,
       }),
     ),
-
-    keyEscape({
-      desc: 'Quit',
-      run: async () => {
-        await closePanel();
-        return ok();
-      },
-    }),
   ],
 });

@@ -5,16 +5,9 @@ import {
   goToParentDirectory,
   renameOverwrite,
 } from '@src/action/helpers';
-import {
-  keyCtrlBackspace,
-  keyCtrlC,
-  keyCtrlG,
-  keyEnter,
-  keyEscape,
-  keyTab,
-} from '@src/action/keys';
-import { closePanel } from '@src/events/native';
-import { Action, Mode, SelectedView, ok } from '@src/store';
+import { keyCtrlBackspace, keyCtrlC, keyEnter, keyTab } from '@src/action/keys';
+import { messageId } from '@src/i18n/ja';
+import { Action, Mode, SelectedView } from '@src/store';
 import { pipe } from 'fp-ts/lib/function';
 
 export const searchBoxIsItemRename = ({
@@ -39,19 +32,11 @@ export const searchBoxIsItemRename = ({
   setSelectedView: (selectedView: SelectedView) => void;
 }>): Action => ({
   id: 'search-box-is-item-rename',
-  title: 'Available actions',
   keys: [
     keyEnter({
-      desc: 'Rename',
+      desc: { id: messageId.rename },
       run: pipe(
-        renameOverwrite(
-          source,
-          item,
-          separator,
-          setMode,
-          setSearchWord,
-          setItemList,
-        ),
+        renameOverwrite(source, item, separator, setSearchWord, setItemList),
       ),
     }),
 
@@ -85,13 +70,5 @@ export const searchBoxIsItemRename = ({
         setItemList,
       }),
     ),
-
-    keyEscape({
-      desc: 'Quit',
-      run: async () => {
-        await closePanel();
-        return ok();
-      },
-    }),
   ],
 });

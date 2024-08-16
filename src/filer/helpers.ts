@@ -1,5 +1,6 @@
 import { FileOptions } from '@src/common/file-options';
 import { Item, ItemStat } from '@src/common/item';
+import { scope } from '@src/common/scope';
 import * as fs from 'fs';
 import * as fsExtra from 'fs-extra';
 import * as os from 'os';
@@ -69,12 +70,27 @@ export const getItems = async (item: string): Promise<ReadonlyArray<Item>> => {
           },
         ]
       : [];
+
+    const match = scope(() => {
+      if (prefix === null) {
+        return (_fname: string) => true;
+      } else {
+        const lprefix = prefix.toLocaleLowerCase();
+        //return (fname: string) => fname.toLocaleLowerCase().startsWith(lprefix);
+        const xs = lprefix.split(' ');
+        if (xs.length === 1) {
+          return (fname: string) =>
+            fname.toLocaleLowerCase().startsWith(lprefix);
+        } else {
+          return (fname: string) =>
+            xs.every(x => x === '' || fname.toLocaleLowerCase().includes(x));
+        }
+      }
+    });
+
     return (await fs.promises.readdir(dir)).reduce(async (fitems, fname) => {
       const items = await fitems;
-      if (
-        prefix === null ||
-        fname.toLocaleLowerCase().startsWith(prefix.toLowerCase())
-      ) {
+      if (match(fname)) {
         const fpath = nodePath.join(dir, fname);
         const fstat = await getItemStat(fpath);
         return [

@@ -7,16 +7,15 @@ import {
   renameOverwrite,
 } from '@src/action/helpers';
 import {
-  keyC,
+  keyCtrlC,
+  keyCtrlF,
+  keyCtrlP,
+  keyCtrlX,
   keyEnter,
-  keyEscape,
-  keyF,
-  keyP,
-  keyQ,
-  keyX,
 } from '@src/action/keys';
-import { closePanel, getParentDirectory } from '@src/events/native';
-import { Action, Mode, SelectedView, ok } from '@src/store';
+import { getParentDirectory } from '@src/events/native';
+import { messageId } from '@src/i18n/ja';
+import { Action, Mode, SelectedView } from '@src/store';
 
 export const itemListIsItemRename = ({
   destination,
@@ -36,10 +35,9 @@ export const itemListIsItemRename = ({
   setItemList: (itemList: ItemList) => void;
 }>): Action => ({
   id: 'item-list-is-item-rename',
-  title: 'Available actions',
   keys: [
     keyEnter({
-      desc: 'Open',
+      desc: { id: messageId.open },
       run: openItem(
         destination,
         separator,
@@ -49,7 +47,7 @@ export const itemListIsItemRename = ({
       ),
     }),
 
-    keyP(
+    keyCtrlP(
       goToParentDirectory({
         path: getParentDirectory(destination.path),
         separator,
@@ -58,21 +56,20 @@ export const itemListIsItemRename = ({
       }),
     ),
 
-    keyX({
-      desc: `Rename`,
+    keyCtrlX({
+      desc: { id: messageId.rename },
       run: renameOverwrite(
         source,
         destination,
         separator,
-        setMode,
         setSearchWord,
         setItemList,
       ),
     }),
 
-    keyF(goToSearchBox({ setSelectedView })),
+    keyCtrlF(goToSearchBox({ setSelectedView })),
 
-    keyC(
+    keyCtrlC(
       cancel({
         source: source[0],
         separator,
@@ -81,21 +78,5 @@ export const itemListIsItemRename = ({
         setItemList,
       }),
     ),
-
-    keyQ({
-      desc: 'Quit',
-      run: async () => {
-        await closePanel();
-        return ok();
-      },
-    }),
-
-    keyEscape({
-      desc: 'Quit',
-      run: async () => {
-        await closePanel();
-        return ok();
-      },
-    }),
   ],
 });

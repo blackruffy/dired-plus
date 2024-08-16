@@ -7,7 +7,6 @@ import React from 'react';
 type LazyUpdate = Readonly<{
   searchWord: string;
   issuedAt: number;
-  timeoutId?: NodeJS.Timeout;
 }>;
 
 const updateDuration = 10;
@@ -21,30 +20,45 @@ export const FilterInput = (): React.ReactElement => {
     setSelectedView,
   } = useStore();
   const ref = React.useRef<HTMLInputElement>();
-  const lazyUpdate = React.useRef<LazyUpdate | null>();
-  const isFocused = selectedView.name === 'search-box';
+  const [lazyUpdate, setLazyUpdate] = React.useState<LazyUpdate | null>(null);
+  const [updateTime, setUpdateTime] = React.useState(0);
+  //const isFocused = selectedView.name === 'search-box';
+
+  ref.current?.focus();
+  // React.useEffect(() => {
+  //   if (isFocused) {
+  //     ref.current?.focus();
+  //   } else {
+  //     ref.current?.blur();
+  //   }
+  // }, [isFocused]);
+
+  // React.useEffect(() => {
+  //   if (isFocused) {
+  //     if (
+  //       selectedView.selectionStart !== undefined &&
+  //       selectedView.selectionEnd !== undefined
+  //     ) {
+  //       ref.current?.setSelectionRange(
+  //         selectedView.selectionStart,
+  //         selectedView.selectionEnd,
+  //       );
+  //     }
+  //   }
+  // }, [isFocused, searchWord, selectedView]);
 
   React.useEffect(() => {
-    if (isFocused) {
-      ref.current?.focus();
-    } else {
-      ref.current?.blur();
+    if (
+      lazyUpdate != null &&
+      Date.now() - lazyUpdate.issuedAt > updateDuration
+    ) {
+      updateItemList({
+        path: lazyUpdate.searchWord,
+        setSearchWord,
+        setItemList,
+      });
     }
-  }, [isFocused]);
-
-  React.useEffect(() => {
-    if (isFocused) {
-      if (
-        selectedView.selectionStart !== undefined &&
-        selectedView.selectionEnd !== undefined
-      ) {
-        ref.current?.setSelectionRange(
-          selectedView.selectionStart,
-          selectedView.selectionEnd,
-        );
-      }
-    }
-  }, [isFocused, searchWord, selectedView]);
+  }, [lazyUpdate, updateTime, setSearchWord, setItemList]);
 
   return (
     <TextField
@@ -54,7 +68,8 @@ export const FilterInput = (): React.ReactElement => {
       fullWidth
       variant='standard'
       value={searchWord}
-      focused={isFocused}
+      // focused={isFocused}
+      focused={true}
       autoFocus
       InputProps={{
         startAdornment: (
@@ -64,33 +79,19 @@ export const FilterInput = (): React.ReactElement => {
         ),
       }}
       onChange={event => {
-        const timeoutId = setTimeout(() => {
-          if (lazyUpdate.current != null) {
-            if (Date.now() - lazyUpdate.current.issuedAt > updateDuration) {
-              updateItemList({
-                path: event.target.value,
-                setSearchWord,
-                setItemList,
-              });
-              lazyUpdate.current = null;
-            } else {
-              clearTimeout(lazyUpdate.current.timeoutId);
-            }
-          }
-        }, updateDuration);
-
-        lazyUpdate.current = {
+        setLazyUpdate({
           searchWord: event.target.value,
           issuedAt: Date.now(),
-          timeoutId,
-        };
-        if (isFocused) {
-          setSelectedView({
-            ...selectedView,
-            selectionStart: ref.current?.selectionStart ?? undefined,
-            selectionEnd: ref.current?.selectionEnd ?? undefined,
-          });
-        }
+        });
+        setTimeout(() => setUpdateTime(Date.now()), updateDuration);
+
+        // if (isFocused) {
+        //   setSelectedView({
+        //     ...selectedView,
+        //     selectionStart: ref.current?.selectionStart ?? undefined,
+        //     selectionEnd: ref.current?.selectionEnd ?? undefined,
+        //   });
+        // }
         setSearchWord(event.target.value);
       }}
     />

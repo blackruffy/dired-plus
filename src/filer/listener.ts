@@ -13,6 +13,10 @@ import {
   DeleteFileResponse,
   GetBaseNameRequest,
   GetBaseNameResponse,
+  GetColorThemeRequest,
+  GetColorThemeResponse,
+  GetLocaleRequest,
+  GetLocaleResponse,
   GetParentDirectoryRequest,
   GetParentDirectoryResponse,
   GetSeparatorRequest,
@@ -32,6 +36,7 @@ import {
   errorResponse,
   response,
 } from '@src/common/messages';
+import { getColorTheme } from '@src/theme';
 import * as nodePath from 'path';
 import * as vscode from 'vscode';
 import {
@@ -223,6 +228,25 @@ export const startListen = (
                 active.viewColumn,
               );
             }
+            return;
+          }
+          case 'get-color-theme': {
+            const req = message as GetColorThemeRequest;
+            panel.webview.postMessage(
+              response<GetColorThemeResponse>(req, {
+                colorTheme: getColorTheme(),
+              }),
+            );
+            return;
+          }
+          case 'get-locale': {
+            const req = message as GetLocaleRequest;
+            panel.webview.postMessage(
+              response<GetLocaleResponse>(req, {
+                locale: vscode.env.language,
+              }),
+            );
+            return;
           }
         }
       } catch (e: unknown) {
