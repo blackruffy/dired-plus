@@ -3,11 +3,14 @@ import * as vscode from 'vscode';
 import { scope } from './common/scope';
 import { openFile } from './filer/helpers';
 
-const maxHistorySize = 100;
+const maxHistorySize = 10;
 
 type HistoryState = {
   context?: vscode.ExtensionContext;
   index: number;
+  /**
+   * one of the history that is currently opened.
+   */
   openedPath?: string;
   outputChannel?: vscode.OutputChannel;
 };
@@ -66,6 +69,7 @@ export const initializeEditorHistory = async (
         fsPath != null &&
         !isHistoryOpen(fsPath)
       ) {
+        // insert the editor path to the top of the history
         updateHistory(fsPath);
       } else if (isHistoryOpen()) {
         historyState.update(s => ({ ...s, openedPath: undefined }));
@@ -74,6 +78,9 @@ export const initializeEditorHistory = async (
   );
 };
 
+/**
+ * Get a index that is normalized to the range of the history length.
+ */
 const normalizeIndex = (index: number, len: number): number => {
   const a = index % len;
   return a < 0 ? len + a : a;
@@ -93,8 +100,8 @@ const insertItem = <A>(
   maxSize: number,
 ): [readonly A[], number] => {
   const len = xs.length;
-  // diff is the number of items that should be removed
-  const diff = len + 1 - maxSize;
+  // 'diff' is the number of items that should be removed
+  // const diff = len + 1 - maxSize;
   const idx = normalizeIndex(index, len);
   if (len === 0) {
     // if the history is empty, just insert the item
@@ -102,39 +109,40 @@ const insertItem = <A>(
   } else if (item === xs[idx]) {
     // if the item is acitve, do nothing
     return [xs, idx];
-  } else if (item === xs[idx - 1]) {
+  } else if (idx > 0 && item === xs[idx - 1]) {
     return [xs, idx - 1];
   } else {
-    // As the history length should be less than maxSize,
-    // you should remove either the first or the last item.
-    // start and end are the indexes of items that should be remained.
-    const [start, end] =
-      diff > 0 // if there are some items to remove
-        ? idx > len / 2 // if the active item is in the latter half
-          ? // you should remote items from the beginning of the history
-            [diff, len - 1]
-          : // if the active item is in the former half,
-            // you should remote items from the end of the history
-            [0, len - 1 - diff]
-        : // if no item should be removed, you take all items
-          [0, len - 1];
-    const { ys, j } = xs.reduce(
-      ({ ys, j }, x, i) => {
-        if (i >= start && i <= end) {
-          if (i === idx) {
-            ys.push(item, x);
-            return { ys, j: ys.length - 2 };
-          } else {
-            ys.push(x);
-            return { ys, j };
-          }
-        } else {
-          return { ys, j };
-        }
-      },
-      { ys: [] as A[], j: idx },
-    );
-    return [ys, j];
+    return [[...xs.slice(0, idx), item, ...xs.slice(idx, maxSize)], idx];
+    // // As the history length should be less than maxSize,
+    // // you should remove either the first or the last item.
+    // // start and end are the indexes of items that should be remained.
+    // const [start, end] =
+    //   diff > 0 // if there are some items to remove
+    //     ? idx > len / 2 // if the active item is in the latter half
+    //       ? // you should remote items from the beginning of the history
+    //         [diff, len - 1]
+    //       : // if the active item is in the former half,
+    //         // you should remote items from the end of the history
+    //         [0, len - 1 - diff]
+    //     : // if no item should be removed, you take all items
+    //       [0, len - 1];
+    // const { ys, j } = xs.reduce(
+    //   ({ ys, j }, x, i) => {
+    //     if (i >= start && i <= end) {
+    //       if (i === idx) {
+    //         ys.push(item, x);
+    //         return { ys, j: ys.length - 2 };
+    //       } else {
+    //         ys.push(x);
+    //         return { ys, j };
+    //       }
+    //     } else {
+    //       return { ys, j };
+    //     }
+    //   },
+    //   { ys: [] as A[], j: idx },
+    // );
+    // return [ys, j];
   }
 };
 
@@ -150,12 +158,21 @@ const updateHistory = (path: string): void =>
 export const getPersistentState = (): vscode.Memento =>
   historyState.get().context!.workspaceState;
 
+/**
+ * @return the key for the history in the persistent state
+ */
 const getHistoryKey = (): string =>
   `incremental-filer.editorHistory.${vscode.window.activeTextEditor?.viewColumn}`;
 
+/**
+ * @return the key for the history index in the persistent state
+ */
 const getHistoryIndexKey = (): string =>
   `incremental-filer.editorHistoryIndex.${vscode.window.activeTextEditor?.viewColumn}`;
 
+/**
+ * @return the history in the persistent state
+ */
 export const getHistory = (): ReadonlyArray<string> =>
   getPersistentState().get(getHistoryKey()) ?? [];
 
