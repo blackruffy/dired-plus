@@ -33,6 +33,8 @@ import {
   RenameFileRequest,
   RenameFileResponse,
   Request,
+  ShowFolderRequest,
+  ShowFolderResponse,
   errorResponse,
   response,
 } from '@src/common/messages';
@@ -246,6 +248,18 @@ export const startListen = (
                 locale: vscode.env.language,
               }),
             );
+            return;
+          }
+          case 'show-folder': {
+            const req = message as ShowFolderRequest;
+            vscode.workspace.updateWorkspaceFolders(
+              vscode.workspace.workspaceFolders
+                ? vscode.workspace.workspaceFolders.length
+                : 0,
+              null,
+              { uri: vscode.Uri.file(req.path) },
+            );
+            panel.webview.postMessage(response<ShowFolderResponse>(req, {}));
             return;
           }
         }

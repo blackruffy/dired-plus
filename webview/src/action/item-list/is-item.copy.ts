@@ -7,9 +7,9 @@ import {
   openItem,
 } from '@src/action/helpers';
 import {
+  keyCtrlBackspace,
   keyCtrlC,
   keyCtrlF,
-  keyCtrlP,
   keyCtrlX,
   keyEnter,
 } from '@src/action/keys';
@@ -47,7 +47,7 @@ export const itemListIsItemCopy = ({
       ),
     }),
 
-    keyCtrlP(
+    keyCtrlBackspace(
       goToParentDirectory({
         path: getParentDirectory(destination.path),
         separator,

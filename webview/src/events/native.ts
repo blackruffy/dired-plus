@@ -35,6 +35,8 @@ import {
   RenameDirectoryResponse,
   RenameFileRequest,
   RenameFileResponse,
+  ShowFolderRequest,
+  ShowFolderResponse,
 } from '@common/messages';
 import { ColorTheme } from '@common/theme-color';
 import { updateItemList } from '@src/action/helpers';
@@ -185,6 +187,13 @@ export const getLocale = async (): Promise<string> =>
       key: 'get-locale',
     })
   ).locale;
+
+export const showFolder = async (path: string): Promise<void> => {
+  await request<ShowFolderRequest, ShowFolderResponse>({
+    key: 'show-folder',
+    path,
+  });
+};
 
 export const useNativeEvent = () => {
   const {

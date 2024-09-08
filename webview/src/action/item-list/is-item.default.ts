@@ -1,5 +1,4 @@
 import { Item, ItemList } from '@common/item';
-import { scope } from '@common/scope';
 import {
   deleteItems,
   goToParentDirectory,
@@ -10,16 +9,17 @@ import {
   updateItemList,
 } from '@src/action/helpers';
 import {
+  keyCtrlBackspace,
   keyCtrlC,
   keyCtrlD,
-  keyCtrlG,
+  keyCtrlF,
   keyCtrlI,
-  keyCtrlP,
   keyCtrlR,
   keyCtrlSpace,
+  keyCtrlU,
   keyEnter,
 } from '@src/action/keys';
-import { getParentDirectory } from '@src/events/native';
+import { showFolder } from '@src/events/native';
 import { messageId } from '@src/i18n/ja';
 import { Action, Mode, SelectedView } from '@src/store';
 
@@ -75,44 +75,8 @@ export const itemListIsItemDefault = ({
       },
     }),
 
-    keyCtrlP(
-      goToParentDirectory({
-        path: scope(async () => {
-          return itemList?.parent.path ?? (await getParentDirectory(item.path));
-        }),
-        separator,
-        setSearchWord,
-        setItemList,
-      }),
-    ),
-
-    keyCtrlI(goToSearchBox({ setSelectedView })),
-
-    keyCtrlG({
-      desc: { id: messageId.reload },
-      run: async () => {
-        await updateItemList({
-          path: itemList?.parent.path,
-          setSearchWord,
-          setItemList,
-        });
-        return {};
-      },
-    }),
-
     keyCtrlC(
       setCopyMode({
-        item,
-        itemList,
-        checked,
-        setMode,
-        setChecked,
-        setSelectedView,
-      }),
-    ),
-
-    keyCtrlR(
-      setRenameMode({
         item,
         itemList,
         checked,
@@ -132,5 +96,54 @@ export const itemListIsItemDefault = ({
         setItemList,
       }),
     ),
+
+    ...(item.itemType === 'directory'
+      ? [
+          keyCtrlF({
+            desc: { id: messageId.addFolder },
+            run: async () => {
+              showFolder(item.path);
+              return {};
+            },
+          }),
+        ]
+      : []),
+
+    keyCtrlI(goToSearchBox({ setSelectedView })),
+
+    keyCtrlBackspace(
+      goToParentDirectory({
+        // path: scope(async () => {
+        //   return itemList?.parent.path ?? (await getParentDirectory(item.path));
+        // }),
+        path: Promise.resolve(item.path),
+        separator,
+        setSearchWord,
+        setItemList,
+      }),
+    ),
+
+    keyCtrlR(
+      setRenameMode({
+        item,
+        itemList,
+        checked,
+        setMode,
+        setChecked,
+        setSelectedView,
+      }),
+    ),
+
+    keyCtrlU({
+      desc: { id: messageId.reload },
+      run: async () => {
+        await updateItemList({
+          path: itemList?.parent.path,
+          setSearchWord,
+          setItemList,
+        });
+        return {};
+      },
+    }),
   ],
 });

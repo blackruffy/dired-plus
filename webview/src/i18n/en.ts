@@ -5,7 +5,7 @@ export const en: Messages = {
 
   // command
   quit: 'Quit',
-  toParentDir: 'To Parent Directory',
+  toParentDir: 'Go Up',
   toSearchBox: 'To Search Box',
   cancel: 'Cancel',
   open: 'Open',
@@ -19,6 +19,7 @@ export const en: Messages = {
   dismiss: 'Dismiss',
   createFile: 'Create File',
   createDir: 'Create Directory',
+  addFolder: 'Add to Workspace',
 
   // status
   canceled: 'Canceled.',

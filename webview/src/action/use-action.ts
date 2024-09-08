@@ -1,4 +1,6 @@
-import { Action, State, useStore } from '@src/store';
+import { Action, ActionKey, State, useStore } from '@src/store';
+import { array, ord, string } from 'fp-ts';
+import { pipe } from 'fp-ts/lib/function';
 import { itemListIsItemCopy } from './item-list/is-item.copy';
 import { itemListIsItemDefault } from './item-list/is-item.default';
 import { itemListIsItemRename } from './item-list/is-item.rename';
@@ -164,6 +166,11 @@ export const useAction = (): Action | undefined => {
     ? undefined
     : {
         ...action,
-        keys: [...action.keys, ...defaultKeys],
+        keys: pipe(
+          [...action.keys, ...defaultKeys],
+          array.sort<ActionKey>(
+            ord.fromCompare((a, b) => string.Ord.compare(a.name, b.name)),
+          ),
+        ),
       };
 };

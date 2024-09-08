@@ -25,7 +25,7 @@ export const keyAlphabet = (
 ) => key(name, `Key${name.toUpperCase()}`, modifierKeys);
 
 export const keyCtrl = (name: string, code: string) =>
-  key(`^ + ${name}`, code, { controlKey: true });
+  key(`^ ${name}`, code, { controlKey: true });
 
 export const keyCtrlAlphabet = (name: string) =>
   keyCtrl(name, `Key${name.toUpperCase()}`);
@@ -37,46 +37,47 @@ export const keys = {
   backspace: key('BS', 'Backspace'),
   tab: key('TAB', 'Tab'),
   shift: {
-    enter: key('⇧ + ↩︎', 'Enter', { shiftKey: true }),
+    enter: key('⇧ ↩︎', 'Enter', { shiftKey: true }),
   },
 };
 
 export const keyEscape = key('ESC', 'Escape');
 export const keyEnter = key('⏎', 'Enter');
-export const keyShiftEnter = key('⇧ + ↩︎', 'Enter', { shiftKey: true });
+export const keyShiftEnter = key('⇧ ↩︎', 'Enter', { shiftKey: true });
 export const keySpace = key('␣', 'Space');
 export const keyBackspace = key('BS', 'Backspace');
 export const keyTab = key('TAB', 'Tab');
-export const keyC = keyAlphabet('c');
-export const keyD = keyAlphabet('d');
-export const keyF = keyAlphabet('f');
-export const keyG = keyAlphabet('g');
-export const keyI = keyAlphabet('i');
-export const keyN = keyAlphabet('n');
-export const keyO = keyAlphabet('o');
-export const keyP = keyAlphabet('p');
-export const keyQ = keyAlphabet('q');
-export const keyR = keyAlphabet('r');
-export const keyX = keyAlphabet('x');
-export const keyY = keyAlphabet('y');
-export const keyZ = keyAlphabet('z');
+export const keyC = keyAlphabet('C');
+export const keyD = keyAlphabet('D');
+export const keyF = keyAlphabet('F');
+export const keyG = keyAlphabet('G');
+export const keyI = keyAlphabet('I');
+export const keyN = keyAlphabet('N');
+export const keyO = keyAlphabet('O');
+export const keyP = keyAlphabet('P');
+export const keyQ = keyAlphabet('Q');
+export const keyR = keyAlphabet('R');
+export const keyX = keyAlphabet('X');
+export const keyY = keyAlphabet('Y');
+export const keyZ = keyAlphabet('Z');
 
 export const keyCtrlBackspace = keyCtrl('BS', 'Backspace');
 export const keyCtrlSpace = keyCtrl('␣', 'Space');
 
-export const keyCtrlC = keyCtrlAlphabet('c');
-export const keyCtrlD = keyCtrlAlphabet('d');
-export const keyCtrlF = keyCtrlAlphabet('f');
-export const keyCtrlG = keyCtrlAlphabet('g');
-export const keyCtrlI = keyCtrlAlphabet('i');
-export const keyCtrlN = keyCtrlAlphabet('n');
-export const keyCtrlO = keyCtrlAlphabet('o');
-export const keyCtrlP = keyCtrlAlphabet('p');
-export const keyCtrlQ = keyCtrlAlphabet('q');
-export const keyCtrlR = keyCtrlAlphabet('r');
-export const keyCtrlX = keyCtrlAlphabet('x');
-export const keyCtrlY = keyCtrlAlphabet('y');
-export const keyCtrlZ = keyCtrlAlphabet('z');
+export const keyCtrlC = keyCtrlAlphabet('C');
+export const keyCtrlD = keyCtrlAlphabet('D');
+export const keyCtrlF = keyCtrlAlphabet('F');
+export const keyCtrlG = keyCtrlAlphabet('G');
+export const keyCtrlI = keyCtrlAlphabet('I');
+export const keyCtrlN = keyCtrlAlphabet('N');
+export const keyCtrlO = keyCtrlAlphabet('O');
+export const keyCtrlP = keyCtrlAlphabet('P');
+export const keyCtrlQ = keyCtrlAlphabet('Q');
+export const keyCtrlR = keyCtrlAlphabet('R');
+export const keyCtrlU = keyCtrlAlphabet('U');
+export const keyCtrlX = keyCtrlAlphabet('X');
+export const keyCtrlY = keyCtrlAlphabet('Y');
+export const keyCtrlZ = keyCtrlAlphabet('Z');
 
 export const defaultKeys: ReadonlyArray<ActionKey> = [
   keyEscape({

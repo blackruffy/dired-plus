@@ -27,6 +27,7 @@ export const ja = {
   dismiss: '閉じる',
   createFile: '新規ファイル',
   createDir: '新規ディレクトリ',
+  addFolder: 'ワークスペースに追加',
 
   // status
   canceled: 'キャンセルしました。',

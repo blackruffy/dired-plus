@@ -11,10 +11,12 @@ import {
   keyCtrlBackspace,
   keyCtrlC,
   keyCtrlD,
+  keyCtrlF,
   keyCtrlR,
   keyEnter,
   keyTab,
 } from '@src/action/keys';
+import { showFolder } from '@src/events/native';
 import { messageId } from '@src/i18n/ja';
 import { Action, Mode, SelectedView } from '@src/store';
 
@@ -64,6 +66,18 @@ export const searchBoxIsItemDefault = ({
         setSelectedView,
       }),
     ),
+
+    ...(item.itemType === 'directory'
+      ? [
+          keyCtrlF({
+            desc: { id: messageId.addFolder },
+            run: async () => {
+              showFolder(item.path);
+              return {};
+            },
+          }),
+        ]
+      : []),
 
     keyCtrlR(
       setRenameMode({

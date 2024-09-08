@@ -16,6 +16,7 @@ import {
   deleteDirectory,
   deleteFile,
   getParentDirectory,
+  joinPath,
   listItems,
   openFile,
   renameDirectory,
@@ -152,7 +153,18 @@ const confirmBeforeRun = (
         keys: [
           keyY({
             desc: descYes,
-            run,
+            run: pipe(
+              run,
+              task.map(s => ({
+                ...s,
+                mode: undefined,
+                dialog: undefined,
+                status: {
+                  type: 'info',
+                  message: { id: messageId.renamed },
+                },
+              })),
+            ),
           }),
           keyN({
             desc: { id: messageId.cancel },
@@ -184,9 +196,9 @@ export const openItem = (
       )
     : item.itemType === 'directory'
       ? pipe(
-          task.fromPromise(() =>
+          task.fromPromise(async () =>
             updateItemList({
-              path: `${item.path}${separator}`,
+              path: await joinPath(item.path, separator),
               setSearchWord,
               setItemList,
             }),

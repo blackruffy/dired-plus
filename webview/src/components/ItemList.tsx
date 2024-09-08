@@ -102,6 +102,9 @@ export const ItemList = (): React.ReactElement => {
         justifyContent: 'flex-start',
         alignItems: 'stretch',
       }}
+      onClick={e => {
+        e.stopPropagation();
+      }}
     >
       {items.map((item, index) => {
         const isSelected =
@@ -124,7 +127,8 @@ export const ItemList = (): React.ReactElement => {
                 ? theme.palette.action.selected
                 : 'transparent',
             }}
-            onClick={() => {
+            onClick={e => {
+              e.stopPropagation();
               setSelectedView({
                 name: 'list-item',
                 index,

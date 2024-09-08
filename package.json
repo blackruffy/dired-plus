@@ -40,8 +40,7 @@
       {
         "command": "incremental-filer.open",
         "key": "ctrl+x ctrl+f",
-        "mac": "ctrl+x ctrl+f",
-        "when": "editorTextFocus"
+        "mac": "ctrl+x ctrl+f"
       },
       {
         "command": "incremental-filer.history:prev",

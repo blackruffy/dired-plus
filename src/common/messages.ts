@@ -20,7 +20,8 @@ export type MessageKey =
   | 'close-panel'
   | 'get-color-theme'
   | 'set-color-theme'
-  | 'get-locale';
+  | 'get-locale'
+  | 'show-folder';
 
 export type MessageType = 'request' | 'response';
 
@@ -115,6 +116,10 @@ export type SetColorThemeResponse = Response<'set-color-theme'>;
 export type GetLocaleRequest = Request<'get-locale'>;
 export type GetLocaleResponse = Response<'get-locale'> &
   Readonly<{ locale: string }>;
+
+export type ShowFolderRequest = Request<'show-folder'> &
+  Readonly<{ path: string }>;
+export type ShowFolderResponse = Response<'show-folder'>;
 
 export const response = <Res extends Response<MessageKey>>(
   req: Request<MessageKey>,

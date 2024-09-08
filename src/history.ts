@@ -112,37 +112,7 @@ const insertItem = <A>(
   } else if (idx > 0 && item === xs[idx - 1]) {
     return [xs, idx - 1];
   } else {
-    return [[...xs.slice(0, idx), item, ...xs.slice(idx, maxSize)], idx];
-    // // As the history length should be less than maxSize,
-    // // you should remove either the first or the last item.
-    // // start and end are the indexes of items that should be remained.
-    // const [start, end] =
-    //   diff > 0 // if there are some items to remove
-    //     ? idx > len / 2 // if the active item is in the latter half
-    //       ? // you should remote items from the beginning of the history
-    //         [diff, len - 1]
-    //       : // if the active item is in the former half,
-    //         // you should remote items from the end of the history
-    //         [0, len - 1 - diff]
-    //     : // if no item should be removed, you take all items
-    //       [0, len - 1];
-    // const { ys, j } = xs.reduce(
-    //   ({ ys, j }, x, i) => {
-    //     if (i >= start && i <= end) {
-    //       if (i === idx) {
-    //         ys.push(item, x);
-    //         return { ys, j: ys.length - 2 };
-    //       } else {
-    //         ys.push(x);
-    //         return { ys, j };
-    //       }
-    //     } else {
-    //       return { ys, j };
-    //     }
-    //   },
-    //   { ys: [] as A[], j: idx },
-    // );
-    // return [ys, j];
+    return [[item, ...xs.slice(idx, maxSize)], 0];
   }
 };
 
@@ -212,6 +182,9 @@ export const debugHistory = (): void => {
   const index = historyState.get().index;
   const h = getHistory();
   console.debug(`[File history] length: ${h.length}, index: ${index}`);
+  historyState
+    .get()
+    .outputChannel?.appendLine(`***** [File history] index: ${index} *****`);
   h.forEach((p, i) =>
     historyState
       .get()

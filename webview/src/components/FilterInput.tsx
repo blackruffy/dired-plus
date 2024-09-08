@@ -12,13 +12,7 @@ type LazyUpdate = Readonly<{
 const updateDuration = 10;
 
 export const FilterInput = (): React.ReactElement => {
-  const {
-    searchWord,
-    selectedView,
-    setSearchWord,
-    setItemList,
-    setSelectedView,
-  } = useStore();
+  const { searchWord, setSearchWord, setItemList } = useStore();
   const ref = React.useRef<HTMLInputElement>();
   const [lazyUpdate, setLazyUpdate] = React.useState<LazyUpdate | null>(null);
   const [updateTime, setUpdateTime] = React.useState(0);

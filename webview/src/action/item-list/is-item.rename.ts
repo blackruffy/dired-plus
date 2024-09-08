@@ -2,14 +2,12 @@ import { Item, ItemList } from '@common/item';
 import {
   cancel,
   goToParentDirectory,
-  goToSearchBox,
   openItem,
   renameOverwrite,
 } from '@src/action/helpers';
 import {
+  keyCtrlBackspace,
   keyCtrlC,
-  keyCtrlF,
-  keyCtrlP,
   keyCtrlX,
   keyEnter,
 } from '@src/action/keys';
@@ -47,7 +45,7 @@ export const itemListIsItemRename = ({
       ),
     }),
 
-    keyCtrlP(
+    keyCtrlBackspace(
       goToParentDirectory({
         path: getParentDirectory(destination.path),
         separator,
@@ -67,7 +65,7 @@ export const itemListIsItemRename = ({
       ),
     }),
 
-    keyCtrlF(goToSearchBox({ setSelectedView })),
+    //keyCtrlF(goToSearchBox({ setSelectedView })),
 
     keyCtrlC(
       cancel({
