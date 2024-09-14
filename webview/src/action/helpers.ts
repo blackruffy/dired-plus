@@ -676,7 +676,13 @@ export const cancel = ({
 const getCommonPrefix = (items: ReadonlyArray<Item>, i: number): string => {
   const [item, ...rest] = items;
   const a = item.name[i];
-  if (rest.every(item => item.name[i] === a)) {
+  if (
+    a != null &&
+    rest.every(x => {
+      const b = x.name[i];
+      return b != null && b.toLocaleLowerCase() === a.toLocaleLowerCase();
+    })
+  ) {
     return a + getCommonPrefix(items, i + 1);
   } else {
     return '';
@@ -731,6 +737,7 @@ export const completion = ({
         itemList?.parent.path.endsWith(separator) === true
           ? `${itemList?.parent.path}${prefix}`
           : `${await getParentDirectory(path)}${separator}${prefix}`;
+
       if (selectedView.name === 'search-box') {
         setSelectedView({
           ...selectedView,
