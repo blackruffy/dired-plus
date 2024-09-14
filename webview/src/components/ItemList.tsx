@@ -1,9 +1,8 @@
 import { formatDate } from '@common/date';
 import { formatFileSize } from '@common/file-size';
 import ArticleIcon from '@mui/icons-material/Article';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import CheckIcon from '@mui/icons-material/Check';
 import FolderIcon from '@mui/icons-material/Folder';
-import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import { Box, Typography, useTheme } from '@mui/material';
 import { useStore } from '@src/store';
 import React from 'react';
@@ -49,13 +48,13 @@ const CheckButton = ({
       }}
     >
       {enabled ? (
-        <CheckCircleOutlineIcon sx={[iconStyle]} />
+        <CheckIcon sx={[iconStyle]} />
       ) : (
-        <RadioButtonUncheckedIcon
+        <CheckIcon
           sx={[
             iconStyle,
             { color: theme.palette.text.disabled },
-            isDot ? { opacity: 0 } : {},
+            isDot ? { opacity: 0 } : { opacity: 0 },
           ]}
         />
       )}
