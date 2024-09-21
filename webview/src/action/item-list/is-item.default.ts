@@ -1,5 +1,7 @@
 import { Item, ItemList } from '@common/item';
+import { scope } from '@common/scope';
 import {
+  bind,
   deleteItems,
   goToParentDirectory,
   goToSearchBox,
@@ -25,6 +27,7 @@ import { Action, Mode, SelectedView } from '@src/store';
 
 export const itemListIsItemDefault = ({
   index,
+  searchWord,
   item,
   itemList,
   separator,
@@ -36,6 +39,7 @@ export const itemListIsItemDefault = ({
   setSelectedView,
 }: Readonly<{
   index: number;
+  searchWord: string;
   item: Item;
   itemList?: ItemList;
   separator: string;
@@ -112,15 +116,17 @@ export const itemListIsItemDefault = ({
     keyCtrlI(goToSearchBox({ setSelectedView })),
 
     keyCtrlBackspace(
-      goToParentDirectory({
-        // path: scope(async () => {
-        //   return itemList?.parent.path ?? (await getParentDirectory(item.path));
-        // }),
-        path: Promise.resolve(item.path),
-        separator,
-        setSearchWord,
-        setItemList,
-      }),
+      bind(
+        { id: messageId.toParentDir },
+
+        goToParentDirectory({
+          path: Promise.resolve(searchWord),
+          separator,
+          setSearchWord,
+          setItemList,
+        }),
+        goToSearchBox({ setSelectedView }),
+      ),
     ),
 
     keyCtrlR(

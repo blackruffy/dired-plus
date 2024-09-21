@@ -14,8 +14,8 @@ const state: State = {};
 
 const createPanel = () =>
   vscode.window.createWebviewPanel(
-    'filer', // Identifies the type of the webview. Used internally
-    'Filer', // Title of the panel displayed to the user
+    'dired-plus', // Identifies the type of the webview. Used internally
+    'Dired+', // Title of the panel displayed to the user
     // Editor column to show the new webview panel in.
     vscode.window.activeTextEditor?.viewColumn ?? vscode.ViewColumn.One,
     {
@@ -44,7 +44,7 @@ const createHTML = (
   <html>
     <head>
       <meta charset="UTF-8" />
-      <title>IncrementalFiler</title>
+      <title>Dired+</title>
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     </head>
     <body></body>

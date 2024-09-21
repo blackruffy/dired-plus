@@ -14,7 +14,7 @@ export const useNativeListener = (): void => {
           break;
         }
         default: {
-          console.error(`Invalid request: ${data.key}`);
+          // console.error(`Invalid request: ${data.key}`);
           break;
         }
       }

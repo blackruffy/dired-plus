@@ -9,31 +9,31 @@ import * as vscode from 'vscode';
 
 export const commands = (context: vscode.ExtensionContext) => {
   context.subscriptions.push(
-    vscode.commands.registerCommand('incremental-filer.open', () =>
+    vscode.commands.registerCommand('dired-plus.open', () =>
       filer.getFilerPanel(context).reveal(),
     ),
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('incremental-filer.history:prev', () => {
+    vscode.commands.registerCommand('dired-plus.history:prev', () => {
       openPrevHistoryItem();
     }),
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('incremental-filer.history:next', () => {
+    vscode.commands.registerCommand('dired-plus.history:next', () => {
       openNextHistoryItem();
     }),
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('incremental-filer.history:reset', () => {
+    vscode.commands.registerCommand('dired-plus.history:reset', () => {
       resetHistory();
     }),
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('incremental-filer.history:debug', () => {
+    vscode.commands.registerCommand('dired-plus.history:debug', () => {
       debugHistory();
     }),
   );

@@ -13,6 +13,7 @@ import { searchBoxIsNoneDefault } from './search-box/is-none.default';
 import { searchBoxIsNoneRename } from './search-box/is-none.rename';
 
 const createAction = ({
+  searchWord,
   selectedView,
   itemList,
   mode,
@@ -113,6 +114,7 @@ const createAction = ({
     if (itemType !== 'none' && mode?.type === undefined && item !== undefined) {
       return itemListIsItemDefault({
         index: selectedView.index,
+        searchWord,
         item,
         itemList,
         separator: separator ?? '/',
@@ -129,6 +131,7 @@ const createAction = ({
       item !== undefined
     ) {
       return itemListIsItemCopy({
+        searchWord,
         destination: item,
         source: mode.source,
         separator: separator ?? '/',
@@ -143,6 +146,7 @@ const createAction = ({
       item !== undefined
     ) {
       return itemListIsItemRename({
+        searchWord,
         destination: item,
         source: mode.source,
         separator: separator ?? '/',

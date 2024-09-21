@@ -1,9 +1,14 @@
 {
-  "name": "incremental-filer",
-  "displayName": "incremental-filer",
-  "description": "",
+  "name": "dired-plus",
+  "displayName": "dired+",
+  "description": "A file manager like Emacs Dired",
   "version": "0.1.1",
+  "publisher": "TaichiKubo",
   "icon": "icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/blackruffy/dired-plus"
+  },
   "engines": {
     "vscode": "^1.86.0"
   },
@@ -17,40 +22,40 @@
   "contributes": {
     "commands": [
       {
-        "command": "incremental-filer.open",
-        "title": "Incremental Filer"
+        "command": "dired-plus.open",
+        "title": "dired-plus.open"
       },
       {
-        "command": "incremental-filer.history:prev",
-        "title": "Open the previous file in history"
+        "command": "dired-plus.history:prev",
+        "title": "dired-plus.history:prev"
       },
       {
-        "command": "incremental-filer.history:next",
-        "title": "Open the next file in history"
+        "command": "dired-plus.history:next",
+        "title": "dired-plus.history:next"
       },
       {
-        "command": "incremental-filer.history:reset",
-        "title": "Reset the file history"
+        "command": "dired-plus.history:reset",
+        "title": "dired-plus.history:reset"
       },
       {
-        "command": "incremental-filer.history:debug",
-        "title": "Debug the file history"
+        "command": "dired-plus.history:debug",
+        "title": "dired-plus.history:debug"
       }
     ],
     "keybindings": [
       {
-        "command": "incremental-filer.open",
+        "command": "dired-plus.open",
         "key": "ctrl+x ctrl+f",
         "mac": "ctrl+x ctrl+f"
       },
       {
-        "command": "incremental-filer.history:prev",
+        "command": "dired-plus.history:prev",
         "key": "alt+left",
         "mac": "alt+left",
         "when": "editorTextFocus"
       },
       {
-        "command": "incremental-filer.history:next",
+        "command": "dired-plus.history:next",
         "key": "alt+right",
         "mac": "alt+right",
         "when": "editorTextFocus"
@@ -59,8 +64,7 @@
   },
   "scripts": {
     "start:mock": "vite --mode mock --open --config vite.config.webview.dev.ts",
-    "vscode:package": "npm run build && vsce package",
-    "launch": "npm run vscode:package && code --install-extension incremental-filer-0.0.1.vsix",
+    "vscode:package": "npm run build && vsce package --allow-star-activation",
     "launch:debug": "npm run build && code --extensionDevelopmentPath=./",
     "build": "npm run typecheck && npm run lint && npm run build:webview && npm run build:extension",
     "build:watch": "vite build --config vite.config.webview.ts --watch & vite build --config vite.config.extension.ts --watch",
@@ -86,7 +90,7 @@
     "@vitejs/plugin-react": "^4.2.1",
     "@vscode/test-cli": "^0.0.6",
     "@vscode/test-electron": "^2.3.9",
-    "@vscode/vsce": "^2.23.0",
+    "@vscode/vsce": "^3.1.0",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-react": "^7.33.2",

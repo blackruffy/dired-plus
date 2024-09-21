@@ -1,5 +1,6 @@
 import { Item, ItemList } from '@common/item';
 import {
+  bind,
   cancel,
   copyOverwrite,
   goToParentDirectory,
@@ -13,11 +14,11 @@ import {
   keyCtrlX,
   keyEnter,
 } from '@src/action/keys';
-import { getParentDirectory } from '@src/events/native';
 import { messageId } from '@src/i18n/ja';
 import { Action, Mode, SelectedView } from '@src/store';
 
 export const itemListIsItemCopy = ({
+  searchWord,
   destination,
   source,
   separator,
@@ -26,6 +27,7 @@ export const itemListIsItemCopy = ({
   setSearchWord,
   setItemList,
 }: Readonly<{
+  searchWord: string;
   destination: Item;
   source: ReadonlyArray<Item>;
   separator: string;
@@ -48,12 +50,16 @@ export const itemListIsItemCopy = ({
     }),
 
     keyCtrlBackspace(
-      goToParentDirectory({
-        path: getParentDirectory(destination.path),
-        separator,
-        setSearchWord,
-        setItemList,
-      }),
+      bind(
+        { id: messageId.toParentDir },
+        goToParentDirectory({
+          path: Promise.resolve(searchWord),
+          separator,
+          setSearchWord,
+          setItemList,
+        }),
+        goToSearchBox({ setSelectedView }),
+      ),
     ),
 
     keyCtrlX({

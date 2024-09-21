@@ -30,6 +30,24 @@ import { Task } from 'fp-ts/lib/Task';
 import { pipe } from 'fp-ts/lib/function';
 import { KeyParams, keyN, keyY } from './keys';
 
+export const bind = (
+  desc: IntlMessage,
+  ...args: ReadonlyArray<KeyParams>
+): KeyParams => ({
+  desc,
+  run: pipe(
+    args,
+    readonlyArray.reduce<KeyParams, Task<Partial<State>>>(task.of({}), (a, b) =>
+      pipe(
+        task.Do,
+        task.bind('sa', () => a),
+        task.bind('sb', () => b.run),
+        task.map(({ sa, sb }) => ({ ...sa, ...sb })),
+      ),
+    ),
+  ),
+});
+
 export const updateItemList = async ({
   path,
   setSearchWord,

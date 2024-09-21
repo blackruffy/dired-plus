@@ -119,8 +119,10 @@ const insertItem = <A>(
 const updateHistory = (path: string): void =>
   pipe({ h: getHistory(), index: historyState.get().index }, ({ h, index }) =>
     pipe(insertItem(h, path, index, maxHistorySize), ([h, idx]) =>
-      pipe(getPersistentState().update(getHistoryKey(), h), () =>
-        historyState.update(s => ({ ...s, index: idx })),
+      pipe(
+        console.log(`history: index: ${idx}, ${JSON.stringify(h, null, 2)}`),
+        () => getPersistentState().update(getHistoryKey(), h),
+        () => historyState.update(s => ({ ...s, index: idx })),
       ),
     ),
   );
@@ -184,7 +186,9 @@ export const debugHistory = (): void => {
   console.debug(`[File history] length: ${h.length}, index: ${index}`);
   historyState
     .get()
-    .outputChannel?.appendLine(`***** [File history] index: ${index} *****`);
+    .outputChannel?.appendLine(
+      `***** [File history] length: ${h.length}, index: ${index} *****`,
+    );
   h.forEach((p, i) =>
     historyState
       .get()
