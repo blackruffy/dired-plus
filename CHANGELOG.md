@@ -11,3 +11,7 @@
 ## 0.1.3
 
 - Optimized the extention file size
+
+## 0.1.4
+
+- Fixed a bug about selecting a item

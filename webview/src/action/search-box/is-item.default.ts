@@ -98,6 +98,7 @@ export const searchBoxIsItemDefault = ({
         separator,
         setSearchWord,
         setItemList,
+        setSelectedView,
       }),
     ),
 
@@ -107,6 +108,7 @@ export const searchBoxIsItemDefault = ({
         separator,
         setItemList,
         setSearchWord,
+        setSelectedView,
       }),
     ),
 

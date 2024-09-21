@@ -1,5 +1,4 @@
 import { Item, ItemList } from '@common/item';
-import { scope } from '@common/scope';
 import {
   bind,
   deleteItems,
@@ -98,6 +97,7 @@ export const itemListIsItemDefault = ({
         separator,
         setSearchWord,
         setItemList,
+        setSelectedView,
       }),
     ),
 
@@ -124,6 +124,7 @@ export const itemListIsItemDefault = ({
           separator,
           setSearchWord,
           setItemList,
+          setSelectedView,
         }),
         goToSearchBox({ setSelectedView }),
       ),
@@ -147,6 +148,7 @@ export const itemListIsItemDefault = ({
           path: itemList?.parent.path,
           setSearchWord,
           setItemList,
+          setSelectedView,
         });
         return {};
       },

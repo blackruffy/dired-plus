@@ -57,6 +57,7 @@ export const itemListIsItemRename = ({
           separator,
           setSearchWord,
           setItemList,
+          setSelectedView,
         }),
         goToSearchBox({ setSelectedView }),
       ),
@@ -70,6 +71,7 @@ export const itemListIsItemRename = ({
         separator,
         setSearchWord,
         setItemList,
+        setSelectedView,
       ),
     }),
 
@@ -82,6 +84,7 @@ export const itemListIsItemRename = ({
         setMode,
         setSearchWord,
         setItemList,
+        setSelectedView,
       }),
     ),
   ],

@@ -36,7 +36,14 @@ export const searchBoxIsItemCopy = ({
     keyEnter({
       desc: { id: messageId.copy },
       run: pipe(
-        copyOverwrite(source, item, separator, setSearchWord, setItemList),
+        copyOverwrite(
+          source,
+          item,
+          separator,
+          setSearchWord,
+          setItemList,
+          setSelectedView,
+        ),
       ),
     }),
 
@@ -46,6 +53,7 @@ export const searchBoxIsItemCopy = ({
         separator,
         setItemList,
         setSearchWord,
+        setSelectedView,
       }),
     ),
 
@@ -68,6 +76,7 @@ export const searchBoxIsItemCopy = ({
         setMode,
         setSearchWord,
         setItemList,
+        setSelectedView,
       }),
     ),
   ],

@@ -55,6 +55,7 @@ export const searchBoxIsNoneCopy = ({
                     path: `${await getParentDirectory(item.path)}${separator}`,
                     setSearchWord,
                     setItemList,
+                    setSelectedView,
                   }),
                 () => ({
                   status: {
@@ -76,6 +77,7 @@ export const searchBoxIsNoneCopy = ({
         separator,
         setItemList,
         setSearchWord,
+        setSelectedView,
       }),
     ),
 
@@ -98,6 +100,7 @@ export const searchBoxIsNoneCopy = ({
         setMode,
         setSearchWord,
         setItemList,
+        setSelectedView,
       }),
     ),
   ],

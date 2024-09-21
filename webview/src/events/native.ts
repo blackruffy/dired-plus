@@ -204,6 +204,7 @@ export const useNativeEvent = () => {
     setSeparator,
     setColorTheme,
     setLocale,
+    setSelectedView,
   } = useStore();
 
   React.useEffect(() => {
@@ -216,9 +217,9 @@ export const useNativeEvent = () => {
 
   React.useEffect(() => {
     if (itemList === undefined) {
-      updateItemList({ setSearchWord, setItemList });
+      updateItemList({ setSearchWord, setItemList, setSelectedView });
     }
-  }, [itemList, setItemList, setSearchWord]);
+  }, [itemList, setItemList, setSearchWord, setSelectedView]);
 
   React.useEffect(() => {
     if (separator == null) {

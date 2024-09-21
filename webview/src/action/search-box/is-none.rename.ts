@@ -50,6 +50,7 @@ export const searchBoxIsNoneRename = ({
                     path: `${await getParentDirectory(item.path)}${separator}`,
                     setSearchWord,
                     setItemList,
+                    setSelectedView,
                   }),
                 () =>
                   statusState({
@@ -95,6 +96,7 @@ export const searchBoxIsNoneRename = ({
         setMode,
         setSearchWord,
         setItemList,
+        setSelectedView,
       }),
     ),
   ],

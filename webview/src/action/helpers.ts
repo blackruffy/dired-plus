@@ -52,13 +52,22 @@ export const updateItemList = async ({
   path,
   setSearchWord,
   setItemList,
+  setSelectedView,
 }: Readonly<{
   path?: string;
   setSearchWord: (searchWord: string) => void;
   setItemList: (itemList: ItemList) => void;
+  setSelectedView: (selectedView: SelectedView) => void;
 }>): Promise<void> =>
   pipe(await listItems(path), a =>
-    pipe(setSearchWord(a.parent.path), () => setItemList(a)),
+    pipe(
+      setSearchWord(a.parent.path),
+      () => setItemList(a),
+      () =>
+        a.items.length === 0
+          ? setSelectedView({ name: 'search-box', updatedAt: Date.now() })
+          : void 0,
+    ),
   );
 
 export const goToParentDirectory = ({
@@ -66,11 +75,13 @@ export const goToParentDirectory = ({
   separator,
   setSearchWord,
   setItemList,
+  setSelectedView,
 }: Readonly<{
   path: Promise<string>;
   separator: string;
   setSearchWord: (searchWord: string) => void;
   setItemList: (itemList: ItemList) => void;
+  setSelectedView: (selectedView: SelectedView) => void;
 }>): KeyParams => ({
   desc: { id: messageId.toParentDir },
   run: async () => {
@@ -78,6 +89,7 @@ export const goToParentDirectory = ({
       path: `${await getParentDirectory(await path)}${separator}`,
       setSearchWord,
       setItemList,
+      setSelectedView,
     });
     return {};
   },
@@ -219,6 +231,7 @@ export const openItem = (
               path: await joinPath(item.path, separator),
               setSearchWord,
               setItemList,
+              setSelectedView,
             }),
           ),
           task.flatMap(() =>
@@ -232,6 +245,7 @@ const afterRun = (
   separator: string,
   setSearchWord: (searchWord: string) => void,
   setItemList: (itemList: ItemList) => void,
+  setSelectedView: (selectedView: SelectedView) => void,
 ): Task<Partial<State>> =>
   pipe(
     task.Do,
@@ -243,6 +257,7 @@ const afterRun = (
             : `${await getParentDirectory(destination.path)}${separator}`,
           setSearchWord,
           setItemList,
+          setSelectedView,
         }),
     ),
     task.map(() => ({
@@ -256,6 +271,7 @@ const confirmRenameBeforeRun = (
   separator: string,
   setSearchWord: (searchWord: string) => void,
   setItemList: (itemList: ItemList) => void,
+  setSelectedView: (selectedView: SelectedView) => void,
   run: () => Promise<Partial<State>>,
 ): Task<Partial<State>> =>
   confirmBeforeRun(
@@ -266,7 +282,13 @@ const confirmRenameBeforeRun = (
       task.Do,
       task.bind('s1', () => task.fromPromise(run)),
       task.bind('s2', () =>
-        afterRun(destination, separator, setSearchWord, setItemList),
+        afterRun(
+          destination,
+          separator,
+          setSearchWord,
+          setItemList,
+          setSelectedView,
+        ),
       ),
       task.map(({ s1, s2 }) => ({
         ...s1,
@@ -291,6 +313,7 @@ export const renameOverwrite = (
   separator: string,
   setSearchWord: (searchWord: string) => void,
   setItemList: (itemList: ItemList) => void,
+  setSelectedView: (selectedView: SelectedView) => void,
 ): Task<Partial<State>> => {
   const confirm = (run: () => Promise<Partial<State>>): Task<Partial<State>> =>
     confirmRenameBeforeRun(
@@ -299,6 +322,7 @@ export const renameOverwrite = (
       separator,
       setSearchWord,
       setItemList,
+      setSelectedView,
       run,
     );
 
@@ -307,7 +331,13 @@ export const renameOverwrite = (
       task.Do,
       task.bind('s1', () => task.fromPromise(run)),
       task.bind('s2', () =>
-        afterRun(destination, separator, setSearchWord, setItemList),
+        afterRun(
+          destination,
+          separator,
+          setSearchWord,
+          setItemList,
+          setSelectedView,
+        ),
       ),
       task.map(({ s1, s2 }) => ({
         ...s1,
@@ -398,6 +428,7 @@ const confirmCopyBeforeRun = (
   separator: string,
   setSearchWord: (searchWord: string) => void,
   setItemList: (itemList: ItemList) => void,
+  setSelectedView: (selectedView: SelectedView) => void,
   run: () => Promise<Partial<State>>,
 ): Task<Partial<State>> =>
   confirmBeforeRun(
@@ -408,7 +439,13 @@ const confirmCopyBeforeRun = (
       task.Do,
       task.bind('s1', () => task.fromPromise(run)),
       task.bind('s2', () =>
-        afterRun(destination, separator, setSearchWord, setItemList),
+        afterRun(
+          destination,
+          separator,
+          setSearchWord,
+          setItemList,
+          setSelectedView,
+        ),
       ),
       task.map(({ s1, s2 }) => ({
         ...s1,
@@ -430,6 +467,7 @@ export const copyOverwrite = (
   separator: string,
   setSearchWord: (searchWord: string) => void,
   setItemList: (itemList: ItemList) => void,
+  setSelectedView: (selectedView: SelectedView) => void,
 ): Task<Partial<State>> => {
   const confirm = (run: () => Promise<Partial<State>>): Task<Partial<State>> =>
     confirmCopyBeforeRun(
@@ -438,6 +476,7 @@ export const copyOverwrite = (
       separator,
       setSearchWord,
       setItemList,
+      setSelectedView,
       run,
     );
 
@@ -446,7 +485,13 @@ export const copyOverwrite = (
       task.Do,
       task.bind('s1', () => task.fromPromise(run)),
       task.bind('s2', () =>
-        afterRun(destination, separator, setSearchWord, setItemList),
+        afterRun(
+          destination,
+          separator,
+          setSearchWord,
+          setItemList,
+          setSelectedView,
+        ),
       ),
       task.map(({ s1, s2 }) => ({
         ...s1,
@@ -591,6 +636,7 @@ export const deleteItems = ({
   separator,
   setSearchWord,
   setItemList,
+  setSelectedView,
 }: Readonly<{
   item: Item;
   itemList?: ItemList;
@@ -598,6 +644,7 @@ export const deleteItems = ({
   separator: string;
   setSearchWord: (searchWord: string) => void;
   setItemList: (itemList: ItemList) => void;
+  setSelectedView: (selectedView: SelectedView) => void;
 }>): KeyParams => ({
   desc: { id: messageId.delete },
   run: async () => ({
@@ -633,6 +680,7 @@ export const deleteItems = ({
                       path: `${a.parent.path}${separator}`,
                       setSearchWord,
                       setItemList,
+                      setSelectedView,
                     })
                   : //pipe(setSearchWord(a.path), () => setItemList(a))
                     void 0,
@@ -672,12 +720,14 @@ export const cancel = ({
   setMode,
   setSearchWord,
   setItemList,
+  setSelectedView,
 }: Readonly<{
   source: Item;
   separator: string;
   setMode: (mode?: Mode) => void;
   setSearchWord: (searchWord: string) => void;
   setItemList: (itemList: ItemList) => void;
+  setSelectedView: (selectedView: SelectedView) => void;
 }>): KeyParams => ({
   desc: { id: messageId.cancel },
   run: async () => {
@@ -686,6 +736,7 @@ export const cancel = ({
       path: `${await getParentDirectory(source.path)}${separator}`,
       setSearchWord,
       setItemList,
+      setSelectedView,
     });
     return {};
   },
@@ -747,6 +798,7 @@ export const completion = ({
         path: newPath,
         setSearchWord,
         setItemList,
+        setSelectedView,
       });
       return {};
     } else {
@@ -767,6 +819,7 @@ export const completion = ({
         path: newPath,
         setSearchWord,
         setItemList,
+        setSelectedView,
       });
       return {};
     }

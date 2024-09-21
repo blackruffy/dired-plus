@@ -36,7 +36,14 @@ export const searchBoxIsItemRename = ({
     keyEnter({
       desc: { id: messageId.rename },
       run: pipe(
-        renameOverwrite(source, item, separator, setSearchWord, setItemList),
+        renameOverwrite(
+          source,
+          item,
+          separator,
+          setSearchWord,
+          setItemList,
+          setSelectedView,
+        ),
       ),
     }),
 
@@ -46,6 +53,7 @@ export const searchBoxIsItemRename = ({
         separator,
         setItemList,
         setSearchWord,
+        setSelectedView,
       }),
     ),
 
@@ -68,6 +76,7 @@ export const searchBoxIsItemRename = ({
         setMode,
         setSearchWord,
         setItemList,
+        setSelectedView,
       }),
     ),
   ],

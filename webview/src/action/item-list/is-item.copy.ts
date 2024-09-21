@@ -57,6 +57,7 @@ export const itemListIsItemCopy = ({
           separator,
           setSearchWord,
           setItemList,
+          setSelectedView,
         }),
         goToSearchBox({ setSelectedView }),
       ),
@@ -70,6 +71,7 @@ export const itemListIsItemCopy = ({
         separator,
         setSearchWord,
         setItemList,
+        setSelectedView,
       ),
     }),
 
@@ -82,6 +84,7 @@ export const itemListIsItemCopy = ({
         setMode,
         setSearchWord,
         setItemList,
+        setSelectedView,
       }),
     ),
   ],

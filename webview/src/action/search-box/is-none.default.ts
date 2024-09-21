@@ -52,6 +52,7 @@ export const searchBoxIsNoneDefault = ({
           path,
           setItemList,
           setSearchWord,
+          setSelectedView,
         });
         return statusState({
           id: messageId.createdDir,
@@ -66,6 +67,7 @@ export const searchBoxIsNoneDefault = ({
         separator,
         setItemList,
         setSearchWord,
+        setSelectedView,
       }),
     ),
 
