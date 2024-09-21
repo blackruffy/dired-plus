@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [react()],
   build: {
     sourcemap: true,
-    minify: false,
+    minify: true,
     emptyOutDir: true,
     outDir: '../dist/webview',
     rollupOptions: {

@@ -9,6 +9,7 @@ export default defineConfig({
       formats: ['cjs'],
       fileName: 'extension',
     },
+    minify: true,
     emptyOutDir: false,
     rollupOptions: {
       external: ['vscode', 'path', 'fs', 'os'],
