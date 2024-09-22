@@ -119,11 +119,13 @@ const insertItem = <A>(
 const updateHistory = (path: string): void =>
   pipe({ h: getHistory(), index: historyState.get().index }, ({ h, index }) =>
     pipe(insertItem(h, path, index, maxHistorySize), ([h, idx]) =>
-      pipe(
-        console.log(`history: index: ${idx}, ${JSON.stringify(h, null, 2)}`),
-        () => getPersistentState().update(getHistoryKey(), h),
-        () => historyState.update(s => ({ ...s, index: idx })),
-      ),
+      pipe(getHistoryKey(), key => {
+        console.log(
+          `history: key: ${key}, index: ${idx}, ${JSON.stringify(h, null, 2)}`,
+        ),
+          getPersistentState().update(key, h);
+        historyState.update(s => ({ ...s, index: idx }));
+      }),
     ),
   );
 
@@ -145,8 +147,10 @@ const getHistoryIndexKey = (): string =>
 /**
  * @return the history in the persistent state
  */
-export const getHistory = (): ReadonlyArray<string> =>
-  getPersistentState().get(getHistoryKey()) ?? [];
+export const getHistory = (
+  historyKey: string | undefined = undefined,
+): ReadonlyArray<string> =>
+  getPersistentState().get(historyKey ?? getHistoryKey()) ?? [];
 
 const isHistoryOpen = (fsPath?: string): boolean =>
   historyState.get().openedPath === fsPath;
@@ -182,12 +186,13 @@ export const resetHistory = async (): Promise<void> => {
 
 export const debugHistory = (): void => {
   const index = historyState.get().index;
-  const h = getHistory();
+  const key = getHistoryKey();
+  const h = getHistory(key);
   console.debug(`[File history] length: ${h.length}, index: ${index}`);
   historyState
     .get()
     .outputChannel?.appendLine(
-      `***** [File history] length: ${h.length}, index: ${index} *****`,
+      `***** [File history] key: ${key}, length: ${h.length}, index: ${index} *****`,
     );
   h.forEach((p, i) =>
     historyState
