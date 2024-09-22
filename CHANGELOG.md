@@ -15,3 +15,8 @@
 ## 0.1.4
 
 - Fixed a bug about selecting a item
+
+## 0.1.5
+
+- Updated README.md
+- Updated icon.png
