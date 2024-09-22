@@ -1,7 +1,7 @@
+import { ItemList } from '@common/item';
 import SearchIcon from '@mui/icons-material/Search';
 import { InputAdornment, TextField } from '@mui/material';
-import { updateItemList } from '@src/action/helpers';
-import { useStore } from '@src/store';
+import { SelectedView } from '@src/store';
 import React from 'react';
 
 type LazyUpdate = Readonly<{
@@ -11,36 +11,31 @@ type LazyUpdate = Readonly<{
 
 const updateDuration = 10;
 
-export const FilterInput = (): React.ReactElement => {
-  const { searchWord, setSearchWord, setItemList, setSelectedView } =
-    useStore();
+export const SearchBox = ({
+  searchWord,
+  setSearchWord,
+  setItemList,
+  setSelectedView,
+  updateItemList,
+}: Readonly<{
+  searchWord: string;
+  setSearchWord: (searchWord: string) => void;
+  setItemList: (itemList: ItemList) => void;
+  setSelectedView: (selectedView: SelectedView) => void;
+  updateItemList: (
+    args: Readonly<{
+      path?: string;
+      setSearchWord: (searchWord: string) => void;
+      setItemList: (itemList: ItemList) => void;
+      setSelectedView: (selectedView: SelectedView) => void;
+    }>,
+  ) => Promise<void>;
+}>): React.ReactElement => {
   const ref = React.useRef<HTMLInputElement>();
   const [lazyUpdate, setLazyUpdate] = React.useState<LazyUpdate | null>(null);
   const [updateTime, setUpdateTime] = React.useState(0);
-  //const isFocused = selectedView.name === 'search-box';
 
   ref.current?.focus();
-  // React.useEffect(() => {
-  //   if (isFocused) {
-  //     ref.current?.focus();
-  //   } else {
-  //     ref.current?.blur();
-  //   }
-  // }, [isFocused]);
-
-  // React.useEffect(() => {
-  //   if (isFocused) {
-  //     if (
-  //       selectedView.selectionStart !== undefined &&
-  //       selectedView.selectionEnd !== undefined
-  //     ) {
-  //       ref.current?.setSelectionRange(
-  //         selectedView.selectionStart,
-  //         selectedView.selectionEnd,
-  //       );
-  //     }
-  //   }
-  // }, [isFocused, searchWord, selectedView]);
 
   React.useEffect(() => {
     if (
@@ -54,7 +49,14 @@ export const FilterInput = (): React.ReactElement => {
         setSelectedView,
       });
     }
-  }, [lazyUpdate, updateTime, setSearchWord, setItemList, setSelectedView]);
+  }, [
+    lazyUpdate,
+    updateTime,
+    setSearchWord,
+    setItemList,
+    setSelectedView,
+    updateItemList,
+  ]);
 
   return (
     <TextField
@@ -80,14 +82,6 @@ export const FilterInput = (): React.ReactElement => {
           issuedAt: Date.now(),
         });
         setTimeout(() => setUpdateTime(Date.now()), updateDuration);
-
-        // if (isFocused) {
-        //   setSelectedView({
-        //     ...selectedView,
-        //     selectionStart: ref.current?.selectionStart ?? undefined,
-        //     selectionEnd: ref.current?.selectionEnd ?? undefined,
-        //   });
-        // }
         setSearchWord(event.target.value);
       }}
     />

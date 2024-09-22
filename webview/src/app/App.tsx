@@ -1,11 +1,11 @@
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { useAction } from '@src/action/use-action';
-import { Main } from '@src/components/Main';
 import { useKeyboardEvent } from '@src/events/keyboard';
 import { useNativeListener } from '@src/events/listener';
 import { useNativeEvent } from '@src/events/native';
 import { useMessages } from '@src/i18n';
+import { Dired } from '@src/pages/Dired';
 import { useStore } from '@src/store';
 import React from 'react';
 import { IntlProvider } from 'react-intl';
@@ -35,7 +35,7 @@ export const App = (): React.ReactNode => {
     <ThemeProvider theme={colorTheme === 'Light' ? lightTheme : darkTheme}>
       <IntlProvider messages={messages} locale={locale} defaultLocale='en'>
         <CssBaseline />
-        <Main action={action} />
+        <Dired action={action} />
       </IntlProvider>
     </ThemeProvider>
   );

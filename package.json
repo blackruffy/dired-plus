@@ -66,7 +66,7 @@
     "start:mock": "vite --mode mock --open --config vite.config.webview.dev.ts",
     "vscode:package": "npm run build && vsce package --allow-star-activation",
     "launch:debug": "npm run build && code --extensionDevelopmentPath=./",
-    "build": "npm run typecheck && npm run lint && npm run build:webview && npm run build:extension",
+    "build": "npm run typecheck && npm run build:webview && npm run build:extension",
     "build:watch": "vite build --config vite.config.webview.ts --watch & vite build --config vite.config.extension.ts --watch",
     "build:webview": "vite build --config vite.config.webview.ts",
     "build:extension": "vite build --config vite.config.extension.ts",

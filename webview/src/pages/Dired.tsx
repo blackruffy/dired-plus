@@ -1,14 +1,14 @@
 import { Box, Divider } from '@mui/material';
 import { ActionPanel } from '@src/components/ActionPanel';
-import { FilterInput } from '@src/components/FilterInput';
+import { Dialog } from '@src/components/Dialog';
+import { DiredSearchBox } from '@src/components/DiredSearchBox';
 import { ItemList } from '@src/components/ItemList';
+import { SearchHint } from '@src/components/SearchHint';
+import { StatusBar } from '@src/components/StatusBar';
 import { Action, useStore } from '@src/store';
 import React from 'react';
-import { Dialog } from './Dialog';
-import { SearchHint } from './SearchHint';
-import { StatusBar } from './StatusBar';
 
-export const Main = ({
+export const Dired = ({
   action,
 }: Readonly<{ action?: Action }>): React.ReactElement => {
   const { mode, setModifierKeys } = useStore();
@@ -41,7 +41,7 @@ export const Main = ({
         }}
       >
         <SearchHint mode={mode} />
-        <FilterInput />
+        <DiredSearchBox />
         <ItemList />
         <Dialog />
       </Box>
