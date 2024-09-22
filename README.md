@@ -10,7 +10,8 @@ You can open `dired+` with `Ctrl + X, Ctrl + F`. Alternatively, you can open it 
 
 | Key              | Description                        |
 | :--------------- | :--------------------------------- |
-| Enter            | Open selected item                 |
+| Enter            | Open/Create a file                 |
+| Shift + Enter    | Create a directory                 |
 | Ctrl + C         | Copy                               |
 | Ctrl + R         | Rename or move                     |
 | Ctrl + D         | Delete                             |
