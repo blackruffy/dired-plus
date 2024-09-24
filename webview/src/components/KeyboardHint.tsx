@@ -1,7 +1,12 @@
 import { Box, Divider, Theme, useTheme } from '@mui/material';
-import { Action, useStore } from '@src/store';
+import { IntlMessage } from '@src/i18n';
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
+
+export type KeyDesc = Readonly<{
+  name: string;
+  desc: IntlMessage;
+}>;
 
 const getStyles = (theme: Theme) => ({
   container: {
@@ -45,16 +50,13 @@ const getStyles = (theme: Theme) => ({
   },
 });
 
-export const ActionPanel = ({
-  action,
-}: Readonly<{ action?: Action }>): React.ReactElement => {
-  const { dialog } = useStore();
+export const KeyboardHint = ({
+  actionKeys,
+}: Readonly<{ actionKeys: ReadonlyArray<KeyDesc> }>): React.ReactElement => {
   const theme = useTheme();
   const styles = React.useMemo(() => getStyles(theme), [theme]);
 
-  const actionKeys = dialog?.keys ?? action?.keys;
-
-  if (actionKeys == null) {
+  if (actionKeys.length === 0) {
     return <></>;
   } else {
     return (

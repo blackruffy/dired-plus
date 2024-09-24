@@ -1,4 +1,3 @@
-import { ItemList } from '@common/item';
 import {
   completion,
   goToParentDirectory,
@@ -10,6 +9,7 @@ import {
   keyShiftEnter,
   keyTab,
 } from '@src/action/keys';
+import { ItemList } from '@src/components/DiredItemList';
 import { createDirectory, createFile } from '@src/events/native';
 import { messageId } from '@src/i18n/ja';
 import { Action, SelectedView, statusState } from '@src/store';

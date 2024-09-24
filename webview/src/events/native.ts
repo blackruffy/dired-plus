@@ -1,5 +1,5 @@
 import { FileOptions } from '@common/file-options';
-import { ItemList } from '@common/item';
+import { ItemList as CommonItemList } from '@common/item';
 import {
   ClosePanelRequest,
   ClosePanelResponse,
@@ -40,15 +40,27 @@ import {
 } from '@common/messages';
 import { ColorTheme } from '@common/theme-color';
 import { updateItemList } from '@src/action/helpers';
+import { ItemList } from '@src/components/DiredItemList';
 import { useStore } from '@src/store';
 import { request } from '@src/utils/request';
 import React from 'react';
 
+const toItemList = (a: CommonItemList): ItemList => ({
+  ...a,
+  parent: {
+    ...a.parent,
+    getSearchWord: () => a.parent.path,
+  },
+  items: a.items.map(x => ({ ...x, getSearchWord: () => x.path })),
+});
+
 export const listItems = async (path?: string): Promise<ItemList> =>
-  request<ListItemsRequest, ListItemsResponnse>({
-    key: 'list-items',
-    path,
-  });
+  toItemList(
+    await request<ListItemsRequest, ListItemsResponnse>({
+      key: 'list-items',
+      path,
+    }),
+  );
 
 export const getParentDirectory = async (path: string): Promise<string> =>
   (
@@ -157,16 +169,20 @@ export const renameDirectory = async (
 };
 
 export const deleteFile = async (path: string): Promise<ItemList> =>
-  request<DeleteFileRequest, DeleteFileResponse>({
-    key: 'delete-file',
-    path,
-  });
+  toItemList(
+    await request<DeleteFileRequest, DeleteFileResponse>({
+      key: 'delete-file',
+      path,
+    }),
+  );
 
 export const deleteDirectory = async (path: string): Promise<ItemList> =>
-  request<DeleteDirectoryRequest, DeleteDirectoryResponse>({
-    key: 'delete-directory',
-    path,
-  });
+  toItemList(
+    await request<DeleteDirectoryRequest, DeleteDirectoryResponse>({
+      key: 'delete-directory',
+      path,
+    }),
+  );
 
 export const closePanel = async (): Promise<void> => {
   await request<ClosePanelRequest, ClosePanelResponse>({

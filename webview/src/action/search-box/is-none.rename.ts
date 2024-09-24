@@ -1,6 +1,6 @@
-import { Item, ItemList } from '@common/item';
 import { cancel, completion, updateItemList } from '@src/action/helpers';
 import { keyCtrlC, keyEnter, keyTab } from '@src/action/keys';
+import { Item, ItemList } from '@src/components/DiredItemList';
 import {
   getParentDirectory,
   renameDirectory,

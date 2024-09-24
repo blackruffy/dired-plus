@@ -1,7 +1,5 @@
 import { task } from '@common/index';
 import {
-  Item,
-  ItemList,
   isDirectory,
   isDot,
   isFile,
@@ -10,6 +8,7 @@ import {
   isSingleFile,
   joinItemPath,
 } from '@common/item';
+import { Item, ItemList } from '@src/components/DiredItemList';
 import {
   copyDirectory,
   copyFile,

@@ -1,8 +1,18 @@
-import { ItemList } from '@common/item';
 import SearchIcon from '@mui/icons-material/Search';
 import { InputAdornment, TextField } from '@mui/material';
 import { SelectedView } from '@src/store';
 import React from 'react';
+import { ItemBase, ItemListBase } from './ItemListView';
+
+export type UpdateItemListArgs<
+  Item extends ItemBase,
+  ItemList extends ItemListBase<Item>,
+> = Readonly<{
+  path?: string;
+  setSearchWord: (word: string) => void;
+  setItemList: (itemList: ItemList) => void;
+  setSelectedView: (selectedView: SelectedView) => void;
+}>;
 
 type LazyUpdate = Readonly<{
   searchWord: string;
@@ -11,7 +21,10 @@ type LazyUpdate = Readonly<{
 
 const updateDuration = 10;
 
-export const SearchBox = ({
+export const SearchBox = <
+  Item extends ItemBase,
+  ItemList extends ItemListBase<Item>,
+>({
   searchWord,
   setSearchWord,
   setItemList,
@@ -19,17 +32,10 @@ export const SearchBox = ({
   updateItemList,
 }: Readonly<{
   searchWord: string;
-  setSearchWord: (searchWord: string) => void;
+  setSearchWord: (word: string) => void;
   setItemList: (itemList: ItemList) => void;
   setSelectedView: (selectedView: SelectedView) => void;
-  updateItemList: (
-    args: Readonly<{
-      path?: string;
-      setSearchWord: (searchWord: string) => void;
-      setItemList: (itemList: ItemList) => void;
-      setSelectedView: (selectedView: SelectedView) => void;
-    }>,
-  ) => Promise<void>;
+  updateItemList: (args: UpdateItemListArgs<Item, ItemList>) => Promise<void>;
 }>): React.ReactElement => {
   const ref = React.useRef<HTMLInputElement>();
   const [lazyUpdate, setLazyUpdate] = React.useState<LazyUpdate | null>(null);

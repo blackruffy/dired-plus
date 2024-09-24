@@ -1,4 +1,3 @@
-import { Item, ItemList } from '@common/item';
 import {
   cancel,
   completion,
@@ -6,6 +5,7 @@ import {
   goToParentDirectory,
 } from '@src/action/helpers';
 import { keyCtrlBackspace, keyCtrlC, keyEnter, keyTab } from '@src/action/keys';
+import { Item, ItemList } from '@src/components/DiredItemList';
 import { messageId } from '@src/i18n/ja';
 import { Action, Mode, SelectedView } from '@src/store';
 import { pipe } from 'fp-ts/lib/function';

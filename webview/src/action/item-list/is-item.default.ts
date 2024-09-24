@@ -1,4 +1,3 @@
-import { Item, ItemList } from '@common/item';
 import {
   bind,
   deleteItems,
@@ -20,6 +19,7 @@ import {
   keyCtrlU,
   keyEnter,
 } from '@src/action/keys';
+import { Item, ItemList } from '@src/components/DiredItemList';
 import { showFolder } from '@src/events/native';
 import { messageId } from '@src/i18n/ja';
 import { Action, Mode, SelectedView } from '@src/store';

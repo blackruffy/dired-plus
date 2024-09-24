@@ -1,5 +1,5 @@
-import { Item, ItemList } from '@common/item';
 import { ColorTheme } from '@common/theme-color';
+import { Item, ItemList } from '@src/components/DiredItemList';
 import { IntlMessage } from '@src/i18n';
 import { create } from 'zustand';
 

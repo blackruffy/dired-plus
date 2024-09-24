@@ -1,12 +1,17 @@
 import { Box, Typography, useTheme } from '@mui/material';
-import { useStore } from '@src/store';
+import { Status } from '@src/store';
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
 
 const statusDuration = 5000;
 
-export const StatusBar = (): React.ReactElement => {
-  const { status, setStatus } = useStore();
+export const StatusBar = ({
+  status,
+  setStatus,
+}: Readonly<{
+  status?: Status;
+  setStatus: (status?: Status) => void;
+}>): React.ReactElement => {
   const [updatedTime, setUpdatedTime] = React.useState(0);
   const [check, setCheck] = React.useState(false);
   const theme = useTheme();

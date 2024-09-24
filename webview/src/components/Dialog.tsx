@@ -1,11 +1,19 @@
 import ErrorIcon from '@mui/icons-material/Error';
 import * as MUI from '@mui/material';
-import { useStore } from '@src/store';
+import { IntlMessage } from '@src/i18n';
+import { StatusType } from '@src/store';
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
 
-export const Dialog = (): React.ReactElement => {
-  const { dialog } = useStore();
+export type Dialog = Readonly<{
+  type: StatusType;
+  title: string | IntlMessage;
+  lines?: ReadonlyArray<string | IntlMessage>;
+}>;
+
+export const Dialog = ({
+  dialog,
+}: Readonly<{ dialog?: Dialog }>): React.ReactElement => {
   const theme = MUI.useTheme();
 
   return (

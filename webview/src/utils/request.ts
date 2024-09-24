@@ -30,9 +30,10 @@ export const request = scope(() => {
             path: r.path,
             items: Array.from({ length: 100 }).map((_, i) => {
               const type = i % 2 === 0 ? 'directory' : 'file';
+              const path = `${r.path}/${type}${i}`;
               return identity<Item>({
                 name: `${type}${i}`,
-                path: `${r.path}/${type}${i}`,
+                path,
                 itemType: type,
               });
             }),
