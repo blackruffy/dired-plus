@@ -8,6 +8,7 @@ import {
   isSingleFile,
   joinItemPath,
 } from '@common/item';
+import { scope } from '@common/scope';
 import { Item, ItemList } from '@src/components/DiredItemList';
 import {
   copyDirectory,
@@ -47,7 +48,38 @@ export const bind = (
   ),
 });
 
-export const updateItemList = async ({
+const runLazy = scope(() => {
+  const duration = 50;
+  const state = {
+    lastTime: 0,
+    pending: null as (() => void) | null,
+    timerId: null as NodeJS.Timeout | null,
+  };
+
+  return (f: () => void): void => {
+    const now = Date.now();
+    const diff = now - state.lastTime;
+    if (diff > duration) {
+      f();
+      state.lastTime = now;
+      state.pending = null;
+    } else {
+      state.pending = f;
+      if (state.timerId === null) {
+        state.timerId = setTimeout(() => {
+          if (state.pending !== null) {
+            state.pending();
+            state.lastTime = Date.now();
+            state.pending = null;
+          }
+          state.timerId = null;
+        }, diff);
+      }
+    }
+  };
+});
+
+export const updateItemList = ({
   path,
   setSearchWord,
   setItemList,
@@ -57,17 +89,19 @@ export const updateItemList = async ({
   setSearchWord: (searchWord: string) => void;
   setItemList: (itemList: ItemList) => void;
   setSelectedView: (selectedView: SelectedView) => void;
-}>): Promise<void> =>
-  pipe(await listItems(path), a =>
-    pipe(
-      setSearchWord(a.parent.path),
-      () => setItemList(a),
-      () =>
-        a.items.length === 0
-          ? setSelectedView({ name: 'search-box', updatedAt: Date.now() })
-          : void 0,
-    ),
-  );
+}>): void =>
+  runLazy(async () => {
+    pipe(await listItems(path), a =>
+      pipe(
+        setSearchWord(a.parent.path),
+        () => setItemList(a),
+        () =>
+          a.items.length === 0
+            ? setSelectedView({ name: 'search-box', updatedAt: Date.now() })
+            : void 0,
+      ),
+    );
+  });
 
 export const goToParentDirectory = ({
   path,
