@@ -117,7 +117,10 @@ const insertItem = <A>(
 };
 
 const updateHistory = (path: string): void =>
-  pipe({ h: getHistory(), index: historyState.get().index }, ({ h, index }) =>
+  pipe({ h: getHistory(), index: historyState.get().index }, ({ h, index }) => {
+    console.log(
+      `updateHistory: ${path}, ${index}, ${JSON.stringify(h, null, 2)}`,
+    );
     pipe(insertItem(h, path, index, maxHistorySize), ([h, idx]) =>
       pipe(getHistoryKey(), key => {
         console.log(
@@ -126,8 +129,8 @@ const updateHistory = (path: string): void =>
           getPersistentState().update(key, h);
         historyState.update(s => ({ ...s, index: idx }));
       }),
-    ),
-  );
+    );
+  });
 
 export const getPersistentState = (): vscode.Memento =>
   historyState.get().context!.workspaceState;
