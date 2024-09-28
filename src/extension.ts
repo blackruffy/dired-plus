@@ -1,5 +1,5 @@
 import { commands } from '@src/commands';
-import { initializeEditorHistory } from '@src/history';
+import { initializeEditorHistory } from '@src/history/index';
 import * as vscode from 'vscode';
 
 export function activate(context: vscode.ExtensionContext) {
