@@ -48,7 +48,6 @@ import {
   getItems,
   getParentDirectory,
   getSeparator,
-  openFile,
   renameDirectory,
   renameFile,
 } from './helpers';

@@ -2,11 +2,14 @@ import { typeclass } from '@core/utils/';
 import { SelectedView } from '@dired/store';
 import { Box, useTheme } from '@mui/material';
 import React from 'react';
+import { Subject, first } from 'rxjs';
 
 export type ItemViewParms<Item> = Readonly<{
   index: number;
   item: Item;
 }>;
+
+export const scrollPageEvent = new Subject<'next' | 'prev'>();
 
 export const ItemListView = <Item, ItemList>({
   itemList,
@@ -29,8 +32,14 @@ export const ItemListView = <Item, ItemList>({
   const theme = useTheme();
   const scrollRef = React.useRef<HTMLUListElement>(null);
   const selectedRef = React.useRef<HTMLDivElement>(null);
+  const firstItemRef = React.useRef<HTMLDivElement>(null);
 
   const items = itemList == null ? [] : itemListInstance.getItems(itemList);
+
+  const selectedIndex = React.useMemo(
+    () => (selectedView.name === 'list-item' ? selectedView.index : undefined),
+    [selectedView],
+  );
 
   React.useEffect(() => {
     if (scrollRef.current && selectedRef.current) {
@@ -51,6 +60,32 @@ export const ItemListView = <Item, ItemList>({
     }
   }, [selectedView]);
 
+  React.useEffect(() => {
+    const s = scrollPageEvent.subscribe(event => {
+      if (scrollRef.current) {
+        const containerRect = scrollRef.current.getBoundingClientRect();
+        const diff = containerRect.height;
+        const sign = event === 'prev' ? -1 : 1;
+        const top = scrollRef.current.scrollTop + sign * diff;
+        scrollRef.current.scrollTop = top < 0 ? 0 : top;
+
+        if (selectedView.name === 'list-item' && firstItemRef.current) {
+          const itemRect = firstItemRef.current.getBoundingClientRect();
+          const index =
+            Math.floor(scrollRef.current.scrollTop / itemRect.height) + 1;
+          setSelectedView({
+            ...selectedView,
+            index: index,
+            updatedAt: Date.now(),
+          });
+        }
+      }
+    });
+    return () => {
+      s.unsubscribe();
+    };
+  }, [selectedView, setSelectedView]);
+
   return (
     <Box
       ref={scrollRef}
@@ -68,11 +103,16 @@ export const ItemListView = <Item, ItemList>({
       }}
     >
       {items.map((item, index) => {
-        const isSelected =
-          selectedView.name === 'list-item' && selectedView.index === index;
+        const isSelected = selectedIndex === index;
         return (
           <Box
-            ref={isSelected ? selectedRef : undefined}
+            ref={
+              isSelected
+                ? selectedRef
+                : index === 0 || index === 1
+                  ? firstItemRef
+                  : undefined
+            }
             key={index}
             //selected={isSelected}
             sx={{

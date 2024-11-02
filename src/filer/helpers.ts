@@ -90,7 +90,8 @@ export const getItems = async (
       }
     });
 
-    return (await fs.promises.readdir(dir)).reduce(async (fitems, fname) => {
+    const rawItems = (await fs.promises.readdir(dir)).slice(0, 500);
+    return rawItems.reduce(async (fitems, fname) => {
       const items = await fitems;
       if (match(fname)) {
         const fpath = nodePath.join(dir, fname);

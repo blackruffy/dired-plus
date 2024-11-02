@@ -26,6 +26,8 @@ export const ja = {
   createFile: '新規ファイル',
   createDir: '新規ディレクトリ',
   addFolder: 'ワークスペースに追加',
+  nextPage: '次のページ',
+  prevPage: '前のページ',
 
   // status
   canceled: 'キャンセルしました。',

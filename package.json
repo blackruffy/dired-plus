@@ -2,7 +2,7 @@
   "name": "dired-plus",
   "displayName": "dired+",
   "description": "A file manager like Emacs Dired",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "publisher": "TaichiKubo",
   "icon": "icon.png",
   "repository": {
@@ -26,23 +26,23 @@
         "title": "dired-plus.open"
       },
       {
-        "command": "dired-plus.history:prev",
+        "command": "dired-plus.editor:prev",
         "title": "dired-plus.history:prev"
       },
       {
-        "command": "dired-plus.history:next",
+        "command": "dired-plus.editor:next",
         "title": "dired-plus.history:next"
       },
       {
-        "command": "dired-plus.history:reset",
+        "command": "dired-plus.editor:reset-history",
         "title": "dired-plus.history:reset"
       },
       {
-        "command": "dired-plus.history:debug",
+        "command": "dired-plus.editor:debug-history",
         "title": "dired-plus.history:debug"
       },
       {
-        "command": "dired-plus.open-history",
+        "command": "dired-plus.history:open",
         "title": "dired-plus.open-history"
       }
     ],
@@ -53,19 +53,19 @@
         "mac": "ctrl+x ctrl+f"
       },
       {
-        "command": "dired-plus.history:prev",
+        "command": "dired-plus.editor:prev",
         "key": "alt+left",
         "mac": "alt+left",
         "when": "editorTextFocus"
       },
       {
-        "command": "dired-plus.history:next",
+        "command": "dired-plus.editor:next",
         "key": "alt+right",
         "mac": "alt+right",
         "when": "editorTextFocus"
       },
       {
-        "command": "dired-plus.open-history",
+        "command": "dired-plus.history:open",
         "key": "ctrl+x r",
         "mac": "ctrl+x r"
       }
@@ -122,6 +122,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.2.0",
     "react-intl": "^6.6.8",
+    "rxjs": "^7.8.1",
     "zustand": "^4.5.1"
   }
 }

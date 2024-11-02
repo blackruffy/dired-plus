@@ -1,5 +1,7 @@
 import { ActionKey, ModifierKeys } from '@core/action';
+import { scrollPageEvent } from '@core/components/ItemListView';
 import { IntlIdBase, IntlMessage } from '@core/i18n';
+import { closePanel } from '@core/native/api';
 import { Task } from 'fp-ts/lib/Task';
 
 export type KeyParams<State, IntlId extends string> = Readonly<{
@@ -38,8 +40,14 @@ export const keyAlphabet = (
 export const keyCtrl = (name: string, code: string) =>
   key(`^ ${name}`, code, { controlKey: true });
 
+export const keyAlt = (name: string, code: string) =>
+  key(`⎇ ${name}`, code, { altKey: true });
+
 export const keyCtrlAlphabet = (name: string) =>
   keyCtrl(name, `Key${name.toUpperCase()}`);
+
+export const keyAltAlphabet = (name: string) =>
+  keyAlt(name, `Key${name.toUpperCase()}`);
 
 export const keys = {
   escape: key('ESC', 'Escape'),
@@ -86,18 +94,36 @@ export const keyCtrlP = keyCtrlAlphabet('P');
 export const keyCtrlQ = keyCtrlAlphabet('Q');
 export const keyCtrlR = keyCtrlAlphabet('R');
 export const keyCtrlU = keyCtrlAlphabet('U');
+export const keyCtrlV = keyCtrlAlphabet('V');
 export const keyCtrlX = keyCtrlAlphabet('X');
 export const keyCtrlY = keyCtrlAlphabet('Y');
 export const keyCtrlZ = keyCtrlAlphabet('Z');
 
+export const keyAltV = keyAltAlphabet('V');
+
 export const defaultKeys = <State, IntlId extends IntlIdBase>(
   quitId: IntlId,
-  closePanel: () => Promise<void>,
+  nextPageId: IntlId,
+  prevPageId: IntlId,
 ): ReadonlyArray<ActionKey<State, IntlId>> => [
   keyEscape({
     desc: { id: quitId },
     run: async () => {
       await closePanel();
+      return {};
+    },
+  }),
+  keyCtrlV({
+    desc: { id: nextPageId },
+    run: async () => {
+      scrollPageEvent.next('next');
+      return {};
+    },
+  }),
+  keyAltV({
+    desc: { id: prevPageId },
+    run: async () => {
+      scrollPageEvent.next('prev');
       return {};
     },
   }),

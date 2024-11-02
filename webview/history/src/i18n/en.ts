@@ -8,4 +8,6 @@ export const en: Messages = {
   cancel: 'Cancel',
   open: 'Open',
   dismiss: 'Dismiss',
+  nextPage: 'Next Page',
+  prevPage: 'Previous Page',
 } as const;

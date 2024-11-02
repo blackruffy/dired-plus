@@ -1,5 +1,4 @@
 import { core } from '@core/index';
-import { closePanel } from '@core/native/api';
 import { MessageId, messageId } from '@history/i18n/ja';
 import { defaultKeys } from '@history/keyboard/use-keyboard';
 import { State, useStore } from '@history/store';

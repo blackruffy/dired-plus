@@ -20,6 +20,8 @@ export const en: Messages = {
   createFile: 'Create File',
   createDir: 'Create Directory',
   addFolder: 'Add to Workspace',
+  nextPage: 'Next Page',
+  prevPage: 'Previous Page',
 
   // status
   canceled: 'Canceled.',

@@ -3,7 +3,6 @@ import { useMessages } from '@history/i18n';
 import { useKeyboardEvent } from '@history/keyboard/use-keyboard';
 import { History } from '@history/pages/History';
 import { useStore } from '@history/store';
-import { Box } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import React from 'react';
