@@ -2,7 +2,7 @@
   "name": "dired-plus",
   "displayName": "dired+",
   "description": "A file manager like Emacs Dired",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "publisher": "TaichiKubo",
   "icon": "icon.png",
   "repository": {
