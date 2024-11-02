@@ -1,8 +1,9 @@
 import { openFile } from '@src/filer/helpers';
+import { LongStorage, ShortStorage } from '@src/state';
 import * as vscode from 'vscode';
-import { Storage } from './state';
 
-const maxHistorySize = 10;
+const maxShortHistorySize = 10;
+const maxLongHistorySize = 1000;
 
 /**
  * Get a index that is normalized to the range of the history length.
@@ -23,7 +24,6 @@ export const insertItem = <A>(
   xs: readonly A[],
   item: A,
   index: number,
-  maxSize: number,
 ): [readonly A[], number] => {
   const len = xs.length;
   // 'diff' is the number of items that should be removed
@@ -38,22 +38,48 @@ export const insertItem = <A>(
   } else if (idx > 0 && item === xs[idx - 1]) {
     return [xs, idx - 1];
   } else {
-    return [[item, ...xs.slice(idx, maxSize)], 0];
+    return [[item, ...xs.slice(idx, maxShortHistorySize)], 0];
   }
 };
 
-export const updateHistory = (storage: Storage, path: string): void => {
+export const updateShortHistory = (
+  storage: ShortStorage,
+  path: string,
+): void => {
   const h = storage.getHistory();
   const index = storage.getIndex();
 
-  const [newHistory, newIndex] = insertItem(h, path, index, maxHistorySize);
+  const [newHistory, newIndex] = insertItem(h, path, index);
 
   storage.setHistory(newHistory);
   storage.setIndex(newIndex);
 };
 
+export const updateLongHistory = (storage: LongStorage, path: string): void => {
+  const f = (
+    path: string,
+    h: ReadonlyArray<string>,
+    i: number,
+    r: Array<string>,
+  ): ReadonlyArray<string> => {
+    if (i >= h.length || r.length === maxLongHistorySize) {
+      return r;
+    } else if (r.length === 0) {
+      r.push(path);
+      return f(path, h, 0, r);
+    } else if (h[i] !== path) {
+      r.push(h[i]);
+      return f(path, h, i + 1, r);
+    } else {
+      return f(path, h, i + 1, r);
+    }
+  };
+
+  storage.setHistory(f(path, storage.getHistory(), 0, []));
+};
+
 export const openHistoryItem = async (
-  storage: Storage,
+  storage: ShortStorage,
   diff: number,
 ): Promise<void> => {
   const h = storage.getHistory();
@@ -72,21 +98,21 @@ export const openHistoryItem = async (
   }
 };
 
-export const openCurrentHistoryItem = (storage: Storage): Promise<void> =>
+export const openCurrentHistoryItem = (storage: ShortStorage): Promise<void> =>
   openHistoryItem(storage, 0);
 
-export const openPrevHistoryItem = (storage: Storage): Promise<void> =>
+export const openPrevHistoryItem = (storage: ShortStorage): Promise<void> =>
   openHistoryItem(storage, 1);
 
-export const openNextHistoryItem = (storage: Storage): Promise<void> =>
+export const openNextHistoryItem = (storage: ShortStorage): Promise<void> =>
   openHistoryItem(storage, -1);
 
-export const resetHistory = async (storage: Storage): Promise<void> => {
+export const resetHistory = async (storage: ShortStorage): Promise<void> => {
   await storage.setHistory([]);
 };
 
 export const debugHistory = (
-  storage: Storage,
+  storage: ShortStorage,
   outputChannel: vscode.OutputChannel,
 ): void => {
   const index = storage.getIndex();

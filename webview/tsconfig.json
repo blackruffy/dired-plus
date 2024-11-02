@@ -16,7 +16,9 @@
     "baseUrl": ".", // ルートディレクトリを指定します
     "paths": {
       // パスのエイリアスを設定します
-      "@src/*": ["src/*"],
+      "@core/*": ["core/src/*"],
+      "@dired/*": ["dired/src/*"],
+      "@history/*": ["history/src/*"],
       "@common/*": ["../src/common/*"]
     },
 
@@ -25,6 +27,6 @@
     //"noUnusedParameters": true, // 使用されていないパラメータを検出します
     //"noUnusedLocals": true // 使用されていないローカル変数を検出します
   },
-  "include": ["src", "../src/common"],
+  "include": ["core/src", "dired/src", "history/src", "../src/common"],
   "references": [{ "path": "../tsconfig.node.json" }]
 }

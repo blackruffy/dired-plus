@@ -1,12 +1,13 @@
 import { commands } from '@src/commands';
-import { initializeEditorHistory } from '@src/history/index';
+import { history } from '@src/history';
 import * as vscode from 'vscode';
 
 export function activate(context: vscode.ExtensionContext) {
-  initializeEditorHistory(context).then(err => {
-    console.error(err);
-  });
-  commands(context);
+  try {
+    commands(history.initializeEditorHistory(context));
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 // This method is called when your extension is deactivated

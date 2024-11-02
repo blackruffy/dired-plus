@@ -1,6 +1,6 @@
 import { FileOptions } from '../common/file-options';
 import { ColorTheme } from '../common/theme-color';
-import { ItemList } from './item';
+import { DiredItemList } from './dired-item';
 
 export type MessageKey =
   | 'list-items'
@@ -21,7 +21,8 @@ export type MessageKey =
   | 'get-color-theme'
   | 'set-color-theme'
   | 'get-locale'
-  | 'show-folder';
+  | 'show-folder'
+  | 'get-long-history';
 
 export type MessageType = 'request' | 'response';
 
@@ -46,7 +47,7 @@ export type ListItemsRequest = Request<'list-items'> &
     path?: string;
   }>;
 
-export type ListItemsResponnse = Response<'list-items'> & ItemList;
+export type ListItemsResponnse = Response<'list-items'> & DiredItemList;
 
 export type GetParentDirectoryRequest = Request<'get-parent-directory'> &
   Readonly<{ path: string }>;
@@ -96,11 +97,12 @@ export type RenameDirectoryResponse = Response<'rename-directory'>;
 
 export type DeleteFileRequest = Request<'delete-file'> &
   Readonly<{ path: string }>;
-export type DeleteFileResponse = Response<'delete-file'> & ItemList;
+export type DeleteFileResponse = Response<'delete-file'> & DiredItemList;
 
 export type DeleteDirectoryRequest = Request<'delete-directory'> &
   Readonly<{ path: string }>;
-export type DeleteDirectoryResponse = Response<'delete-directory'> & ItemList;
+export type DeleteDirectoryResponse = Response<'delete-directory'> &
+  DiredItemList;
 
 export type ClosePanelRequest = Request<'close-panel'>;
 export type ClosePanelResponse = Response<'close-panel'>;
@@ -120,6 +122,12 @@ export type GetLocaleResponse = Response<'get-locale'> &
 export type ShowFolderRequest = Request<'show-folder'> &
   Readonly<{ path: string }>;
 export type ShowFolderResponse = Response<'show-folder'>;
+
+export type GetLongHistoryRequest = Request<'get-long-history'>;
+export type GetLongHistoryResponse = Response<'get-long-history'> &
+  Readonly<{
+    items: ReadonlyArray<string>;
+  }>;
 
 export const response = <Res extends Response<MessageKey>>(
   req: Request<MessageKey>,

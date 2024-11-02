@@ -1,5 +1,5 @@
+import { DiredItem, DiredItemStat } from '@src/common/dired-item';
 import { FileOptions } from '@src/common/file-options';
-import { Item, ItemStat } from '@src/common/item';
 import { scope } from '@src/common/scope';
 import * as fs from 'fs';
 import * as fsExtra from 'fs-extra';
@@ -28,7 +28,7 @@ export const getBaseName = (path: string): string => nodePath.basename(path);
 
 export const getSeparator = (): string => nodePath.sep;
 
-export const getItemStat = async (path: string): Promise<ItemStat> => {
+export const getItemStat = async (path: string): Promise<DiredItemStat> => {
   try {
     const stat = await fs.promises.stat(path);
     return {
@@ -45,7 +45,9 @@ export const getItemStat = async (path: string): Promise<ItemStat> => {
   }
 };
 
-export const getItems = async (item: string): Promise<ReadonlyArray<Item>> => {
+export const getItems = async (
+  item: string,
+): Promise<ReadonlyArray<DiredItem>> => {
   const stat = await getItemStat(item);
   const isSep = item.endsWith(nodePath.sep);
   const isDir = stat.type === 'directory';
@@ -56,7 +58,7 @@ export const getItems = async (item: string): Promise<ReadonlyArray<Item>> => {
     const [dir, prefix] = isDirSep
       ? [item, null]
       : [nodePath.dirname(item), nodePath.basename(item)];
-    const defaultItems: ReadonlyArray<Item> = isDirSep
+    const defaultItems: ReadonlyArray<DiredItem> = isDirSep
       ? [
           {
             name: '.',
@@ -106,7 +108,7 @@ export const getItems = async (item: string): Promise<ReadonlyArray<Item>> => {
       } else {
         return items;
       }
-    }, Promise.resolve<ReadonlyArray<Item>>(defaultItems));
+    }, Promise.resolve<ReadonlyArray<DiredItem>>(defaultItems));
   }
 };
 
@@ -170,7 +172,7 @@ export const renameDirectory = async (
 
 export const deleteFile = async (
   path: string,
-): Promise<Readonly<{ path: string; items: ReadonlyArray<Item> }>> => {
+): Promise<Readonly<{ path: string; items: ReadonlyArray<DiredItem> }>> => {
   await fs.promises.rm(path);
   const parent = nodePath.dirname(path);
   return {
@@ -181,7 +183,7 @@ export const deleteFile = async (
 
 export const deleteDirectory = async (
   path: string,
-): Promise<Readonly<{ path: string; items: ReadonlyArray<Item> }>> => {
+): Promise<Readonly<{ path: string; items: ReadonlyArray<DiredItem> }>> => {
   await fs.promises.rm(path, { recursive: true, force: true });
   const parent = nodePath.dirname(path);
   return {

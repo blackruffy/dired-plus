@@ -40,6 +40,10 @@
       {
         "command": "dired-plus.history:debug",
         "title": "dired-plus.history:debug"
+      },
+      {
+        "command": "dired-plus.open-history",
+        "title": "dired-plus.open-history"
       }
     ],
     "keybindings": [
@@ -59,6 +63,11 @@
         "key": "alt+right",
         "mac": "alt+right",
         "when": "editorTextFocus"
+      },
+      {
+        "command": "dired-plus.open-history",
+        "key": "ctrl+x r",
+        "mac": "ctrl+x r"
       }
     ]
   },
@@ -66,9 +75,10 @@
     "start:mock": "vite --mode mock --open --config vite.config.webview.dev.ts",
     "vscode:package": "npm run build && vsce package --allow-star-activation",
     "launch:debug": "npm run build && code --extensionDevelopmentPath=./",
-    "build": "npm run typecheck && npm run build:webview && npm run build:extension",
-    "build:watch": "vite build --config vite.config.webview.ts --watch & vite build --config vite.config.extension.ts --watch",
-    "build:webview": "vite build --config vite.config.webview.ts",
+    "build": "npm run typecheck && npm run build:dired && npm run build:history && npm run build:extension",
+    "build:watch": "vite build --config vite.config.dired.ts --watch & vite build --config vite.config.extension.ts --watch",
+    "build:dired": "vite build --config vite.config.dired.ts",
+    "build:history": "vite build --config vite.config.history.ts",
     "build:extension": "vite build --config vite.config.extension.ts",
     "typecheck": "npm run typecheck:webview && npm run typecheck:extension && npm run lint",
     "typecheck:webview": "cd webview && tsc -p tsconfig.json",

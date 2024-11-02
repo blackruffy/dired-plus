@@ -9,7 +9,8 @@
   },
   "include": [
     "vite.config.extension.ts",
-    "vite.config.webview.ts",
+    "vite.config.dired.ts",
+    "vite.config.history.ts",
     "vite.config.webview.dev.ts"
   ]
 }
