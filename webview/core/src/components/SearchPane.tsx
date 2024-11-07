@@ -6,7 +6,7 @@ import { SearchBox, UpdateItemListArgs } from '@core/components/SearchBox';
 import { StatusBar } from '@core/components/StatusBar';
 import * as store from '@core/store';
 import { typeclass } from '@core/utils';
-import { Box, Divider } from '@mui/material';
+import { Box } from '@mui/material';
 import React from 'react';
 import { SearchHint } from './SearchHint';
 
@@ -78,7 +78,6 @@ export const SearchPane = <State, Item, ItemList, IntlId extends string>({
         <Dialog dialog={state.dialog} />
       </Box>
       <KeyboardHint actionKeys={actionKeys} />
-      <Divider />
       <StatusBar status={state.status} setStatus={state.setStatus} />
     </Box>
   );

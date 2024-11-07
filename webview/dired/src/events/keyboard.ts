@@ -3,11 +3,29 @@ import {
   DiredItemList as ItemList,
 } from '@common/dired-item';
 import { core } from '@core/index';
-import { updateSearchWord } from '@core/keyboard/event';
 import { defaultKeys } from '@dired/action/keys';
 import { MessageId, messageId } from '@dired/i18n/ja';
-import { Action, State, useStore } from '@dired/store';
+import { Action, SelectedView, State, useStore } from '@dired/store';
 import { itemInstance, itemListInstance } from '@dired/utils/item-list';
+import { pipe } from 'fp-ts/lib/function';
+
+const updateSearchWord = (
+  args: Readonly<{
+    nextSelectedView: SelectedView;
+    itemList: ItemList | undefined;
+    separator?: string;
+    setSearchWord: (searchWord: string) => void;
+  }>,
+): void => {
+  if (args.nextSelectedView.name === 'list-item') {
+    pipe(
+      args.nextSelectedView.index,
+      index => args.itemList?.items?.[index]?.path ?? null,
+      nextSearchWord =>
+        nextSearchWord == null ? void 0 : args.setSearchWord(nextSearchWord),
+    );
+  }
+};
 
 export const useKeyboardEvent = (params: Readonly<{ action?: Action }>) => {
   const state = useStore();
@@ -23,12 +41,10 @@ export const useKeyboardEvent = (params: Readonly<{ action?: Action }>) => {
     setState: state.setState,
     setSelectedView: state.setSelectedView,
     updateSearchWord: nextSelectedView =>
-      updateSearchWord(
-        itemInstance,
-        itemListInstance,
-      )({
+      updateSearchWord({
         nextSelectedView,
         itemList: state.itemList,
+        separator: state.separator,
         setSearchWord: state.setSearchWord,
       }),
     setDialog: state.setDialog,

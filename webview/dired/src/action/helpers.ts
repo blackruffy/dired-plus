@@ -67,7 +67,11 @@ export const updateItemList = ({
         () =>
           a.items.length === 0
             ? setSelectedView({ name: 'search-box', updatedAt: Date.now() })
-            : void 0,
+            : setSelectedView({
+                name: 'list-item',
+                index: 0,
+                updatedAt: Date.now(),
+              }),
       ),
     );
   });

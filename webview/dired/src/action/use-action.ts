@@ -117,6 +117,7 @@ const createAction = ({
         searchWord,
         item,
         itemList,
+        selectedView,
         separator: separator ?? '/',
         setMode,
         setSearchWord,
@@ -132,6 +133,8 @@ const createAction = ({
     ) {
       return itemListIsItemCopy({
         searchWord,
+        itemList,
+        selectedView,
         destination: item,
         source: mode.source,
         separator: separator ?? '/',
@@ -147,6 +150,8 @@ const createAction = ({
     ) {
       return itemListIsItemRename({
         searchWord,
+        itemList,
+        selectedView,
         destination: item,
         source: mode.source,
         separator: separator ?? '/',

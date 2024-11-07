@@ -7,14 +7,15 @@ import {
   keyCtrlC,
   keyCtrlD,
   keyCtrlF,
-  keyCtrlI,
   keyCtrlR,
   keyCtrlSpace,
   keyCtrlU,
   keyEnter,
+  keyTab,
 } from '@core/keyboard/keys';
 import {
   bind,
+  completion,
   deleteItems,
   goToParentDirectory,
   goToSearchBox,
@@ -32,6 +33,7 @@ export const itemListIsItemDefault = ({
   searchWord,
   item,
   itemList,
+  selectedView,
   separator,
   setMode,
   setSearchWord,
@@ -44,6 +46,7 @@ export const itemListIsItemDefault = ({
   searchWord: string;
   item: Item;
   itemList?: ItemList;
+  selectedView: SelectedView;
   separator: string;
   setMode: (mode?: Mode) => void;
   setSearchWord: (searchWord: string) => void;
@@ -116,8 +119,6 @@ export const itemListIsItemDefault = ({
         ]
       : []),
 
-    keyCtrlI(goToSearchBox({ setSelectedView })),
-
     keyCtrlBackspace(
       bind(
         { id: messageId.toParentDir },
@@ -131,6 +132,18 @@ export const itemListIsItemDefault = ({
         }),
         goToSearchBox({ setSelectedView }),
       ),
+    ),
+
+    keyTab(
+      completion({
+        path: searchWord,
+        itemList,
+        selectedView,
+        separator,
+        setItemList,
+        setSearchWord,
+        setSelectedView,
+      }),
     ),
 
     keyCtrlR(

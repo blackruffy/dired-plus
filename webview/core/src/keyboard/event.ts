@@ -3,39 +3,10 @@ import { IntlError, IntlIdBase } from '@core/i18n';
 import { keyY } from '@core/keyboard/keys';
 import { Dialog, SelectedView } from '@core/store';
 import { typeclass } from '@core/utils';
-import { identity, pipe } from 'fp-ts/lib/function';
+import { identity } from 'fp-ts/lib/function';
 import React from 'react';
 
 const keyInterval = 30;
-
-export const updateSearchWord =
-  <Item, ItemList>(
-    itemInstance: typeclass.Item<Item>,
-    itemListInstance: typeclass.ItemList<ItemList, Item>,
-  ) =>
-  (
-    args: Readonly<{
-      nextSelectedView: SelectedView;
-      itemList: ItemList | undefined;
-      setSearchWord: (searchWord: string) => void;
-    }>,
-  ): void => {
-    if (args.nextSelectedView.name === 'list-item') {
-      const index = args.nextSelectedView.index;
-      const nextSearchWord = pipe(args.itemList, _ =>
-        _ == null
-          ? null
-          : pipe(
-              itemListInstance.getItems(_),
-              items => items[index],
-              item => (item == null ? null : itemInstance.getSearchWord(item)),
-            ),
-      );
-      if (nextSearchWord != null) {
-        args.setSearchWord(nextSearchWord);
-      }
-    }
-  };
 
 const onArrowUp =
   <Item, ItemList>(itemListInstance: typeclass.ItemList<ItemList, Item>) =>
@@ -65,16 +36,11 @@ const onArrowUp =
               index: selectedView.index - 1,
               updatedAt: Date.now(),
             })
-          : selectedView.name === 'list-item'
-            ? identity<SelectedView>({
-                name: 'search-box',
-                updatedAt: Date.now(),
-              })
-            : identity<SelectedView>({
-                name: 'list-item',
-                index: nitems - 1,
-                updatedAt: Date.now(),
-              });
+          : identity<SelectedView>({
+              name: 'list-item',
+              index: nitems - 1,
+              updatedAt: Date.now(),
+            });
 
       setSelectedView(nextSelectedView);
 
@@ -110,16 +76,11 @@ const onArrowDown =
               index: selectedView.index + 1,
               updatedAt: Date.now(),
             })
-          : selectedView.name === 'list-item'
-            ? identity<SelectedView>({
-                name: 'search-box',
-                updatedAt: Date.now(),
-              })
-            : identity<SelectedView>({
-                name: 'list-item',
-                index: 0,
-                updatedAt: Date.now(),
-              });
+          : identity<SelectedView>({
+              name: 'list-item',
+              index: 0,
+              updatedAt: Date.now(),
+            });
       setSelectedView(nextSelectedView);
 
       updateSearchWord?.(nextSelectedView);

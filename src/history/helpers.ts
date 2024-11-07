@@ -64,9 +64,6 @@ export const updateLongHistory = (storage: LongStorage, path: string): void => {
   ): ReadonlyArray<string> => {
     if (i >= h.length || r.length === maxLongHistorySize) {
       return r;
-    } else if (r.length === 0) {
-      r.push(path);
-      return f(path, h, 0, r);
     } else if (h[i] !== path) {
       r.push(h[i]);
       return f(path, h, i + 1, r);
@@ -75,7 +72,7 @@ export const updateLongHistory = (storage: LongStorage, path: string): void => {
     }
   };
 
-  storage.setHistory(f(path, storage.getHistory(), 0, []));
+  storage.setHistory(f(path, storage.getHistory(), 0, [path]));
 };
 
 export const openHistoryItem = async (

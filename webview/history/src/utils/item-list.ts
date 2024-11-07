@@ -23,13 +23,18 @@ export const updateItemList = ({
   runLazy(async () => {
     pipe(
       setSearchWord(searchWord ?? ''),
-      () => history?.items ?? [],
-      items =>
-        searchWord == null
+      () => ({
+        items: history?.items ?? [],
+        lsw: searchWord?.toLocaleLowerCase(),
+      }),
+      ({ items, lsw }) =>
+        lsw == null
           ? items
           : pipe(
               items,
-              readonlyArray.filter(x => x != null && x.includes(searchWord)),
+              readonlyArray.filter(
+                x => x != null && x.toLocaleLowerCase().includes(lsw),
+              ),
             ),
       items =>
         pipe(setItemList({ items }), () =>

@@ -63,7 +63,6 @@ export const KeyboardHint = <IntlId extends IntlIdBase>({
   } else {
     return (
       <Box sx={[styles.container]}>
-        {/* <Box sx={[styles.header, colorStyle]}>{action.title}</Box> */}
         <Divider />
         <Box sx={styles.listContainer}>
           {actionKeys.map(({ name, desc }, i) => (

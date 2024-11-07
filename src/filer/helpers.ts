@@ -62,12 +62,12 @@ export const getItems = async (
       ? [
           {
             name: '.',
-            path: nodePath.join(dir, '.'),
+            path: nodePath.join(dir, nodePath.sep),
             itemType: 'directory',
           },
           {
             name: '..',
-            path: getParentDirectory(dir),
+            path: nodePath.join(getParentDirectory(dir), nodePath.sep),
             itemType: 'directory',
           },
         ]
@@ -90,7 +90,7 @@ export const getItems = async (
       }
     });
 
-    const rawItems = (await fs.promises.readdir(dir)).slice(0, 500);
+    const rawItems = (await fs.promises.readdir(dir)).slice(0, 1000);
     return rawItems.reduce(async (fitems, fname) => {
       const items = await fitems;
       if (match(fname)) {

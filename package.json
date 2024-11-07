@@ -2,7 +2,7 @@
   "name": "dired-plus",
   "displayName": "dired+",
   "description": "A file manager like Emacs Dired",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "publisher": "TaichiKubo",
   "icon": "icon.png",
   "repository": {
@@ -122,6 +122,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.2.0",
     "react-intl": "^6.6.8",
+    "react-virtuoso": "^4.12.0",
     "rxjs": "^7.8.1",
     "zustand": "^4.5.1"
   }

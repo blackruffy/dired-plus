@@ -20,10 +20,12 @@ export const createWebViewManager = (
   }>,
 ): WebViewManager => {
   type State = {
-    panel: vscode.WebviewPanel | null;
+    panels: {
+      [idx: number]: vscode.WebviewPanel | null;
+    };
   };
   const state: State = {
-    panel: null,
+    panels: {},
   };
 
   const createHTML = (panel: vscode.WebviewPanel): string => {
@@ -47,12 +49,12 @@ export const createWebViewManager = (
       `;
   };
 
-  const createWebViewPanel = () => {
+  const createWebViewPanel = (column: number) => {
     const panel = vscode.window.createWebviewPanel(
-      args.id, // Identifies the type of the webview. Used internally
+      `${args.id}-${column}`, // Identifies the type of the webview. Used internally
       args.title, // Title of the panel displayed to the user
       // Editor column to show the new webview panel in.
-      vscode.window.activeTextEditor?.viewColumn ?? vscode.ViewColumn.One,
+      column,
       {
         enableScripts: true,
         // localResourceRoots: [
@@ -60,8 +62,9 @@ export const createWebViewManager = (
         // ],
       },
     );
+
     panel.onDidDispose(() => {
-      state.panel = null;
+      state.panels[column] = null;
     });
 
     args.startListen({ context: args.context, panel });
@@ -70,12 +73,16 @@ export const createWebViewManager = (
   };
 
   const getPanel = (): vscode.WebviewPanel => {
-    if (state.panel !== null) {
-      state.panel.dispose();
+    const column =
+      vscode.window.activeTextEditor?.viewColumn ?? vscode.ViewColumn.One;
+
+    if (state.panels[column] != null) {
+      state.panels[column]?.dispose();
     }
-    state.panel = createWebViewPanel();
-    initializeTheme(state.panel);
-    return state.panel;
+    const newPanel = createWebViewPanel(column);
+    state.panels[column] = newPanel;
+    initializeTheme(newPanel);
+    return newPanel;
   };
 
   return {

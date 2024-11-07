@@ -8,10 +8,12 @@ import {
   keyCtrlF,
   keyCtrlX,
   keyEnter,
+  keyTab,
 } from '@core/keyboard/keys';
 import {
   bind,
   cancel,
+  completion,
   copyOverwrite,
   goToParentDirectory,
   goToSearchBox,
@@ -22,6 +24,8 @@ import { Action, Mode, SelectedView } from '@dired/store';
 
 export const itemListIsItemCopy = ({
   searchWord,
+  itemList,
+  selectedView,
   destination,
   source,
   separator,
@@ -31,6 +35,8 @@ export const itemListIsItemCopy = ({
   setItemList,
 }: Readonly<{
   searchWord: string;
+  itemList?: ItemList;
+  selectedView: SelectedView;
   destination: Item;
   source: ReadonlyArray<Item>;
   separator: string;
@@ -64,6 +70,18 @@ export const itemListIsItemCopy = ({
         }),
         goToSearchBox({ setSelectedView }),
       ),
+    ),
+
+    keyTab(
+      completion({
+        path: searchWord,
+        itemList,
+        selectedView,
+        separator,
+        setItemList,
+        setSearchWord,
+        setSelectedView,
+      }),
     ),
 
     keyCtrlX({
