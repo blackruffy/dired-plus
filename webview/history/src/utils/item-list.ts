@@ -25,7 +25,10 @@ export const updateItemList = ({
       setSearchWord(searchWord ?? ''),
       () => ({
         items: history?.items ?? [],
-        lsw: searchWord?.toLocaleLowerCase(),
+        lsw: searchWord
+          ?.toLocaleLowerCase()
+          .split(' ')
+          .filter(_ => _ !== ''),
       }),
       ({ items, lsw }) =>
         lsw == null
@@ -33,7 +36,9 @@ export const updateItemList = ({
           : pipe(
               items,
               readonlyArray.filter(
-                x => x != null && x.toLocaleLowerCase().includes(lsw),
+                x =>
+                  x != null &&
+                  lsw.every(y => x.toLocaleLowerCase().includes(y)),
               ),
             ),
       items =>
