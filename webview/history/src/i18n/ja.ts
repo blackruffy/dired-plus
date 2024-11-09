@@ -14,8 +14,8 @@ export const ja = {
   cancel: 'キャンセル',
   open: '開く',
   dismiss: '閉じる',
-  nextPage: '次のページ',
-  prevPage: '前のページ',
+  nextPage: '次を表示',
+  prevPage: '前を表示',
 } as const;
 
 export const messageId: MessageIdMap = core.i18n.getIntlMessageIdMap(ja);
