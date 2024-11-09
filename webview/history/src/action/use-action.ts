@@ -1,4 +1,5 @@
 import { core } from '@core/index';
+import { useMessages } from '@history/i18n';
 import { MessageId, messageId } from '@history/i18n/ja';
 import { defaultKeys } from '@history/keyboard/use-keyboard';
 import { State, useStore } from '@history/store';
@@ -40,7 +41,9 @@ const createAction = ({
 };
 
 export const useAction = (): Action | undefined => {
+  const store = useStore();
   const action = createAction(useStore());
+  const messages = useMessages(store.locale);
 
   return action === undefined
     ? undefined
@@ -49,7 +52,9 @@ export const useAction = (): Action | undefined => {
         keys: pipe(
           [...action.keys, ...defaultKeys],
           array.sort<ActionKey>(
-            ord.fromCompare((a, b) => string.Ord.compare(a.name, b.name)),
+            ord.fromCompare((a, b) =>
+              string.Ord.compare(messages[a.desc.id], messages[b.desc.id]),
+            ),
           ),
         ),
       };

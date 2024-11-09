@@ -66,7 +66,6 @@ export const searchBoxIsItemDefault = ({
         checked,
         setMode,
         setChecked,
-        setSelectedView,
       }),
     ),
 
@@ -89,7 +88,6 @@ export const searchBoxIsItemDefault = ({
         checked,
         setMode,
         setChecked,
-        setSelectedView,
       }),
     ),
 

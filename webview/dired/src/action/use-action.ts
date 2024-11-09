@@ -1,3 +1,4 @@
+import { useMessages } from '@dired/i18n';
 import { Action, ActionKey, State, useStore } from '@dired/store';
 import { array, ord, string } from 'fp-ts';
 import { pipe } from 'fp-ts/lib/function';
@@ -169,7 +170,9 @@ const createAction = ({
 };
 
 export const useAction = (): Action | undefined => {
-  const action = createAction(useStore());
+  const store = useStore();
+  const action = createAction(store);
+  const messages = useMessages(store.locale);
 
   return action === undefined
     ? undefined
@@ -178,7 +181,9 @@ export const useAction = (): Action | undefined => {
         keys: pipe(
           [...action.keys, ...defaultKeys],
           array.sort<ActionKey>(
-            ord.fromCompare((a, b) => string.Ord.compare(a.name, b.name)),
+            ord.fromCompare((a, b) =>
+              string.Ord.compare(messages[a.desc.id], messages[b.desc.id]),
+            ),
           ),
         ),
       };

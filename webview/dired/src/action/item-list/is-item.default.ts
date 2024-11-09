@@ -91,7 +91,6 @@ export const itemListIsItemDefault = ({
         checked,
         setMode,
         setChecked,
-        setSelectedView,
       }),
     ),
 
@@ -153,7 +152,6 @@ export const itemListIsItemDefault = ({
         checked,
         setMode,
         setChecked,
-        setSelectedView,
       }),
     ),
 

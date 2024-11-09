@@ -585,14 +585,12 @@ export const setCopyMode = ({
   checked,
   setMode,
   setChecked,
-  setSelectedView,
 }: Readonly<{
   item: Item;
   itemList?: ItemList;
   checked: Readonly<{ [key: number]: boolean }>;
   setMode: (mode?: Mode) => void;
   setChecked: (checked: Readonly<{ [key: number]: boolean }>) => void;
-  setSelectedView: (selectedView: SelectedView) => void;
 }>): KeyParams => ({
   desc: { id: messageId.copy },
   run: async () =>
@@ -602,7 +600,6 @@ export const setCopyMode = ({
         source: getCheckedItemsOr({ checked, itemList, default: item }),
       }),
       () => setChecked({}),
-      async () => await goToSearchBox({ setSelectedView }).run(),
       () => ({}),
     ),
 });
@@ -613,14 +610,12 @@ export const setRenameMode = ({
   checked,
   setMode,
   setChecked,
-  setSelectedView,
 }: Readonly<{
   item: Item;
   itemList?: ItemList;
   checked: Readonly<{ [key: number]: boolean }>;
   setMode: (mode?: Mode) => void;
   setChecked: (checked: Readonly<{ [key: number]: boolean }>) => void;
-  setSelectedView: (selectedView: SelectedView) => void;
 }>): KeyParams => ({
   desc: { id: messageId.rename },
   run: async () =>
@@ -630,7 +625,6 @@ export const setRenameMode = ({
         source: getCheckedItemsOr({ checked, itemList, default: item }),
       }),
       () => setChecked({}),
-      async () => await goToSearchBox({ setSelectedView }).run(),
       () => ({}),
     ),
 });
