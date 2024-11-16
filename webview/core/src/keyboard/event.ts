@@ -190,11 +190,10 @@ const runAction = <State, IntlId extends IntlIdBase>({
   event,
   actionKeys,
   modifierKeys,
-  defaultKeys,
   dismissId,
-  dialog,
   setDialog,
   setState,
+  instances,
 }: Readonly<{
   event: KeyboardEvent;
   actionKeys?: ReadonlyArray<ActionKey<State, IntlId>>;
@@ -204,6 +203,9 @@ const runAction = <State, IntlId extends IntlIdBase>({
   dismissId: IntlId;
   setDialog: (dialog?: Dialog<State, IntlId>) => void;
   setState: (state: Partial<State>) => void;
+  instances: Readonly<{
+    stateInstance: typeclass.State<State, IntlId>;
+  }>;
 }>): void => {
   const actionKey = getMatchedActionKey({
     actionKeys,
@@ -222,15 +224,7 @@ const runAction = <State, IntlId extends IntlIdBase>({
     event.stopPropagation();
     actionKey
       .run()
-      .then(_ => {
-        if (dialog !== undefined) {
-          setDialog({
-            ...dialog,
-            keys: [...dialog.keys, ...defaultKeys],
-          });
-        }
-        setState(_);
-      })
+      .then(_ => setState(_))
       .catch(err => {
         console.error(err);
         setDialog({
@@ -240,10 +234,7 @@ const runAction = <State, IntlId extends IntlIdBase>({
           keys: [
             keyY<State, IntlId>({
               desc: { id: dismissId },
-              run: async () => {
-                setDialog(undefined);
-                return {};
-              },
+              run: async () => instances.stateInstance.fromDialog(undefined),
             }),
           ],
         });
@@ -265,7 +256,7 @@ export const useKeyDownEvent = <State, IntlId extends string, Item, ItemList>({
   setSelectedView,
   updateSearchWord,
   setDialog,
-  instances: { itemInstance, itemListInstance },
+  instances: { itemInstance, itemListInstance, stateInstance },
 }: Readonly<{
   state: State;
   action?: Action<State, IntlId>;
@@ -283,6 +274,7 @@ export const useKeyDownEvent = <State, IntlId extends string, Item, ItemList>({
   instances: Readonly<{
     itemInstance: typeclass.Item<Item>;
     itemListInstance: typeclass.ItemList<ItemList, Item>;
+    stateInstance: typeclass.State<State, IntlId>;
   }>;
 }>) => {
   React.useEffect(() => {
@@ -300,6 +292,7 @@ export const useKeyDownEvent = <State, IntlId extends string, Item, ItemList>({
           dialog,
           setState,
           setDialog,
+          instances: { stateInstance },
         });
       } else if (action !== undefined) {
         runAction<State, IntlId>({
@@ -311,6 +304,7 @@ export const useKeyDownEvent = <State, IntlId extends string, Item, ItemList>({
           dialog,
           setState,
           setDialog,
+          instances: { stateInstance },
         });
       }
 
@@ -330,6 +324,7 @@ export const useKeyDownEvent = <State, IntlId extends string, Item, ItemList>({
   }, [
     itemInstance,
     itemListInstance,
+    stateInstance,
     modifierKeys,
     setModifierKeys,
     action,
@@ -387,6 +382,7 @@ export const useKeyboardEvent = <
     instances: Readonly<{
       itemInstance: typeclass.Item<Item>;
       itemListInstance: typeclass.ItemList<ItemList, Item>;
+      stateInstance: typeclass.State<State, IntlId>;
     }>;
   }>,
 ) => {

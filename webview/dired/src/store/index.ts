@@ -3,6 +3,7 @@ import {
   DiredItemList as ItemList,
 } from '@common/dired-item';
 import { core } from '@core/index';
+import { typeclass } from '@core/utils';
 import { IntlMessage } from '@dired/i18n';
 import { MessageId } from '@dired/i18n/ja';
 import { identity } from 'fp-ts/lib/function';
@@ -69,3 +70,7 @@ export const useStore = create<State>(set => ({
   setChecked: checked => set(() => ({ checked })),
   setMode: mode => set(() => ({ mode })),
 }));
+
+export const stateInstance: typeclass.State<State, MessageId> = {
+  fromDialog: (dialog?: Dialog): Partial<State> => ({ dialog }),
+};

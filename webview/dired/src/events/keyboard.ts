@@ -5,7 +5,13 @@ import {
 import { core } from '@core/index';
 import { defaultKeys } from '@dired/action/keys';
 import { MessageId, messageId } from '@dired/i18n/ja';
-import { Action, SelectedView, State, useStore } from '@dired/store';
+import {
+  Action,
+  SelectedView,
+  State,
+  stateInstance,
+  useStore,
+} from '@dired/store';
 import { itemInstance, itemListInstance } from '@dired/utils/item-list';
 import { pipe } from 'fp-ts/lib/function';
 
@@ -49,6 +55,6 @@ export const useKeyboardEvent = (params: Readonly<{ action?: Action }>) => {
       }),
     setDialog: state.setDialog,
     setModifierKeys: state.setModifierKeys,
-    instances: { itemInstance, itemListInstance },
+    instances: { itemInstance, itemListInstance, stateInstance },
   });
 };

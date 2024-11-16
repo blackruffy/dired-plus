@@ -113,6 +113,19 @@ export const getItems = async (
   }
 };
 
+export const fileExists = async (path: string): Promise<boolean> => {
+  try {
+    await fs.promises.access(path, fs.constants.F_OK);
+    return true;
+  } catch (e: unknown) {
+    if ((e as { code: string }).code === 'ENOENT') {
+      return false;
+    } else {
+      throw e;
+    }
+  }
+};
+
 export const openFile = async (path: string): Promise<void> => {
   const fileUri = vscode.Uri.file(path);
   const doc = await vscode.workspace.openTextDocument(fileUri);
@@ -120,8 +133,12 @@ export const openFile = async (path: string): Promise<void> => {
 };
 
 export const createFile = async (path: string): Promise<void> => {
-  await fs.promises.writeFile(path, '');
-  await openFile(path);
+  if (await fileExists(path)) {
+    return Promise.reject(new Error(`File already exists: ${path}`));
+  } else {
+    await fs.promises.writeFile(path, '');
+    await openFile(path);
+  }
 };
 
 export const createDirectory = async (path: string): Promise<void> => {
