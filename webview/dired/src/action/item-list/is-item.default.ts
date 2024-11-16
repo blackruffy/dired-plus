@@ -6,11 +6,13 @@ import {
   keyCtrlBackspace,
   keyCtrlC,
   keyCtrlD,
+  keyCtrlEnter,
   keyCtrlF,
   keyCtrlR,
   keyCtrlSpace,
   keyCtrlU,
   keyEnter,
+  keyShiftEnter,
   keyTab,
 } from '@core/keyboard/keys';
 import {
@@ -25,8 +27,9 @@ import {
   updateItemList,
 } from '@dired/action/helpers';
 import { showFolder } from '@dired/events/native';
+import { createDirectory, createFile } from '@dired/events/native';
 import { messageId } from '@dired/i18n/ja';
-import { Action, Mode, SelectedView } from '@dired/store';
+import { Action, Mode, SelectedView, statusState } from '@dired/store';
 
 export const itemListIsItemDefault = ({
   index,
@@ -165,6 +168,34 @@ export const itemListIsItemDefault = ({
           setSelectedView,
         });
         return {};
+      },
+    }),
+
+    keyCtrlEnter({
+      desc: { id: messageId.createFile },
+      run: async () => {
+        await createFile(searchWord);
+        return statusState({
+          id: messageId.createdFile,
+          values: { src: searchWord },
+        });
+      },
+    }),
+
+    keyShiftEnter({
+      desc: { id: messageId.createDir },
+      run: async () => {
+        await createDirectory(searchWord);
+        await updateItemList({
+          searchWord,
+          setItemList,
+          setSearchWord,
+          setSelectedView,
+        });
+        return statusState({
+          id: messageId.createdDir,
+          values: { src: searchWord },
+        });
       },
     }),
   ],

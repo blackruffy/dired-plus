@@ -62,10 +62,10 @@ export const keys = {
 
 export const keyEscape = key('ESC', 'Escape');
 export const keyEnter = key('⏎', 'Enter');
-export const keyShiftEnter = key('⇧ ↩︎', 'Enter', { shiftKey: true });
 export const keySpace = key('␣', 'Space');
 export const keyBackspace = key('BS', 'Backspace');
 export const keyTab = key('TAB', 'Tab');
+
 export const keyC = keyAlphabet('C');
 export const keyD = keyAlphabet('D');
 export const keyF = keyAlphabet('F');
@@ -80,8 +80,11 @@ export const keyX = keyAlphabet('X');
 export const keyY = keyAlphabet('Y');
 export const keyZ = keyAlphabet('Z');
 
+export const keyShiftEnter = key('⇧ ↩︎', 'Enter', { shiftKey: true });
+
 export const keyCtrlBackspace = keyCtrl('BS', 'Backspace');
 export const keyCtrlSpace = keyCtrl('␣', 'Space');
+export const keyCtrlEnter = keyCtrl('↩︎', 'Enter');
 
 export const keyCtrlC = keyCtrlAlphabet('C');
 export const keyCtrlD = keyCtrlAlphabet('D');

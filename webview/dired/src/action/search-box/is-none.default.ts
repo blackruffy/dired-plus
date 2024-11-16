@@ -1,7 +1,7 @@
 import { DiredItemList as ItemList } from '@common/dired-item';
 import {
   keyCtrlBackspace,
-  keyEnter,
+  keyCtrlEnter,
   keyShiftEnter,
   keyTab,
 } from '@core/keyboard/keys';
@@ -33,7 +33,7 @@ export const searchBoxIsNoneDefault = ({
 }>): Action => ({
   id: 'search-box-is-none-default',
   keys: [
-    keyEnter({
+    keyCtrlEnter({
       desc: { id: messageId.createFile },
       run: async () => {
         await createFile(path);
