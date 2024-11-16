@@ -80,6 +80,7 @@
     "build:dired": "vite build --config vite.config.dired.ts",
     "build:history": "vite build --config vite.config.history.ts",
     "build:extension": "vite build --config vite.config.extension.ts",
+    "build:test": "vite build --config vite.config.test.ts",
     "typecheck": "npm run typecheck:webview && npm run typecheck:extension && npm run lint",
     "typecheck:webview": "cd webview && tsc -p tsconfig.json",
     "typecheck:extension": "tsc -p tsconfig.json",
@@ -106,7 +107,9 @@
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
+    "mocha": "^10.8.2",
     "prettier": "^3.2.5",
+    "ts-node": "^10.9.2",
     "typescript": "^5.3.3",
     "vite": "^5.1.4"
   },
@@ -124,6 +127,7 @@
     "react-intl": "^6.6.8",
     "react-virtuoso": "^4.12.0",
     "rxjs": "^7.8.1",
+    "uuid": "^11.0.2",
     "zustand": "^4.5.1"
   }
 }

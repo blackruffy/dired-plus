@@ -7,10 +7,10 @@ import {
 } from '@common/messages';
 import { scope } from '@common/scope';
 import { identity } from 'fp-ts/lib/function';
+import { v4 as uuidv4 } from 'uuid';
 
 export const request = scope(() => {
-  const getId = (key: string) =>
-    `${key}-${Date.now()}-${Math.round(Math.random() * 1000)}`;
+  const getId = (key: string) => `${key}-${uuidv4()}`;
 
   if (import.meta.env.MODE === 'mock') {
     return async <

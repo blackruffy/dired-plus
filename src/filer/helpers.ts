@@ -1,10 +1,17 @@
 import { DiredItem, DiredItemStat } from '@src/common/dired-item';
 import { FileOptions } from '@src/common/file-options';
+import * as loop from '@src/common/loop';
+import {
+  ListItemsRequest,
+  ListItemsResponnse,
+  response,
+} from '@src/common/messages';
 import { scope } from '@src/common/scope';
 import * as fs from 'fs';
 import * as fsExtra from 'fs-extra';
 import * as os from 'os';
 import * as nodePath from 'path';
+import { v4 as uuidv4 } from 'uuid';
 import * as vscode from 'vscode';
 
 export const getCurrentDirectory = (): string => {
@@ -90,7 +97,8 @@ export const getItems = async (
       }
     });
 
-    const rawItems = (await fs.promises.readdir(dir)).slice(0, 1000);
+    //const rawItems = (await fs.promises.readdir(dir)).slice(0, 1000);
+    const rawItems = await fs.promises.readdir(dir);
     return rawItems.reduce(async (fitems, fname) => {
       const items = await fitems;
       if (match(fname)) {
@@ -112,6 +120,160 @@ export const getItems = async (
     }, Promise.resolve<ReadonlyArray<DiredItem>>(defaultItems));
   }
 };
+
+type ItemsIter = Readonly<{
+  hasNext: () => boolean;
+  next: () => Promise<ReadonlyArray<DiredItem>>;
+}>;
+
+export const getItemsIter = async (item: string): Promise<ItemsIter> => {
+  const stat = await getItemStat(item);
+  const isSep = item.endsWith(nodePath.sep);
+  const isDir = stat.type === 'directory';
+  if (!isDir && isSep) {
+    return {
+      hasNext: () => false,
+      next: async () => [],
+    };
+  } else {
+    const maxSize = 1000;
+    const state = { index: 0 };
+    const isDirSep = isDir && isSep;
+    const [dir, prefix] = isDirSep
+      ? [item, null]
+      : [nodePath.dirname(item), nodePath.basename(item)];
+    const getDefaultItems = (): Array<DiredItem> =>
+      isDirSep && state.index === 0
+        ? [
+            {
+              name: '.',
+              path: nodePath.join(dir, nodePath.sep),
+              itemType: 'directory',
+            },
+            {
+              name: '..',
+              path: nodePath.join(getParentDirectory(dir), nodePath.sep),
+              itemType: 'directory',
+            },
+          ]
+        : [];
+
+    const match = scope(() => {
+      if (prefix === null) {
+        return (_fname: string) => true;
+      } else {
+        const lprefix = prefix.toLocaleLowerCase();
+        //return (fname: string) => fname.toLocaleLowerCase().startsWith(lprefix);
+        const xs = lprefix.split(' ');
+        if (xs.length === 1) {
+          return (fname: string) =>
+            fname.toLocaleLowerCase().startsWith(lprefix);
+        } else {
+          return (fname: string) =>
+            xs.every(x => x === '' || fname.toLocaleLowerCase().includes(x));
+        }
+      }
+    });
+
+    const filter = async (
+      rawItems: ReadonlyArray<string>,
+      index: number,
+      items: Array<DiredItem>,
+    ): Promise<[ReadonlyArray<DiredItem>, number]> => {
+      return loop.async<[Array<DiredItem>, number]>(
+        async ([items, index]) => {
+          if (items.length >= maxSize || index >= rawItems.length) {
+            return loop.done([items, index]);
+          } else {
+            const fname = rawItems[index];
+            if (match(fname)) {
+              const fpath = nodePath.join(dir, fname);
+              const fstat = await getItemStat(fpath);
+              items.push({
+                name: fname,
+                path: fpath,
+                itemType: fstat.type,
+                size: fstat.size,
+                lastUpdated: fstat.lastUpdated,
+              });
+            }
+            return loop.next([items, index + 1]);
+          }
+        },
+        Promise.resolve([items, index]),
+      );
+    };
+
+    const rawItems = await fs.promises.readdir(dir);
+
+    const hasNext = (): boolean => state.index < rawItems.length;
+
+    const next = async (): Promise<ReadonlyArray<DiredItem>> => {
+      const [items, index] = await filter(
+        rawItems,
+        state.index,
+        getDefaultItems(),
+      );
+      state.index = index;
+      return items;
+    };
+
+    return { hasNext, next };
+  }
+};
+
+export const listItemsHandler = scope(() => {
+  type Sessions = Record<string, Session>;
+  type Session = Readonly<{
+    itemsIter: ItemsIter;
+    parent: DiredItem;
+  }>;
+  const sessions: Sessions = {};
+
+  return async (
+    panel: vscode.WebviewPanel,
+    currentDirectory: string,
+    req: ListItemsRequest,
+  ): Promise<void> => {
+    console.log(`>>>>>>>>>>>>>>>>> listItemsHandler: ${req.nextToken}`);
+    if (req.nextToken != null) {
+      const session = sessions[req.nextToken];
+      const items = await session.itemsIter.next();
+      panel.webview.postMessage(
+        response<ListItemsResponnse>(req, {
+          parent: session.parent,
+          items,
+          nextToken: session.itemsIter.hasNext() ? req.nextToken : undefined,
+        }),
+      );
+    } else {
+      const searchPath = req.path ?? `${currentDirectory}${nodePath.sep}`;
+      const itemStat = await getItemStat(searchPath);
+      const itemsIter = await getItemsIter(searchPath);
+      const items = await itemsIter.next();
+      const parent: DiredItem = {
+        name: nodePath.basename(searchPath),
+        path: searchPath,
+        itemType: itemStat.type,
+        size: itemStat.size,
+        lastUpdated: itemStat.lastUpdated,
+      };
+      const sessionId = uuidv4();
+      const session: Session = {
+        itemsIter,
+        parent,
+      };
+      sessions[sessionId] = session;
+      panel.webview.postMessage(
+        response<ListItemsResponnse>(req, {
+          parent,
+          items,
+          nextToken: itemsIter.hasNext() ? sessionId : undefined,
+        }),
+      );
+    }
+  };
+});
 
 export const fileExists = async (path: string): Promise<boolean> => {
   try {

@@ -48,6 +48,7 @@ import {
   getItems,
   getParentDirectory,
   getSeparator,
+  listItemsHandler,
   renameDirectory,
   renameFile,
 } from './helpers';
@@ -67,22 +68,23 @@ export const startListen = ({
           switch (message.key) {
             case 'list-items': {
               const req = message as ListItemsRequest;
-              const searchPath =
-                req.path ?? `${currentDirectory}${nodePath.sep}`;
-              const itemStat = await getItemStat(searchPath);
-              const itemList = await getItems(searchPath);
-              panel.webview.postMessage(
-                response<ListItemsResponnse>(req, {
-                  parent: {
-                    name: nodePath.basename(searchPath),
-                    path: searchPath,
-                    itemType: itemStat.type,
-                    size: itemStat.size,
-                    lastUpdated: itemStat.lastUpdated,
-                  },
-                  items: itemList,
-                }),
-              );
+              await listItemsHandler(panel, currentDirectory, req);
+              // const searchPath =
+              //   req.path ?? `${currentDirectory}${nodePath.sep}`;
+              // const itemStat = await getItemStat(searchPath);
+              // const itemList = await getItems(searchPath);
+              // panel.webview.postMessage(
+              //   response<ListItemsResponnse>(req, {
+              //     parent: {
+              //       name: nodePath.basename(searchPath),
+              //       path: searchPath,
+              //       itemType: itemStat.type,
+              //       size: itemStat.size,
+              //       lastUpdated: itemStat.lastUpdated,
+              //     },
+              //     items: itemList,
+              //   }),
+              // );
               return;
             }
             case 'get-parent-directory': {

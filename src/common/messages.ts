@@ -45,9 +45,14 @@ export type Response<Key extends MessageKey> = Message<Key, 'response'> & Error;
 export type ListItemsRequest = Request<'list-items'> &
   Readonly<{
     path?: string;
+    nextToken?: string;
   }>;
 
-export type ListItemsResponnse = Response<'list-items'> & DiredItemList;
+export type ListItemsResponnse = Response<'list-items'> &
+  DiredItemList &
+  Readonly<{
+    nextToken?: string;
+  }>;
 
 export type GetParentDirectoryRequest = Request<'get-parent-directory'> &
   Readonly<{ path: string }>;

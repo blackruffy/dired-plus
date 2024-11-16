@@ -38,7 +38,7 @@
         "varsIgnorePattern": "^_"
       }
     ],
-    "@typescript-eslint/strict-boolean-expressions": ["error"]
+    "@typescript-eslint/strict-boolean-expressions": "error"
   },
-  "ignorePatterns": ["out", "dist", "**/*.d.ts"]
+  "ignorePatterns": ["out", "dist", "**/*.d.ts", "vite.config.*.ts"]
 }

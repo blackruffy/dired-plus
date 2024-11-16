@@ -36,6 +36,31 @@ export const listItems = async (path?: string): Promise<ItemList> =>
     path,
   });
 
+export const eachListItems = async (
+  path: string,
+  callback: (items: ItemList) => void,
+): Promise<void> => eachListItemsHelper({ path, callback });
+
+const eachListItemsHelper = async ({
+  path,
+  nextToken,
+  callback,
+}: Readonly<{
+  path: string;
+  nextToken?: string;
+  callback: (items: ItemList) => void;
+}>): Promise<void> => {
+  const resp1 = await request<ListItemsRequest, ListItemsResponnse>({
+    key: 'list-items',
+    path,
+    nextToken,
+  });
+  callback(resp1);
+  if (resp1.nextToken != null) {
+    await eachListItemsHelper({ path, nextToken: resp1.nextToken, callback });
+  }
+};
+
 export const getParentDirectory = async (path: string): Promise<string> =>
   (
     await request<GetParentDirectoryRequest, GetParentDirectoryResponse>({
