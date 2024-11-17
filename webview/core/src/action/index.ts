@@ -5,6 +5,14 @@ export type Action<State, IntlId extends IntlIdBase> = Readonly<{
   keys: ReadonlyArray<ActionKey<State, IntlId>>;
 }>;
 
+export type ActionWithNullableKeys<
+  State,
+  IntlId extends IntlIdBase,
+> = Readonly<{
+  id: string;
+  keys: ReadonlyArray<ActionKey<State, IntlId> | null | undefined>;
+}>;
+
 export type ModifierKeys = Readonly<{
   shiftKey: boolean;
   controlKey: boolean;

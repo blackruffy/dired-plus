@@ -20,9 +20,7 @@ export type StatusType = core.store.StatusType;
 
 export type Status = core.store.Status<MessageId>;
 
-export type SelectedView = core.store.SelectedView;
 export type SearchBox = core.store.SearchBox;
-export type ListItem = core.store.ListItem;
 export type ModifierKeys = core.action.ModifierKeys;
 export type ActionKey = core.action.ActionKey<State, MessageId>;
 
@@ -49,6 +47,10 @@ export type RenameMode = Readonly<{
 // }>;
 
 export type Action = core.action.Action<State, MessageId>;
+export type ActionWithNullableKeys = core.action.ActionWithNullableKeys<
+  State,
+  MessageId
+>;
 
 export type Dialog = core.store.Dialog<State, MessageId>;
 

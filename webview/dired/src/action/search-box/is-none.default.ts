@@ -12,24 +12,26 @@ import {
 } from '@dired/action/helpers';
 import { createDirectory, createFile } from '@dired/events/native';
 import { messageId } from '@dired/i18n/ja';
-import { Action, SelectedView, statusState } from '@dired/store';
+import { Action, SearchBox, statusState } from '@dired/store';
 
 export const searchBoxIsNoneDefault = ({
   path,
   itemList,
-  selectedView,
+  selectedItemIndex,
   separator,
   setItemList,
   setSearchWord,
-  setSelectedView,
+  setSearchBox,
+  setSelectedItemIndex,
 }: Readonly<{
   path: string;
   itemList?: ItemList;
-  selectedView: SelectedView;
+  selectedItemIndex?: number;
   separator: string;
   setItemList: (itemList: ItemList) => void;
   setSearchWord: (searchWord: string) => void;
-  setSelectedView: (selectedView: SelectedView) => void;
+  setSearchBox: (searchBox: SearchBox) => void;
+  setSelectedItemIndex: (selectedItemIndex?: number) => void;
 }>): Action => ({
   id: 'search-box-is-none-default',
   keys: [
@@ -52,7 +54,7 @@ export const searchBoxIsNoneDefault = ({
           searchWord: path,
           setItemList,
           setSearchWord,
-          setSelectedView,
+          setSelectedItemIndex,
         });
         return statusState({
           id: messageId.createdDir,
@@ -67,7 +69,7 @@ export const searchBoxIsNoneDefault = ({
         separator,
         setItemList,
         setSearchWord,
-        setSelectedView,
+        setSelectedItemIndex,
       }),
     ),
 
@@ -75,11 +77,12 @@ export const searchBoxIsNoneDefault = ({
       completion({
         path,
         itemList,
-        selectedView,
+        selectedItemIndex,
         separator,
         setItemList,
         setSearchWord,
-        setSelectedView,
+        setSearchBox,
+        setSelectedItemIndex,
       }),
     ),
   ],

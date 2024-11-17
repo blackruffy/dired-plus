@@ -1,9 +1,11 @@
-import { runLazy } from '@common/lazy-run';
+import { createRunLazy } from '@common/lazy-run';
 import { UpdateItemListArgs } from '@core/components/SearchBox';
 import { typeclass } from '@core/utils';
 import { Item, ItemList } from '@history/store';
 import { readonlyArray } from 'fp-ts';
 import { pipe } from 'fp-ts/lib/function';
+
+const runLazy = createRunLazy();
 
 export const itemInstance: typeclass.Item<Item> = {
   getSearchWord: self => self,
@@ -18,7 +20,7 @@ export const updateItemList = ({
   history,
   setSearchWord,
   setItemList,
-  setSelectedView,
+  setSelectedItemIndex,
 }: UpdateItemListArgs<ItemList> & Readonly<{ history?: ItemList }>): void =>
   runLazy(async () => {
     pipe(
@@ -43,9 +45,7 @@ export const updateItemList = ({
             ),
       items =>
         pipe(setItemList({ items }), () =>
-          items.length === 0
-            ? setSelectedView({ name: 'search-box', updatedAt: Date.now() })
-            : void 0,
+          items.length === 0 ? setSelectedItemIndex(undefined) : void 0,
         ),
     );
   });

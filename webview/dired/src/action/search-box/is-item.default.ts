@@ -21,29 +21,31 @@ import {
 } from '@dired/action/helpers';
 import { showFolder } from '@dired/events/native';
 import { messageId } from '@dired/i18n/ja';
-import { Action, Mode, SelectedView } from '@dired/store';
+import { Action, Mode, SearchBox } from '@dired/store';
 
 export const searchBoxIsItemDefault = ({
   item,
   itemList,
-  selectedView,
+  selectedItemIndex,
   checked,
   separator,
   setMode,
   setItemList,
   setSearchWord,
-  setSelectedView,
+  setSearchBox,
+  setSelectedItemIndex,
   setChecked,
 }: Readonly<{
   item: Item;
   itemList?: ItemList;
-  selectedView: SelectedView;
+  selectedItemIndex?: number;
   checked: Readonly<{ [key: number]: boolean }>;
   separator: string;
   setMode: (mode?: Mode) => void;
   setItemList: (itemList: ItemList) => void;
   setSearchWord: (searchWord: string) => void;
-  setSelectedView: (selectedView: SelectedView) => void;
+  setSearchBox: (searchBox: SearchBox) => void;
+  setSelectedItemIndex: (selectedItemIndex?: number) => void;
   setChecked: (checked: Readonly<{ [key: number]: boolean }>) => void;
 }>): Action => ({
   id: 'search-box-is-item-default',
@@ -55,7 +57,7 @@ export const searchBoxIsItemDefault = ({
         separator,
         setSearchWord,
         setItemList,
-        setSelectedView,
+        setSelectedItemIndex,
       ),
     }),
 
@@ -99,7 +101,7 @@ export const searchBoxIsItemDefault = ({
         separator,
         setSearchWord,
         setItemList,
-        setSelectedView,
+        setSelectedItemIndex,
       }),
     ),
 
@@ -109,7 +111,7 @@ export const searchBoxIsItemDefault = ({
         separator,
         setItemList,
         setSearchWord,
-        setSelectedView,
+        setSelectedItemIndex,
       }),
     ),
 
@@ -117,11 +119,12 @@ export const searchBoxIsItemDefault = ({
       completion({
         path: item.path,
         itemList,
-        selectedView,
+        selectedItemIndex,
         separator,
         setItemList,
         setSearchWord,
-        setSelectedView,
+        setSearchBox,
+        setSelectedItemIndex,
       }),
     ),
   ],

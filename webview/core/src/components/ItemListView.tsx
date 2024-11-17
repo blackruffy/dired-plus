@@ -1,5 +1,4 @@
 import { typeclass } from '@core/utils/';
-import { SelectedView } from '@dired/store';
 import { Box, useTheme } from '@mui/material';
 import React, { useMemo } from 'react';
 import { ListRange, Virtuoso, VirtuosoHandle } from 'react-virtuoso';
@@ -15,27 +14,25 @@ export const scrollPageEvent = new Subject<'next' | 'prev'>();
 const ItemBox = <Item, _Dummy = unknown>({
   index,
   items,
-  selectedIndex,
-  selectedView,
+  selectedItemIndex,
   ItemView,
   setSearchWord,
-  setSelectedView,
+  setSelectedItemIndex,
   instances: { itemInstance },
 }: Readonly<{
   index: number;
   items: ReadonlyArray<Item>;
-  selectedIndex?: number;
-  selectedView: SelectedView;
+  selectedItemIndex?: number;
   ItemView: (args: ItemViewParms<Item>) => React.ReactElement;
   setSearchWord: (word: string) => void;
-  setSelectedView: (selectedView: SelectedView) => void;
+  setSelectedItemIndex: (index: number) => void;
   instances: Readonly<{
     itemInstance: typeclass.Item<Item>;
   }>;
 }>): React.ReactElement => {
   const theme = useTheme();
   const item = items[index];
-  const isSelected = selectedIndex === index;
+  const isSelected = selectedItemIndex === index;
   return (
     <Box
       key={index}
@@ -54,11 +51,12 @@ const ItemBox = <Item, _Dummy = unknown>({
       }}
       onClick={e => {
         e.stopPropagation();
-        setSelectedView({
-          name: 'list-item',
-          index,
-          updatedAt: selectedView.updatedAt,
-        });
+        setSelectedItemIndex(index);
+        // setSelectedView({
+        //   name: 'list-item',
+        //   index,
+        //   updatedAt: selectedView.updatedAt,
+        // });
         setSearchWord(itemInstance.getSearchWord(item));
       }}
     >
@@ -69,17 +67,17 @@ const ItemBox = <Item, _Dummy = unknown>({
 
 export const ItemListView = <Item, ItemList>({
   itemList,
-  selectedView,
+  selectedItemIndex,
   ItemView,
   setSearchWord,
-  setSelectedView,
+  setSelectedItemIndex,
   instances,
 }: Readonly<{
   itemList?: ItemList;
-  selectedView: SelectedView;
+  selectedItemIndex: number | undefined;
   ItemView: (args: ItemViewParms<Item>) => React.ReactElement;
   setSearchWord: (word: string) => void;
-  setSelectedView: (selectedView: SelectedView) => void;
+  setSelectedItemIndex: (index: number) => void;
   instances: Readonly<{
     itemInstance: typeclass.Item<Item>;
     itemListInstance: typeclass.ItemList<ItemList, Item>;
@@ -95,31 +93,27 @@ export const ItemListView = <Item, ItemList>({
       : instances.itemListInstance.getItems(itemList);
   }, [itemList, instances.itemListInstance]);
 
-  const selectedIndex = React.useMemo(
-    () => (selectedView.name === 'list-item' ? selectedView.index : undefined),
-    [selectedView],
-  );
-
   const [prevSelectedIndex, setPrevSelectedIndex] = React.useState<number>();
 
   React.useEffect(() => {
-    setPrevSelectedIndex(selectedIndex);
-  }, [selectedIndex]);
+    setPrevSelectedIndex(selectedItemIndex);
+  }, [selectedItemIndex]);
 
   React.useEffect(() => {
     if (
-      selectedIndex != null &&
+      selectedItemIndex != null &&
       range != null &&
       range.startIndex !== range.endIndex &&
-      ((selectedIndex !== 0 && selectedIndex <= range.startIndex) ||
-        (selectedIndex !== items.length - 1 && selectedIndex >= range.endIndex))
+      ((selectedItemIndex !== 0 && selectedItemIndex <= range.startIndex) ||
+        (selectedItemIndex !== items.length - 1 &&
+          selectedItemIndex >= range.endIndex))
     ) {
       if (
         prevSelectedIndex != null &&
-        Math.abs(selectedIndex - prevSelectedIndex) === 1
+        Math.abs(selectedItemIndex - prevSelectedIndex) === 1
       ) {
         ref.current?.scrollToIndex({
-          index: selectedIndex,
+          index: selectedItemIndex,
           align: 'center',
           // behavior: 'smooth',
         });
@@ -133,14 +127,7 @@ export const ItemListView = <Item, ItemList>({
       //   }
       // }
     }
-  }, [
-    selectedIndex,
-    prevSelectedIndex,
-    range,
-    setSelectedView,
-    selectedView,
-    items,
-  ]);
+  }, [selectedItemIndex, prevSelectedIndex, range, items]);
 
   React.useEffect(() => {
     const s = scrollPageEvent.subscribe(event => {
@@ -151,18 +138,13 @@ export const ItemListView = <Item, ItemList>({
           align: event === 'next' ? 'start' : 'end',
         });
 
-        if (selectedView.name === 'list-item') {
-          setSelectedView({
-            ...selectedView,
-            index: nextIndex,
-          });
-        }
+        setSelectedItemIndex(nextIndex);
       }
     });
     return () => {
       s.unsubscribe();
     };
-  }, [range, setSelectedView, selectedView]);
+  }, [range, setSelectedItemIndex, selectedItemIndex]);
 
   return (
     <Virtuoso
@@ -173,11 +155,10 @@ export const ItemListView = <Item, ItemList>({
           key={index}
           index={index}
           items={items}
-          selectedIndex={selectedIndex}
-          selectedView={selectedView}
+          selectedItemIndex={selectedItemIndex}
           ItemView={ItemView}
           setSearchWord={setSearchWord}
-          setSelectedView={setSelectedView}
+          setSelectedItemIndex={setSelectedItemIndex}
           instances={instances}
         />
       )}
@@ -185,111 +166,3 @@ export const ItemListView = <Item, ItemList>({
     />
   );
 };
-
-// export const ItemListView = <Item, ItemList>({
-//   itemList,
-//   selectedView,
-//   setSearchWord,
-//   setSelectedView,
-//   ItemView,
-//   instances: { itemInstance, itemListInstance },
-// }: Readonly<{
-//   itemList?: ItemList;
-//   selectedView: SelectedView;
-//   setSearchWord: (word: string) => void;
-//   setSelectedView: (selectedView: SelectedView) => void;
-//   ItemView: (args: ItemViewParms<Item>) => React.ReactElement;
-//   instances: Readonly<{
-//     itemInstance: typeclass.Item<Item>;
-//     itemListInstance: typeclass.ItemList<ItemList, Item>;
-//   }>;
-// }>): React.ReactElement => {
-//   const theme = useTheme();
-//   const scrollRef = React.useRef<HTMLUListElement>(null);
-//   const selectedRef = React.useRef<HTMLDivElement>(null);
-//   const firstItemRef = React.useRef<HTMLDivElement>(null);
-
-//   const items = itemList == null ? [] : itemListInstance.getItems(itemList);
-
-//   const selectedIndex = React.useMemo(
-//     () => (selectedView.name === 'list-item' ? selectedView.index : undefined),
-//     [selectedView],
-//   );
-
-//   React.useEffect(() => {
-//     if (scrollRef.current && selectedRef.current) {
-//       const containerRect = scrollRef.current.getBoundingClientRect();
-//       const scrollTop = scrollRef.current.scrollTop;
-//       const scrollBottom = scrollTop + containerRect.height;
-//       const itemRect = selectedRef.current.getBoundingClientRect();
-//       const itemY = scrollTop + itemRect.y - itemRect.height;
-//       if (itemY < scrollTop) {
-//         selectedRef.current.scrollIntoView({
-//           block: 'center',
-//         });
-//       } else if (itemY > scrollBottom) {
-//         selectedRef.current.scrollIntoView({
-//           block: 'center',
-//         });
-//       }
-//     }
-//   }, [selectedView]);
-
-//   React.useEffect(() => {
-//     const s = scrollPageEvent.subscribe(event => {
-//       if (scrollRef.current) {
-//         const containerRect = scrollRef.current.getBoundingClientRect();
-//         const diff = containerRect.height;
-//         const sign = event === 'prev' ? -1 : 1;
-//         const top = scrollRef.current.scrollTop + sign * diff;
-//         scrollRef.current.scrollTop = top < 0 ? 0 : top;
-
-//         if (selectedView.name === 'list-item' && firstItemRef.current) {
-//           const itemRect = firstItemRef.current.getBoundingClientRect();
-//           const index =
-//             Math.floor(scrollRef.current.scrollTop / itemRect.height) + 1;
-//           setSelectedView({
-//             ...selectedView,
-//             index: index,
-//             updatedAt: Date.now(),
-//           });
-//         }
-//       }
-//     });
-//     return () => {
-//       s.unsubscribe();
-//     };
-//   }, [selectedView, setSelectedView]);
-
-//   return (
-//     <Box
-//       ref={scrollRef}
-//       sx={{
-//         p: 0.5,
-//         flex: 1,
-//         overflow: 'scroll',
-//         display: 'flex',
-//         flexDirection: 'column',
-//         justifyContent: 'flex-start',
-//         alignItems: 'stretch',
-//       }}
-//       onClick={e => {
-//         e.stopPropagation();
-//       }}
-//     >
-//       {items.map((item, index) => (
-//         <ItemBox
-//           key={index}
-//           index={index}
-//           items={items}
-//           selectedIndex={selectedIndex}
-//           selectedView={selectedView}
-//           ItemView={ItemView}
-//           setSearchWord={setSearchWord}
-//           setSelectedView={setSelectedView}
-//           instances={{ itemInstance }}
-//         />
-//       ))}
-//     </Box>
-//   );
-// };

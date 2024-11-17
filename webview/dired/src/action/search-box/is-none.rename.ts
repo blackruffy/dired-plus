@@ -10,29 +10,31 @@ import {
   renameFile,
 } from '@dired/events/native';
 import { messageId } from '@dired/i18n/ja';
-import { Action, Mode, SelectedView, statusState } from '@dired/store';
+import { Action, Mode, SearchBox, statusState } from '@dired/store';
 import { pipe } from 'fp-ts/lib/function';
 
 export const searchBoxIsNoneRename = ({
   item,
   itemList,
   source,
-  selectedView,
+  selectedItemIndex,
   separator,
   setMode,
   setSearchWord,
+  setSearchBox,
   setItemList,
-  setSelectedView,
+  setSelectedItemIndex,
 }: Readonly<{
   item: Item;
   itemList?: ItemList;
   source: ReadonlyArray<Item>;
-  selectedView: SelectedView;
+  selectedItemIndex?: number;
   separator: string;
   setMode: (mode?: Mode) => void;
   setSearchWord: (searchWord: string) => void;
+  setSearchBox: (searchBox: SearchBox) => void;
   setItemList: (itemList: ItemList) => void;
-  setSelectedView: (selectedView: SelectedView) => void;
+  setSelectedItemIndex: (selectedItemIndex?: number) => void;
 }>): Action => ({
   id: 'search-box-is-none-rename',
   keys: [
@@ -53,7 +55,7 @@ export const searchBoxIsNoneRename = ({
                     searchWord: `${await getParentDirectory(item.path)}${separator}`,
                     setSearchWord,
                     setItemList,
-                    setSelectedView,
+                    setSelectedItemIndex,
                   }),
                 () =>
                   statusState({
@@ -84,11 +86,12 @@ export const searchBoxIsNoneRename = ({
       completion({
         path: item.path,
         itemList,
-        selectedView,
+        selectedItemIndex,
         separator,
         setItemList,
         setSearchWord,
-        setSelectedView,
+        setSearchBox,
+        setSelectedItemIndex,
       }),
     ),
 
@@ -99,7 +102,7 @@ export const searchBoxIsNoneRename = ({
         setMode,
         setSearchWord,
         setItemList,
-        setSelectedView,
+        setSelectedItemIndex,
       }),
     ),
   ],

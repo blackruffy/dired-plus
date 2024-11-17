@@ -5,7 +5,6 @@ import {
 import {
   keyCtrlBackspace,
   keyCtrlC,
-  keyCtrlF,
   keyCtrlX,
   keyEnter,
   keyTab,
@@ -15,34 +14,35 @@ import {
   cancel,
   completion,
   goToParentDirectory,
-  goToSearchBox,
   openItem,
   renameOverwrite,
 } from '@dired/action/helpers';
 import { messageId } from '@dired/i18n/ja';
-import { Action, Mode, SelectedView } from '@dired/store';
+import { Action, Mode, SearchBox } from '@dired/store';
 
 export const itemListIsItemRename = ({
   searchWord,
   itemList,
-  selectedView,
+  selectedItemIndex,
   destination,
   source,
   separator,
   setMode,
-  setSelectedView,
+  setSelectedItemIndex,
   setSearchWord,
+  setSearchBox,
   setItemList,
 }: Readonly<{
   searchWord: string;
   itemList?: ItemList;
-  selectedView: SelectedView;
+  selectedItemIndex?: number;
   destination: Item;
   source: ReadonlyArray<Item>;
   separator: string;
   setMode: (mode?: Mode) => void;
-  setSelectedView: (selectedView: SelectedView) => void;
+  setSelectedItemIndex: (selectedItemIndex?: number) => void;
   setSearchWord: (searchWord: string) => void;
+  setSearchBox: (searchBox: SearchBox) => void;
   setItemList: (itemList: ItemList) => void;
 }>): Action => ({
   id: 'item-list-is-item-rename',
@@ -54,7 +54,7 @@ export const itemListIsItemRename = ({
         separator,
         setSearchWord,
         setItemList,
-        setSelectedView,
+        setSelectedItemIndex,
       ),
     }),
 
@@ -66,9 +66,8 @@ export const itemListIsItemRename = ({
           separator,
           setSearchWord,
           setItemList,
-          setSelectedView,
+          setSelectedItemIndex,
         }),
-        goToSearchBox({ setSelectedView }),
       ),
     ),
 
@@ -76,11 +75,12 @@ export const itemListIsItemRename = ({
       completion({
         path: searchWord,
         itemList,
-        selectedView,
+        selectedItemIndex,
         separator,
         setItemList,
         setSearchWord,
-        setSelectedView,
+        setSearchBox,
+        setSelectedItemIndex,
       }),
     ),
 
@@ -92,11 +92,9 @@ export const itemListIsItemRename = ({
         separator,
         setSearchWord,
         setItemList,
-        setSelectedView,
+        setSelectedItemIndex,
       ),
     }),
-
-    keyCtrlF(goToSearchBox({ setSelectedView })),
 
     keyCtrlC(
       cancel({
@@ -105,7 +103,7 @@ export const itemListIsItemRename = ({
         setMode,
         setSearchWord,
         setItemList,
-        setSelectedView,
+        setSelectedItemIndex,
       }),
     ),
   ],

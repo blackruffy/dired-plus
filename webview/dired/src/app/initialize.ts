@@ -12,7 +12,7 @@ export const useInitialize = (): void => {
     setSeparator,
     setColorTheme,
     setLocale,
-    setSelectedView,
+    setSelectedItemIndex,
   } = useStore();
 
   core.useInitialize({
@@ -24,7 +24,7 @@ export const useInitialize = (): void => {
 
   React.useEffect(() => {
     if (itemList === undefined) {
-      updateItemList({ setSearchWord, setItemList, setSelectedView });
+      updateItemList({ setSearchWord, setItemList, setSelectedItemIndex });
     }
-  }, [itemList, setItemList, setSearchWord, setSelectedView]);
+  }, [itemList, setItemList, setSearchWord, setSelectedItemIndex]);
 };

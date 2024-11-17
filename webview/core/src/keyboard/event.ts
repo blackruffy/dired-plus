@@ -1,91 +1,71 @@
+import { createRunLazy } from '@common/lazy-run';
 import { Action, ActionKey, ModifierKeys } from '@core/action';
 import { IntlError, IntlIdBase } from '@core/i18n';
 import { keyY } from '@core/keyboard/keys';
-import { Dialog, SelectedView } from '@core/store';
+import { Dialog } from '@core/store';
 import { typeclass } from '@core/utils';
-import { identity } from 'fp-ts/lib/function';
 import React from 'react';
 
-const keyInterval = 30;
+const runLazyArrowKey = createRunLazy({ duration: 30 });
 
 const onArrowUp =
   <Item, ItemList>(itemListInstance: typeclass.ItemList<ItemList, Item>) =>
   ({
     event,
     itemList,
-    selectedView,
-    setSelectedView,
+    selectedItemIndex,
+    setSelectedItemIndex,
     updateSearchWord,
   }: Readonly<{
     event: KeyboardEvent;
-    itemList: ItemList | undefined;
-    selectedView: SelectedView;
-    setSelectedView: (selectedView: SelectedView) => void;
-    updateSearchWord?: (nextSelectedView: SelectedView) => void;
-  }>): void => {
-    event.preventDefault();
-    event.stopPropagation();
-    const nitems =
-      itemList === undefined ? 0 : itemListInstance.getItems(itemList).length;
+    itemList?: ItemList;
+    selectedItemIndex?: number;
+    setSelectedItemIndex: (selectedItemIndex: number) => void;
+    updateSearchWord?: (nextSelectedItemIndex?: number) => void;
+  }>): void =>
+    runLazyArrowKey(() => {
+      event.preventDefault();
+      event.stopPropagation();
+      const nitems =
+        itemList === undefined ? 0 : itemListInstance.getItems(itemList).length;
 
-    if (Date.now() - selectedView.updatedAt > keyInterval) {
-      const nextSelectedView =
-        selectedView.name === 'list-item' && selectedView.index > 0
-          ? identity<SelectedView>({
-              name: 'list-item',
-              index: selectedView.index - 1,
-              updatedAt: Date.now(),
-            })
-          : identity<SelectedView>({
-              name: 'list-item',
-              index: nitems - 1,
-              updatedAt: Date.now(),
-            });
+      const nextSelectedItemIndex =
+        selectedItemIndex != null && selectedItemIndex > 0
+          ? selectedItemIndex - 1
+          : nitems - 1;
 
-      setSelectedView(nextSelectedView);
-
-      updateSearchWord?.(nextSelectedView);
-    }
-  };
+      setSelectedItemIndex(nextSelectedItemIndex);
+      updateSearchWord?.(nextSelectedItemIndex);
+    });
 
 const onArrowDown =
   <Item, ItemList>(itemListInstance: typeclass.ItemList<ItemList, Item>) =>
   ({
     event,
     itemList,
-    selectedView,
-    setSelectedView,
+    selectedItemIndex,
+    setSelectedItemIndex,
     updateSearchWord,
   }: Readonly<{
     event: KeyboardEvent;
     itemList: ItemList | undefined;
-    selectedView: SelectedView;
-    setSelectedView: (selectedView: SelectedView) => void;
-    updateSearchWord?: (nextSelectedView: SelectedView) => void;
-  }>): void => {
-    event.preventDefault();
-    event.stopPropagation();
-    const nitems =
-      itemList === undefined ? 0 : itemListInstance.getItems(itemList).length;
+    selectedItemIndex?: number;
+    setSelectedItemIndex: (selectedItemIndex: number) => void;
+    updateSearchWord?: (nextSelectedItemIndex: number) => void;
+  }>): void =>
+    runLazyArrowKey(() => {
+      event.preventDefault();
+      event.stopPropagation();
+      const nitems =
+        itemList === undefined ? 0 : itemListInstance.getItems(itemList).length;
 
-    if (Date.now() - selectedView.updatedAt > keyInterval) {
-      const nextSelectedView =
-        selectedView.name === 'list-item' && selectedView.index < nitems - 1
-          ? identity<SelectedView>({
-              name: 'list-item',
-              index: selectedView.index + 1,
-              updatedAt: Date.now(),
-            })
-          : identity<SelectedView>({
-              name: 'list-item',
-              index: 0,
-              updatedAt: Date.now(),
-            });
-      setSelectedView(nextSelectedView);
-
-      updateSearchWord?.(nextSelectedView);
-    }
-  };
+      const nextSelectedItemIndex =
+        selectedItemIndex != null && selectedItemIndex < nitems - 1
+          ? selectedItemIndex + 1
+          : 0;
+      setSelectedItemIndex(nextSelectedItemIndex);
+      updateSearchWord?.(nextSelectedItemIndex);
+    });
 
 const moveItems =
   <Item, ItemList>(
@@ -95,15 +75,15 @@ const moveItems =
   (
     event: KeyboardEvent,
     {
-      selectedView,
+      selectedItemIndex,
       itemList,
-      setSelectedView,
+      setSelectedItemIndex,
       updateSearchWord,
     }: Readonly<{
       itemList?: ItemList;
-      selectedView: SelectedView;
-      setSelectedView: (selectedView: SelectedView) => void;
-      updateSearchWord?: (nextSelectedView: SelectedView) => void;
+      selectedItemIndex?: number;
+      setSelectedItemIndex: (selectedItemIndex: number) => void;
+      updateSearchWord?: (nextSelectedIndex?: number) => void;
     }>,
   ): void => {
     switch (event.code) {
@@ -111,16 +91,16 @@ const moveItems =
         return onArrowUp(itemListInstance)({
           event,
           itemList,
-          selectedView,
-          setSelectedView,
+          selectedItemIndex,
+          setSelectedItemIndex,
           updateSearchWord,
         });
       case 'ArrowDown':
         return onArrowDown(itemListInstance)({
           event,
           itemList,
-          selectedView,
-          setSelectedView,
+          selectedItemIndex,
+          setSelectedItemIndex,
           updateSearchWord,
         });
       default:
@@ -246,14 +226,14 @@ export const useKeyDownEvent = <State, IntlId extends string, Item, ItemList>({
   state,
   action,
   itemList,
-  selectedView,
+  selectedItemIndex,
   modifierKeys,
   defaultKeys,
   dismissId,
   dialog,
   setState,
   setModifierKeys,
-  setSelectedView,
+  setSelectedItemIndex,
   updateSearchWord,
   setDialog,
   instances: { itemInstance, itemListInstance, stateInstance },
@@ -261,15 +241,15 @@ export const useKeyDownEvent = <State, IntlId extends string, Item, ItemList>({
   state: State;
   action?: Action<State, IntlId>;
   itemList?: ItemList;
-  selectedView: SelectedView;
+  selectedItemIndex?: number;
   modifierKeys: ModifierKeys;
   defaultKeys: ReadonlyArray<ActionKey<State, IntlId>>;
   dismissId: IntlId;
   dialog?: Dialog<State, IntlId>;
   setState: (state: Partial<State>) => void;
   setModifierKeys: (modifierKeys: Partial<ModifierKeys>) => void;
-  setSelectedView: (selectedView: SelectedView) => void;
-  updateSearchWord?: (nextSelectedView: SelectedView) => void;
+  setSelectedItemIndex: (selectedItemIndex: number) => void;
+  updateSearchWord?: (nextSelectedItemIndex?: number) => void;
   setDialog: (dialog?: Dialog<State, IntlId>) => void;
   instances: Readonly<{
     itemInstance: typeclass.Item<Item>;
@@ -309,9 +289,9 @@ export const useKeyDownEvent = <State, IntlId extends string, Item, ItemList>({
       }
 
       moveItems(itemInstance, itemListInstance)(event, {
-        selectedView,
+        selectedItemIndex,
         itemList,
-        setSelectedView,
+        setSelectedItemIndex,
         updateSearchWord,
       });
       updateModifierDown(event.code, setModifierKeys);
@@ -329,8 +309,8 @@ export const useKeyDownEvent = <State, IntlId extends string, Item, ItemList>({
     setModifierKeys,
     action,
     itemList,
-    selectedView,
-    setSelectedView,
+    selectedItemIndex,
+    setSelectedItemIndex,
     updateSearchWord,
     defaultKeys,
     dismissId,
@@ -368,7 +348,7 @@ export const useKeyboardEvent = <
     state: State;
     action?: Action<State, IntlId>;
     itemList?: ItemList;
-    selectedView: SelectedView;
+    selectedItemIndex?: number;
     modifierKeys: ModifierKeys;
     dialogKeys?: ReadonlyArray<ActionKey<State, IntlId>>;
     defaultKeys: ReadonlyArray<ActionKey<State, IntlId>>;
@@ -376,8 +356,8 @@ export const useKeyboardEvent = <
     dialog?: Dialog<State, IntlId>;
     setState: (state: Partial<State>) => void;
     setModifierKeys: (modifierKeys: Partial<ModifierKeys>) => void;
-    setSelectedView: (selectedView: SelectedView) => void;
-    updateSearchWord?: (nextSelectedView: SelectedView) => void;
+    setSelectedItemIndex: (selectedItemIndex: number) => void;
+    updateSearchWord?: (nextSelectedItemIndex?: number) => void;
     setDialog: (dialog?: Dialog<State, IntlId>) => void;
     instances: Readonly<{
       itemInstance: typeclass.Item<Item>;

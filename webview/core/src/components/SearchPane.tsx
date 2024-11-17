@@ -64,14 +64,14 @@ export const SearchPane = <State, Item, ItemList, IntlId extends string>({
           itemList={state.itemList}
           setSearchWord={state.setSearchWord}
           setItemList={state.setItemList}
-          setSelectedView={state.setSelectedView}
+          setSelectedItemIndex={state.setSelectedItemIndex}
           updateItemList={updateItemList}
         />
         <ItemListView
           itemList={state.itemList}
-          selectedView={state.selectedView}
+          selectedItemIndex={state.selectedItemIndex}
           setSearchWord={state.setSearchWord}
-          setSelectedView={state.setSelectedView}
+          setSelectedItemIndex={state.setSelectedItemIndex}
           ItemView={ItemView}
           instances={instances}
         />

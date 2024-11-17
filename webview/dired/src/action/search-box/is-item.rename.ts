@@ -15,29 +15,31 @@ import {
   renameOverwrite,
 } from '@dired/action/helpers';
 import { messageId } from '@dired/i18n/ja';
-import { Action, Mode, SelectedView } from '@dired/store';
+import { Action, Mode, SearchBox } from '@dired/store';
 import { pipe } from 'fp-ts/lib/function';
 
 export const searchBoxIsItemRename = ({
   item,
   itemList,
   source,
-  selectedView,
+  selectedItemIndex,
   separator,
   setMode,
   setSearchWord,
+  setSearchBox,
   setItemList,
-  setSelectedView,
+  setSelectedItemIndex,
 }: Readonly<{
   item: Item;
   itemList?: ItemList;
   source: ReadonlyArray<Item>;
-  selectedView: SelectedView;
+  selectedItemIndex?: number;
   separator: string;
   setMode: (mode?: Mode) => void;
   setSearchWord: (searchWord: string) => void;
+  setSearchBox: (searchBox: SearchBox) => void;
   setItemList: (itemList: ItemList) => void;
-  setSelectedView: (selectedView: SelectedView) => void;
+  setSelectedItemIndex: (selectedItemIndex?: number) => void;
 }>): Action => ({
   id: 'search-box-is-item-rename',
   keys: [
@@ -50,7 +52,7 @@ export const searchBoxIsItemRename = ({
           separator,
           setSearchWord,
           setItemList,
-          setSelectedView,
+          setSelectedItemIndex,
         ),
       ),
     }),
@@ -61,7 +63,7 @@ export const searchBoxIsItemRename = ({
         separator,
         setItemList,
         setSearchWord,
-        setSelectedView,
+        setSelectedItemIndex,
       }),
     ),
 
@@ -69,11 +71,12 @@ export const searchBoxIsItemRename = ({
       completion({
         path: item.path,
         itemList,
-        selectedView,
+        selectedItemIndex,
         separator,
         setItemList,
         setSearchWord,
-        setSelectedView,
+        setSearchBox,
+        setSelectedItemIndex,
       }),
     ),
 
@@ -84,7 +87,7 @@ export const searchBoxIsItemRename = ({
         setMode,
         setSearchWord,
         setItemList,
-        setSelectedView,
+        setSelectedItemIndex,
       }),
     ),
   ],

@@ -19,7 +19,7 @@ const CheckButton = ({
   isDot,
 }: Readonly<{ index: number; isDot: boolean }>): React.ReactElement => {
   const theme = useTheme();
-  const { selectedView, checked, setSelectedView, setChecked } = useStore();
+  const { checked, setSelectedItemIndex, setChecked } = useStore();
   const enabled = checked[index] ?? false;
 
   return (
@@ -33,11 +33,7 @@ const CheckButton = ({
         alignItems: 'center',
       }}
       onClick={() => {
-        setSelectedView({
-          name: 'list-item',
-          index,
-          updatedAt: selectedView.updatedAt,
-        });
+        setSelectedItemIndex(index);
         setChecked({
           ...checked,
           [index]: checked[index] === undefined ? true : !checked[index],

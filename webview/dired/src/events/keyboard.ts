@@ -5,32 +5,25 @@ import {
 import { core } from '@core/index';
 import { defaultKeys } from '@dired/action/keys';
 import { MessageId, messageId } from '@dired/i18n/ja';
-import {
-  Action,
-  SelectedView,
-  State,
-  stateInstance,
-  useStore,
-} from '@dired/store';
+import { Action, State, stateInstance, useStore } from '@dired/store';
 import { itemInstance, itemListInstance } from '@dired/utils/item-list';
 import { pipe } from 'fp-ts/lib/function';
 
 const updateSearchWord = (
   args: Readonly<{
-    nextSelectedView: SelectedView;
+    nextSelectedItemIndex?: number;
     itemList: ItemList | undefined;
     separator?: string;
     setSearchWord: (searchWord: string) => void;
   }>,
 ): void => {
-  if (args.nextSelectedView.name === 'list-item') {
-    pipe(
-      args.nextSelectedView.index,
-      index => args.itemList?.items?.[index]?.path ?? null,
-      nextSearchWord =>
-        nextSearchWord == null ? void 0 : args.setSearchWord(nextSearchWord),
-    );
-  }
+  pipe(
+    args.nextSelectedItemIndex,
+    index =>
+      index == null ? null : args.itemList?.items?.[index]?.path ?? null,
+    nextSearchWord =>
+      nextSearchWord == null ? void 0 : args.setSearchWord(nextSearchWord),
+  );
 };
 
 export const useKeyboardEvent = (params: Readonly<{ action?: Action }>) => {
@@ -40,15 +33,15 @@ export const useKeyboardEvent = (params: Readonly<{ action?: Action }>) => {
     modifierKeys: state.modifierKeys,
     state,
     itemList: state.itemList,
-    selectedView: state.selectedView,
+    selectedItemIndex: state.selectedItemIndex,
     defaultKeys,
     dismissId: messageId.dismiss,
     dialog: state.dialog,
     setState: state.setState,
-    setSelectedView: state.setSelectedView,
-    updateSearchWord: nextSelectedView =>
+    setSelectedItemIndex: state.setSelectedItemIndex,
+    updateSearchWord: nextSelectedItemIndex =>
       updateSearchWord({
-        nextSelectedView,
+        nextSelectedItemIndex,
         itemList: state.itemList,
         separator: state.separator,
         setSearchWord: state.setSearchWord,

@@ -7,7 +7,8 @@ export type State<Self, IntlId extends IntlIdBase, ItemList> = Readonly<{
   status?: Status<IntlId>;
   itemList?: ItemList;
   searchWord: string;
-  selectedView: SelectedView;
+  searchBox: SearchBox;
+  selectedItemIndex?: number;
   modifierKeys: ModifierKeys;
   separator?: string;
   dialog?: Dialog<Self, IntlId>;
@@ -17,7 +18,8 @@ export type State<Self, IntlId extends IntlIdBase, ItemList> = Readonly<{
   setItemList: (itemList: ItemList) => void;
   setStatus: (status?: Status<IntlId>) => void;
   setSearchWord: (searchWord: string) => void;
-  setSelectedView: (selectedView: SelectedView) => void;
+  setSearchBox: (searchBox: SearchBox) => void;
+  setSelectedItemIndex: (selectedItemIndex?: number) => void;
   setModifierKeys: (modifierKeys: Partial<ModifierKeys>) => void;
   setSeparator: (separator: string) => void;
   setDialog: (dialog?: Dialog<Self, IntlId>) => void;
@@ -38,19 +40,9 @@ export type Status<IntlId extends IntlIdBase> = Readonly<{
   type: StatusType;
 }>;
 
-export type SelectedView = SearchBox | ListItem;
-
 export type SearchBox = Readonly<{
-  name: 'search-box';
   selectionStart?: number;
   selectionEnd?: number;
-  itemIndex?: number;
-  updatedAt: number;
-}>;
-export type ListItem = Readonly<{
-  name: 'list-item';
-  index: number;
-  updatedAt: number;
 }>;
 
 export type Dialog<State, IntlId extends IntlIdBase> = Readonly<{
@@ -74,10 +66,8 @@ export const createStore = <S, IntlId extends IntlIdBase, ItemList>(
     type: 'none',
   },
   searchWord: '',
-  selectedView: {
-    name: 'search-box',
-    updatedAt: 0,
-  },
+  searchBox: {},
+  selectedItemIndex: undefined,
   modifierKeys: toModifierKeys(),
   colorTheme: 'Dark',
   locale: 'en-US',
@@ -85,7 +75,9 @@ export const createStore = <S, IntlId extends IntlIdBase, ItemList>(
   setItemList: itemList => set(() => convert({ itemList })),
   setStatus: status => set(() => convert({ status })),
   setSearchWord: searchWord => set(() => convert({ searchWord })),
-  setSelectedView: selectedView => set(() => convert({ selectedView })),
+  setSearchBox: searchBox => set(() => convert({ searchBox })),
+  setSelectedItemIndex: selectedItemIndex =>
+    set(() => convert({ selectedItemIndex })),
   setModifierKeys: modifierKeys =>
     set(() => convert({ modifierKeys: toModifierKeys(modifierKeys) })),
   setSeparator: separator => set(() => convert({ separator })),

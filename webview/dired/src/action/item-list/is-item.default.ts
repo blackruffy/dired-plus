@@ -20,7 +20,6 @@ import {
   completion,
   deleteItems,
   goToParentDirectory,
-  goToSearchBox,
   openItem,
   setCopyMode,
   setRenameMode,
@@ -29,97 +28,110 @@ import {
 import { showFolder } from '@dired/events/native';
 import { createDirectory, createFile } from '@dired/events/native';
 import { messageId } from '@dired/i18n/ja';
-import { Action, Mode, SelectedView, statusState } from '@dired/store';
+import {
+  ActionWithNullableKeys,
+  Mode,
+  SearchBox,
+  statusState,
+} from '@dired/store';
 
 export const itemListIsItemDefault = ({
   index,
   searchWord,
   item,
   itemList,
-  selectedView,
+  selectedItemIndex,
   separator,
   setMode,
   setSearchWord,
+  setSearchBox,
   setItemList,
   checked,
   setChecked,
-  setSelectedView,
+  setSelectedItemIndex,
 }: Readonly<{
-  index: number;
+  index?: number;
   searchWord: string;
-  item: Item;
+  item?: Item;
   itemList?: ItemList;
-  selectedView: SelectedView;
+  selectedItemIndex?: number;
   separator: string;
   setMode: (mode?: Mode) => void;
   setSearchWord: (searchWord: string) => void;
+  setSearchBox: (searchBox: SearchBox) => void;
   setItemList: (itemList: ItemList) => void;
   checked: Readonly<{ [key: number]: boolean }>;
   setChecked: (checked: Readonly<{ [key: number]: boolean }>) => void;
-  setSelectedView: (selectedView: SelectedView) => void;
-}>): Action => ({
+  setSelectedItemIndex: (selectedItemIndex?: number) => void;
+}>): ActionWithNullableKeys => ({
   id: 'item-list-is-item-default',
   keys: [
-    keyEnter({
-      desc: { id: messageId.open },
-      run: openItem(
-        item,
-        separator,
-        setSearchWord,
-        setItemList,
-        setSelectedView,
-      ),
-    }),
+    item == null
+      ? null
+      : keyEnter({
+          desc: { id: messageId.open },
+          run: openItem(
+            item,
+            separator,
+            setSearchWord,
+            setItemList,
+            setSelectedItemIndex,
+          ),
+        }),
 
-    keyCtrlSpace({
-      desc: { id: messageId.select },
-      run: async () => {
-        const isDot = item.name === '.' || item.name === '..';
-        setChecked({
-          ...checked,
-          [index]: isDot
-            ? false
-            : checked[index] === undefined
-              ? true
-              : !checked[index],
-        });
-        return {};
-      },
-    }),
+    index == null || item == null
+      ? null
+      : keyCtrlSpace({
+          desc: { id: messageId.select },
+          run: async () => {
+            const isDot = item.name === '.' || item.name === '..';
+            setChecked({
+              ...checked,
+              [index]: isDot
+                ? false
+                : checked[index] === undefined
+                  ? true
+                  : !checked[index],
+            });
+            return {};
+          },
+        }),
 
-    keyCtrlC(
-      setCopyMode({
-        item,
-        itemList,
-        checked,
-        setMode,
-        setChecked,
-      }),
-    ),
-
-    keyCtrlD(
-      deleteItems({
-        item,
-        itemList,
-        checked,
-        separator,
-        setSearchWord,
-        setItemList,
-        setSelectedView,
-      }),
-    ),
-
-    ...(item.itemType === 'directory'
-      ? [
-          keyCtrlF({
-            desc: { id: messageId.addFolder },
-            run: async () => {
-              showFolder(item.path);
-              return {};
-            },
+    item == null
+      ? null
+      : keyCtrlC(
+          setCopyMode({
+            item,
+            itemList,
+            checked,
+            setMode,
+            setChecked,
           }),
-        ]
-      : []),
+        ),
+
+    item == null
+      ? null
+      : keyCtrlD(
+          deleteItems({
+            item,
+            itemList,
+            checked,
+            separator,
+            setSearchWord,
+            setItemList,
+            setSelectedItemIndex,
+          }),
+        ),
+
+    item?.itemType === 'directory'
+      ? keyCtrlF({
+          desc: { id: messageId.addFolder },
+          run: async () => {
+            showFolder(item.path);
+            return {};
+          },
+        })
+      : null,
 
     keyCtrlBackspace(
       bind(
@@ -130,9 +142,8 @@ export const itemListIsItemDefault = ({
           separator,
           setSearchWord,
           setItemList,
-          setSelectedView,
+          setSelectedItemIndex,
         }),
-        goToSearchBox({ setSelectedView }),
       ),
     ),
 
@@ -140,23 +151,26 @@ export const itemListIsItemDefault = ({
       completion({
         path: searchWord,
         itemList,
-        selectedView,
+        selectedItemIndex,
         separator,
         setItemList,
         setSearchWord,
-        setSelectedView,
+        setSearchBox,
+        setSelectedItemIndex,
       }),
     ),
 
-    keyCtrlR(
-      setRenameMode({
-        item,
-        itemList,
-        checked,
-        setMode,
-        setChecked,
-      }),
-    ),
+    item == null
+      ? null
+      : keyCtrlR(
+          setRenameMode({
+            item,
+            itemList,
+            checked,
+            setMode,
+            setChecked,
+          }),
+        ),
 
     keyCtrlU({
       desc: { id: messageId.reload },
@@ -165,9 +179,20 @@ export const itemListIsItemDefault = ({
           searchWord: itemList?.parent.path,
           setSearchWord,
           setItemList,
-          setSelectedView,
+          setSelectedItemIndex,
         });
         return {};
+      },
+    }),
+
+    keyCtrlEnter({
+      desc: { id: messageId.createFile },
+      run: async () => {
+        await createFile(searchWord);
+        return statusState({
+          id: messageId.createdFile,
+          values: { src: searchWord },
+        });
       },
     }),
 
@@ -190,7 +215,7 @@ export const itemListIsItemDefault = ({
           searchWord,
           setItemList,
           setSearchWord,
-          setSelectedView,
+          setSelectedItemIndex,
         });
         return statusState({
           id: messageId.createdDir,

@@ -1,5 +1,4 @@
 import { AnyVal } from '@common/anyval';
-import { SelectedView } from '@core/store';
 import SearchIcon from '@mui/icons-material/Search';
 import { InputAdornment, TextField } from '@mui/material';
 import React from 'react';
@@ -9,7 +8,7 @@ export type UpdateItemListArgs<ItemList> = Readonly<{
   itemList?: ItemList;
   setSearchWord: (word: string) => void;
   setItemList: (itemList: ItemList) => void;
-  setSelectedView: (selectedView: SelectedView) => void;
+  setSelectedItemIndex: (index?: number) => void;
 }>;
 
 export const SearchBox = <ItemList, _Dummy = AnyVal>({
@@ -17,14 +16,14 @@ export const SearchBox = <ItemList, _Dummy = AnyVal>({
   itemList,
   setSearchWord,
   setItemList,
-  setSelectedView,
+  setSelectedItemIndex,
   updateItemList,
 }: Readonly<{
   searchWord: string;
   itemList?: ItemList;
   setSearchWord: (word: string) => void;
   setItemList: (itemList: ItemList) => void;
-  setSelectedView: (selectedView: SelectedView) => void;
+  setSelectedItemIndex: (index?: number) => void;
   updateItemList: (args: UpdateItemListArgs<ItemList>) => void;
 }>): React.ReactElement => {
   const ref = React.useRef<HTMLInputElement>();
@@ -54,7 +53,7 @@ export const SearchBox = <ItemList, _Dummy = AnyVal>({
           itemList,
           setSearchWord,
           setItemList,
-          setSelectedView,
+          setSelectedItemIndex,
         });
         setSearchWord(event.target.value);
       }}
