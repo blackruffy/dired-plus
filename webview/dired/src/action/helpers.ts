@@ -21,9 +21,9 @@ import {
   copyFile,
   deleteDirectory,
   deleteFile,
+  eachListItems,
   getParentDirectory,
   joinPath,
-  listItems,
   renameDirectory,
   renameFile,
 } from '@dired/events/native';
@@ -62,16 +62,16 @@ export const updateItemList = ({
   setSelectedItemIndex,
 }: UpdateItemListArgs<ItemList>): void =>
   runLazy(async () => {
-    pipe(await listItems(searchWord), a =>
-      pipe(
-        setSearchWord(a.parent.path),
-        () => setItemList(a),
-        () =>
-          a.items.length === 0
-            ? setSelectedItemIndex(undefined)
-            : setSelectedItemIndex(0),
-      ),
-    );
+    await eachListItems({
+      path: searchWord,
+      callback: async (itemList, index) => {
+        setItemList(itemList);
+        if (index === 0) {
+          setSearchWord(itemList.parent.path);
+          setSelectedItemIndex(itemList.items.length === 0 ? undefined : 0);
+        }
+      },
+    });
   });
 
 export const goToParentDirectory = ({

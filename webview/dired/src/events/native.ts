@@ -36,28 +36,56 @@ export const listItems = async (path?: string): Promise<ItemList> =>
     path,
   });
 
-export const eachListItems = async (
-  path: string,
-  callback: (items: ItemList) => void,
-): Promise<void> => eachListItemsHelper({ path, callback });
-
-const eachListItemsHelper = async ({
+export const eachListItems = async ({
   path,
-  nextToken,
   callback,
 }: Readonly<{
-  path: string;
-  nextToken?: string;
-  callback: (items: ItemList) => void;
+  path?: string;
+  callback: (items: ItemList, index: number) => void;
 }>): Promise<void> => {
+  await foldListItemsHelper<[ItemList | null, number]>({
+    path,
+    value: [null, 0],
+    callback: ([a, i], itemList) => {
+      const r =
+        a == null
+          ? itemList
+          : {
+              parent: a.parent,
+              items: [...a.items, ...itemList.items],
+            };
+      callback(r, i);
+      return [r, i + 1];
+    },
+  });
+};
+
+const foldListItemsHelper = async <A>({
+  path,
+  nextToken,
+  value,
+  callback,
+}: Readonly<{
+  path?: string;
+  nextToken?: string;
+  value: A;
+  callback: (a: A, items: ItemList) => A;
+}>): Promise<A> => {
   const resp1 = await request<ListItemsRequest, ListItemsResponnse>({
     key: 'list-items',
     path,
     nextToken,
   });
-  callback(resp1);
+  const next = callback(value, resp1);
   if (resp1.nextToken != null) {
-    await eachListItemsHelper({ path, nextToken: resp1.nextToken, callback });
+    return await foldListItemsHelper({
+      path,
+      nextToken: resp1.nextToken,
+      value: next,
+      callback,
+    });
+  } else {
+    return next;
   }
 };
 

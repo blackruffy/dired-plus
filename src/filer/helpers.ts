@@ -235,7 +235,6 @@ export const listItemsHandler = scope(() => {
     currentDirectory: string,
     req: ListItemsRequest,
   ): Promise<void> => {
-    console.log(`>>>>>>>>>>>>>>>>> listItemsHandler: ${req.nextToken}`);
     if (req.nextToken != null) {
       const session = sessions[req.nextToken];
       const items = await session.itemsIter.next();
