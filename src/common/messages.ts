@@ -101,13 +101,20 @@ export type RenameDirectoryRequest = Request<'rename-directory'> &
 export type RenameDirectoryResponse = Response<'rename-directory'>;
 
 export type DeleteFileRequest = Request<'delete-file'> &
-  Readonly<{ path: string }>;
-export type DeleteFileResponse = Response<'delete-file'> & DiredItemList;
+  Readonly<{ path: string; nextToken?: string }>;
+export type DeleteFileResponse = Response<'delete-file'> &
+  Omit<DiredItemList, 'items'> &
+  Readonly<{
+    nextToken?: string;
+  }>;
 
 export type DeleteDirectoryRequest = Request<'delete-directory'> &
-  Readonly<{ path: string }>;
+  Readonly<{ path: string; nextToken?: string }>;
 export type DeleteDirectoryResponse = Response<'delete-directory'> &
-  DiredItemList;
+  Omit<DiredItemList, 'items'> &
+  Readonly<{
+    nextToken?: string;
+  }>;
 
 export type ClosePanelRequest = Request<'close-panel'>;
 export type ClosePanelResponse = Response<'close-panel'>;

@@ -18,7 +18,7 @@ import {
   openItem,
 } from '@dired/action/helpers';
 import { messageId } from '@dired/i18n/ja';
-import { Action, Mode, SearchBox } from '@dired/store';
+import { ActionWithNullableKeys, Mode, SearchBox } from '@dired/store';
 
 export const itemListIsItemCopy = ({
   searchWord,
@@ -44,19 +44,21 @@ export const itemListIsItemCopy = ({
   setSearchWord: (searchWord: string) => void;
   setSearchBox: (searchBox: SearchBox) => void;
   setItemList: (itemList: ItemList) => void;
-}>): Action => ({
+}>): ActionWithNullableKeys => ({
   id: 'item-list-is-item-copy',
   keys: [
-    keyEnter({
-      desc: { id: messageId.open },
-      run: openItem(
-        destination,
-        separator,
-        setSearchWord,
-        setItemList,
-        setSelectedItemIndex,
-      ),
-    }),
+    destination == null
+      ? null
+      : keyEnter({
+          desc: { id: messageId.open },
+          run: openItem(
+            destination,
+            separator,
+            setSearchWord,
+            setItemList,
+            setSelectedItemIndex,
+          ),
+        }),
 
     keyCtrlBackspace(
       bind(

@@ -1,3 +1,4 @@
+import { DiredItem } from '@common/dired-item';
 import { useMessages } from '@dired/i18n';
 import {
   Action,
@@ -8,6 +9,7 @@ import {
 } from '@dired/store';
 import { ord, readonlyArray, string } from 'fp-ts';
 import { pipe } from 'fp-ts/lib/function';
+import { getBaseName } from './helpers';
 import { itemListIsItemCopy } from './item-list/is-item.copy';
 import { itemListIsItemDefault } from './item-list/is-item.default';
 import { itemListIsItemRename } from './item-list/is-item.rename';
@@ -27,10 +29,20 @@ const createAction = ({
   setChecked,
   setSelectedItemIndex,
 }: State): ActionWithNullableKeys | undefined => {
-  const item =
-    selectedItemIndex == null ? undefined : itemList?.items[selectedItemIndex];
-  const itemType = item?.itemType;
-  if (itemType !== 'none' && mode?.type === 'copy' && item !== undefined) {
+  const item: DiredItem | null = pipe(
+    selectedItemIndex == null ? null : itemList?.items[selectedItemIndex],
+    _ =>
+      _ == null
+        ? {
+            name: getBaseName(searchWord, separator ?? '/'),
+            path: searchWord,
+            itemType: 'none',
+          }
+        : _,
+  );
+  // const itemType = item?.itemType ?? 'none';
+  // if (itemType !== 'none' && mode?.type === 'copy' && item !== undefined) {
+  if (mode?.type === 'copy') {
     return itemListIsItemCopy({
       searchWord,
       itemList,
@@ -44,11 +56,11 @@ const createAction = ({
       setSearchBox,
       setItemList,
     });
-  } else if (
-    itemType !== 'none' &&
-    mode?.type === 'rename' &&
-    item !== undefined
-  ) {
+    // } else if (
+    //   itemType !== 'none' &&
+    //   mode?.type === 'rename' &&
+    //   item !== undefined
+  } else if (mode?.type === 'rename') {
     return itemListIsItemRename({
       searchWord,
       itemList,

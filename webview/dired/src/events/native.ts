@@ -43,8 +43,32 @@ export const eachListItems = async ({
   path?: string;
   callback: (items: ItemList, index: number) => void;
 }>): Promise<void> => {
-  await foldListItemsHelper<[ItemList | null, number]>({
-    path,
+  await eachListItemsHelper({
+    makeRequest: ({ nextToken }) =>
+      request<ListItemsRequest, ListItemsResponnse>({
+        key: 'list-items',
+        path,
+        nextToken,
+      }),
+    callback,
+  });
+};
+
+const eachListItemsHelper = async ({
+  makeRequest,
+  callback,
+}: Readonly<{
+  makeRequest: (
+    args: Readonly<{ nextToken?: string }>,
+  ) => Promise<ItemList & Readonly<{ nextToken?: string }>>;
+  callback: (items: ItemList, index: number) => void;
+}>): Promise<void> => {
+  await foldRequestSeqHelper<
+    [ItemList | null, number],
+    ItemList & Readonly<{ nextToken?: string }>
+  >({
+    makeRequest: ({ nextToken }) => makeRequest({ nextToken }),
+    getNextToken: _ => _.nextToken,
     value: [null, 0],
     callback: ([a, i], itemList) => {
       const r =
@@ -60,27 +84,28 @@ export const eachListItems = async ({
   });
 };
 
-const foldListItemsHelper = async <A>({
-  path,
+const foldRequestSeqHelper = async <A, B>({
+  //path,
   nextToken,
+  makeRequest,
+  getNextToken,
   value,
   callback,
 }: Readonly<{
-  path?: string;
   nextToken?: string;
+  makeRequest: (args: Readonly<{ nextToken?: string }>) => Promise<B>;
+  getNextToken: (b: B) => string | undefined;
   value: A;
-  callback: (a: A, items: ItemList) => A;
+  callback: (a: A, b: B) => A;
 }>): Promise<A> => {
-  const resp1 = await request<ListItemsRequest, ListItemsResponnse>({
-    key: 'list-items',
-    path,
-    nextToken,
-  });
+  const resp1 = await makeRequest({ nextToken });
   const next = callback(value, resp1);
-  if (resp1.nextToken != null) {
-    return await foldListItemsHelper({
-      path,
-      nextToken: resp1.nextToken,
+  const nextNextToken = getNextToken(resp1);
+  if (nextNextToken != null) {
+    return await foldRequestSeqHelper({
+      nextToken: nextNextToken,
+      makeRequest,
+      getNextToken,
       value: next,
       callback,
     });
@@ -181,13 +206,17 @@ export const renameDirectory = async (
   });
 };
 
-export const deleteFile = async (path: string): Promise<ItemList> =>
+export const deleteFile = async (
+  path: string,
+): Promise<Omit<ItemList, 'items'>> =>
   await request<DeleteFileRequest, DeleteFileResponse>({
     key: 'delete-file',
     path,
   });
 
-export const deleteDirectory = async (path: string): Promise<ItemList> =>
+export const deleteDirectory = async (
+  path: string,
+): Promise<Omit<ItemList, 'items'>> =>
   await request<DeleteDirectoryRequest, DeleteDirectoryResponse>({
     key: 'delete-directory',
     path,

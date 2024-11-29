@@ -20,6 +20,7 @@ import {
   JoinPathRequest,
   JoinPathResponse,
   ListItemsRequest,
+  ListItemsResponnse,
   MessageKey,
   RenameDirectoryRequest,
   RenameDirectoryResponse,
@@ -66,23 +67,17 @@ export const startListen = ({
           switch (message.key) {
             case 'list-items': {
               const req = message as ListItemsRequest;
-              await listItemsHandler(panel, currentDirectory, req);
-              // const searchPath =
-              //   req.path ?? `${currentDirectory}${nodePath.sep}`;
-              // const itemStat = await getItemStat(searchPath);
-              // const itemList = await getItems(searchPath);
-              // panel.webview.postMessage(
-              //   response<ListItemsResponnse>(req, {
-              //     parent: {
-              //       name: nodePath.basename(searchPath),
-              //       path: searchPath,
-              //       itemType: itemStat.type,
-              //       size: itemStat.size,
-              //       lastUpdated: itemStat.lastUpdated,
-              //     },
-              //     items: itemList,
-              //   }),
-              // );
+              await listItemsHandler({
+                panel,
+                currentDirectory,
+                path: req.path,
+                nextToken: req.nextToken,
+                onResponse: (itemList, nextToken) =>
+                  response<ListItemsResponnse>(req, {
+                    ...itemList,
+                    nextToken,
+                  }),
+              });
               return;
             }
             case 'get-parent-directory': {
@@ -174,7 +169,11 @@ export const startListen = ({
             }
             case 'delete-file': {
               const req = message as DeleteFileRequest;
-              const { path, items } = await deleteFile(req.path);
+              // await deleteFileHandler({
+              //   panel,
+              //   req,
+              // });
+              const { path } = await deleteFile(req.path);
               const stat = await getItemStat(path);
               panel.webview.postMessage(
                 response<DeleteFileResponse>(req, {
@@ -185,7 +184,7 @@ export const startListen = ({
                     size: stat.size,
                     lastUpdated: stat.lastUpdated,
                   },
-                  items,
+                  //items,
                 }),
               );
               //showMessage(`Delete file: ${req.path}`);
@@ -193,7 +192,11 @@ export const startListen = ({
             }
             case 'delete-directory': {
               const req = message as DeleteDirectoryRequest;
-              const { path, items } = await deleteDirectory(req.path);
+              // await deleteDirectoryHandler({
+              //   panel,
+              //   req,
+              // });
+              const { path } = await deleteDirectory(req.path);
               const stat = await getItemStat(path);
               panel.webview.postMessage(
                 response<DeleteDirectoryResponse>(req, {
@@ -204,7 +207,7 @@ export const startListen = ({
                     size: stat.size,
                     lastUpdated: stat.lastUpdated,
                   },
-                  items,
+                  // items,
                 }),
               );
               //showMessage(`Delete Directory: ${req.path}`);

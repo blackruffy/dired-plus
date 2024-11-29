@@ -55,6 +55,11 @@ export const bind = (
   ),
 });
 
+export const getBaseName = (path: string, separator: string): string => {
+  const lastIndex = path.lastIndexOf(separator);
+  return lastIndex === -1 ? path : path.substring(lastIndex + 1);
+};
+
 export const updateItemList = ({
   searchWord,
   setSearchWord,
@@ -359,7 +364,15 @@ export const renameOverwrite = (
       })),
     );
 
-  if (isSingleFile(source) && isFile(destination)) {
+  if (isSingleFile(source) && destination.itemType === 'none') {
+    return exec(() =>
+      renameFile(source[0].path, destination.path).then(() => ({})),
+    );
+  } else if (isSingleDirectory(source) && destination.itemType === 'none') {
+    return exec(() =>
+      renameDirectory(source[0].path, destination.path).then(() => ({})),
+    );
+  } else if (isSingleFile(source) && isFile(destination)) {
     return confirm(() =>
       renameFile(source[0].path, destination.path).then(() => ({})),
     );
@@ -510,7 +523,15 @@ export const copyOverwrite = (
       })),
     );
 
-  if (isSingleFile(source) && isFile(destination)) {
+  if (isSingleFile(source) && destination.itemType === 'none') {
+    return exec(() =>
+      copyFile(source[0].path, destination.path).then(() => ({})),
+    );
+  } else if (isSingleDirectory(source) && destination.itemType === 'none') {
+    return exec(() =>
+      copyDirectory(source[0].path, destination.path).then(() => ({})),
+    );
+  } else if (isSingleFile(source) && isFile(destination)) {
     return confirm(() =>
       copyFile(source[0].path, destination.path).then(() => ({})),
     );

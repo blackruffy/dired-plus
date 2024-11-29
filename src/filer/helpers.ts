@@ -1,9 +1,17 @@
-import { DiredItem, DiredItemStat } from '@src/common/dired-item';
+import {
+  DiredItem,
+  DiredItemList,
+  DiredItemStat,
+} from '@src/common/dired-item';
 import { FileOptions } from '@src/common/file-options';
 import * as loop from '@src/common/loop';
 import {
-  ListItemsRequest,
-  ListItemsResponnse,
+  DeleteDirectoryRequest,
+  DeleteDirectoryResponse,
+  DeleteFileRequest,
+  DeleteFileResponse,
+  MessageKey,
+  Response,
   response,
 } from '@src/common/messages';
 import { scope } from '@src/common/scope';
@@ -230,23 +238,27 @@ export const listItemsHandler = scope(() => {
   }>;
   const sessions: Sessions = {};
 
-  return async (
-    panel: vscode.WebviewPanel,
-    currentDirectory: string,
-    req: ListItemsRequest,
+  return async <Res extends Response<MessageKey>>(
+    args: Readonly<{
+      panel: vscode.WebviewPanel;
+      currentDirectory: string;
+      path?: string;
+      nextToken?: string;
+      onResponse: (itemList: DiredItemList, nextToken?: string) => Res;
+    }>,
   ): Promise<void> => {
-    if (req.nextToken != null) {
-      const session = sessions[req.nextToken];
+    if (args.nextToken != null) {
+      const session = sessions[args.nextToken];
       const items = await session.itemsIter.next();
-      panel.webview.postMessage(
-        response<ListItemsResponnse>(req, {
-          parent: session.parent,
-          items,
-          nextToken: session.itemsIter.hasNext() ? req.nextToken : undefined,
-        }),
+      const nextToken = session.itemsIter.hasNext()
+        ? args.nextToken
+        : undefined;
+      args.panel.webview.postMessage(
+        args.onResponse({ parent: session.parent, items }, nextToken),
       );
+      delete sessions[args.nextToken];
     } else {
-      const searchPath = req.path ?? `${currentDirectory}${nodePath.sep}`;
+      const searchPath = args.path ?? `${args.currentDirectory}${nodePath.sep}`;
       const itemStat = await getItemStat(searchPath);
       const itemsIter = await getItemsIter(searchPath);
       const items = await itemsIter.next();
@@ -263,12 +275,9 @@ export const listItemsHandler = scope(() => {
         parent,
       };
       sessions[sessionId] = session;
-      panel.webview.postMessage(
-        response<ListItemsResponnse>(req, {
-          parent,
-          items,
-          nextToken: itemsIter.hasNext() ? sessionId : undefined,
-        }),
+      const nextToken = itemsIter.hasNext() ? sessionId : undefined;
+      args.panel.webview.postMessage(
+        args.onResponse({ parent, items }, nextToken),
       );
     }
   };
@@ -351,22 +360,62 @@ export const renameDirectory = async (
 
 export const deleteFile = async (
   path: string,
-): Promise<Readonly<{ path: string; items: ReadonlyArray<DiredItem> }>> => {
+): Promise<Readonly<{ path: string /* items: ReadonlyArray<DiredItem>*/ }>> => {
   await fs.promises.rm(path);
   const parent = nodePath.dirname(path);
   return {
     path: parent,
-    items: await getItems(parent),
+    // items: await getItems(parent),
   };
+};
+
+export const deleteFileHandler = async (
+  args: Readonly<{
+    panel: vscode.WebviewPanel;
+    req: DeleteFileRequest;
+  }>,
+): Promise<void> => {
+  await fs.promises.rm(args.req.path);
+  const parent = nodePath.dirname(args.req.path);
+  await listItemsHandler({
+    panel: args.panel,
+    currentDirectory: parent,
+    nextToken: args.req.nextToken,
+    onResponse: (itemList, nextToken) =>
+      response<DeleteFileResponse>(args.req, {
+        ...itemList,
+        nextToken,
+      }),
+  });
 };
 
 export const deleteDirectory = async (
   path: string,
-): Promise<Readonly<{ path: string; items: ReadonlyArray<DiredItem> }>> => {
+): Promise<Readonly<{ path: string /* items: ReadonlyArray<DiredItem>*/ }>> => {
   await fs.promises.rm(path, { recursive: true, force: true });
   const parent = nodePath.dirname(path);
   return {
     path: parent,
-    items: await getItems(parent),
+    //items: await getItems(parent),
   };
+};
+
+export const deleteDirectoryHandler = async (
+  args: Readonly<{
+    panel: vscode.WebviewPanel;
+    req: DeleteDirectoryRequest;
+  }>,
+): Promise<void> => {
+  await fs.promises.rm(args.req.path, { recursive: true, force: true });
+  const parent = nodePath.dirname(args.req.path);
+  await listItemsHandler({
+    panel: args.panel,
+    currentDirectory: parent,
+    nextToken: args.req.nextToken,
+    onResponse: (itemList, nextToken) =>
+      response<DeleteDirectoryResponse>(args.req, {
+        ...itemList,
+        nextToken,
+      }),
+  });
 };
