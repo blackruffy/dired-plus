@@ -250,13 +250,14 @@ export const listItemsHandler = scope(() => {
     if (args.nextToken != null) {
       const session = sessions[args.nextToken];
       const items = await session.itemsIter.next();
-      const nextToken = session.itemsIter.hasNext()
-        ? args.nextToken
-        : undefined;
+      const hasNext = session.itemsIter.hasNext();
+      const nextToken = hasNext ? args.nextToken : undefined;
       args.panel.webview.postMessage(
         args.onResponse({ parent: session.parent, items }, nextToken),
       );
-      delete sessions[args.nextToken];
+      if (hasNext === false) {
+        delete sessions[args.nextToken];
+      }
     } else {
       const searchPath = args.path ?? `${args.currentDirectory}${nodePath.sep}`;
       const itemStat = await getItemStat(searchPath);
@@ -270,12 +271,15 @@ export const listItemsHandler = scope(() => {
         lastUpdated: itemStat.lastUpdated,
       };
       const sessionId = uuidv4();
-      const session: Session = {
-        itemsIter,
-        parent,
-      };
-      sessions[sessionId] = session;
-      const nextToken = itemsIter.hasNext() ? sessionId : undefined;
+      const hasNext = itemsIter.hasNext();
+      const nextToken = hasNext ? sessionId : undefined;
+      if (hasNext) {
+        const session: Session = {
+          itemsIter,
+          parent,
+        };
+        sessions[sessionId] = session;
+      }
       args.panel.webview.postMessage(
         args.onResponse({ parent, items }, nextToken),
       );
