@@ -86,7 +86,8 @@
     "typecheck:extension": "tsc -p tsconfig.json",
     "lint": "eslint . --ext ts,tsx",
     "format": "prettier --experimental-ternaries --write .",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "print-oss-license": "./scripts/oss-license.sh"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
