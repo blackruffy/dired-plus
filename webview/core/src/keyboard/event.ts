@@ -1,7 +1,7 @@
 import { createRunLazy } from '@common/lazy-run';
 import { Action, ActionKey, ModifierKeys } from '@core/action';
 import { IntlError, IntlIdBase } from '@core/i18n';
-import { keyY } from '@core/keyboard/keys';
+import { keyEnter, keyY } from '@core/keyboard/keys';
 import { Dialog } from '@core/store';
 import { typeclass } from '@core/utils';
 import React from 'react';
@@ -213,6 +213,10 @@ const runAction = <State, IntlId extends IntlIdBase>({
           lines: [],
           keys: [
             keyY<State, IntlId>({
+              desc: { id: dismissId },
+              run: async () => instances.stateInstance.fromDialog(undefined),
+            }),
+            keyEnter<State, IntlId>({
               desc: { id: dismissId },
               run: async () => instances.stateInstance.fromDialog(undefined),
             }),
