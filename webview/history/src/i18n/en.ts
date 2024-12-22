@@ -10,4 +10,7 @@ export const en: Messages = {
   dismiss: 'Dismiss',
   nextPage: 'Scroll Down',
   prevPage: 'Scroll Up',
+
+  // dialog
+  helpEnterToClose: 'Press Enter to close',
 } as const;

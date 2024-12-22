@@ -39,4 +39,5 @@ export const en: Messages = {
   confirmOverwrite: '{dst} already exists. Do you want to overwrite it?',
   confirmDelete: 'Do you want to delete these files?',
   systemError: 'A system error has occurred.',
+  helpEnterToClose: 'Press Enter to close',
 } as const;

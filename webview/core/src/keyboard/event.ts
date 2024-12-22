@@ -1,7 +1,8 @@
 import { createRunLazy } from '@common/lazy-run';
 import { Action, ActionKey, ModifierKeys } from '@core/action';
 import { IntlError, IntlIdBase } from '@core/i18n';
-import { keyEnter, keyY } from '@core/keyboard/keys';
+import { keyEnter, keyEscape, keyY } from '@core/keyboard/keys';
+import { closePanel } from '@core/native/api';
 import { Dialog } from '@core/store';
 import { typeclass } from '@core/utils';
 import React from 'react';
@@ -171,6 +172,7 @@ const runAction = <State, IntlId extends IntlIdBase>({
   actionKeys,
   modifierKeys,
   dismissId,
+  quitId,
   setDialog,
   setState,
   instances,
@@ -181,6 +183,7 @@ const runAction = <State, IntlId extends IntlIdBase>({
   defaultKeys: ReadonlyArray<ActionKey<State, IntlId>>;
   dialog?: Dialog<State, IntlId>;
   dismissId: IntlId;
+  quitId: IntlId;
   setDialog: (dialog?: Dialog<State, IntlId>) => void;
   setState: (state: Partial<State>) => void;
   instances: Readonly<{
@@ -220,6 +223,13 @@ const runAction = <State, IntlId extends IntlIdBase>({
               desc: { id: dismissId },
               run: async () => instances.stateInstance.fromDialog(undefined),
             }),
+            keyEscape({
+              desc: { id: quitId },
+              run: async () => {
+                await closePanel();
+                return {};
+              },
+            }),
           ],
         });
       });
@@ -234,6 +244,7 @@ export const useKeyDownEvent = <State, IntlId extends string, Item, ItemList>({
   modifierKeys,
   defaultKeys,
   dismissId,
+  quitId,
   dialog,
   setState,
   setModifierKeys,
@@ -249,6 +260,7 @@ export const useKeyDownEvent = <State, IntlId extends string, Item, ItemList>({
   modifierKeys: ModifierKeys;
   defaultKeys: ReadonlyArray<ActionKey<State, IntlId>>;
   dismissId: IntlId;
+  quitId: IntlId;
   dialog?: Dialog<State, IntlId>;
   setState: (state: Partial<State>) => void;
   setModifierKeys: (modifierKeys: Partial<ModifierKeys>) => void;
@@ -273,6 +285,7 @@ export const useKeyDownEvent = <State, IntlId extends string, Item, ItemList>({
           modifierKeys,
           defaultKeys,
           dismissId,
+          quitId,
           dialog,
           setState,
           setDialog,
@@ -285,6 +298,7 @@ export const useKeyDownEvent = <State, IntlId extends string, Item, ItemList>({
           modifierKeys,
           defaultKeys,
           dismissId,
+          quitId,
           dialog,
           setState,
           setDialog,
@@ -318,6 +332,7 @@ export const useKeyDownEvent = <State, IntlId extends string, Item, ItemList>({
     updateSearchWord,
     defaultKeys,
     dismissId,
+    quitId,
     setState,
     state,
     dialog,
@@ -357,6 +372,7 @@ export const useKeyboardEvent = <
     dialogKeys?: ReadonlyArray<ActionKey<State, IntlId>>;
     defaultKeys: ReadonlyArray<ActionKey<State, IntlId>>;
     dismissId: IntlId;
+    quitId: IntlId;
     dialog?: Dialog<State, IntlId>;
     setState: (state: Partial<State>) => void;
     setModifierKeys: (modifierKeys: Partial<ModifierKeys>) => void;

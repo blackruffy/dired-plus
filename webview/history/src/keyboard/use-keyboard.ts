@@ -21,6 +21,7 @@ export const useKeyboardEvent = (params: Readonly<{ action?: Action }>) => {
     selectedItemIndex: state.selectedItemIndex,
     defaultKeys,
     dismissId: messageId.dismiss,
+    quitId: messageId.quit,
     dialog: state.dialog,
     setState: state.setState,
     setSelectedItemIndex: state.setSelectedItemIndex,

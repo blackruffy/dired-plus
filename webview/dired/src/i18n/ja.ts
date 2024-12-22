@@ -45,6 +45,7 @@ export const ja = {
   confirmOverwrite: '{dst}はすでに存在します。上書きしますか？',
   confirmDelete: 'これらのファイルを削除しますか？',
   systemError: 'システムエラーが発生しました。',
+  helpEnterToClose: 'Enter キーで閉じる',
 } as const;
 
 export const messageId: MessageIdMap = core.i18n.getIntlMessageIdMap(ja);

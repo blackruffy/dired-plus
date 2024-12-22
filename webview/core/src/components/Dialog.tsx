@@ -67,6 +67,18 @@ export const Dialog = <State, IntlId extends IntlIdBase>({
             </MUI.Typography>
           ))}
         </MUI.Box>
+        <MUI.Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <MUI.Typography sx={{ fontSize: 12, color: 'gray' }}>
+            <FormattedMessage id='helpEnterToClose' />
+          </MUI.Typography>
+        </MUI.Box>
       </MUI.Box>
     </MUI.Backdrop>
   );

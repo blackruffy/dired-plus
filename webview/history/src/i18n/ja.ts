@@ -16,6 +16,9 @@ export const ja = {
   dismiss: '閉じる',
   nextPage: '次を表示',
   prevPage: '前を表示',
+
+  // dialog
+  helpEnterToClose: 'Enter キーで閉じる',
 } as const;
 
 export const messageId: MessageIdMap = core.i18n.getIntlMessageIdMap(ja);
