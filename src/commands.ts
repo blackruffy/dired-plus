@@ -12,7 +12,7 @@ import { State } from './state';
 export const commands = (state: State) => {
   state.context.subscriptions.push(
     vscode.commands.registerCommand('dired-plus.open', () =>
-      filer.getPanel(state.context).reveal(),
+      filer.getPanel(state).reveal(),
     ),
   );
 

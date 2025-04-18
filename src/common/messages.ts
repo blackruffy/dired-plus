@@ -4,6 +4,7 @@ import { DiredItemList } from './dired-item';
 
 export type MessageKey =
   | 'list-items'
+  | 'update-item-list'
   | 'get-parent-directory'
   | 'get-base-name'
   | 'get-separator'
@@ -48,11 +49,18 @@ export type ListItemsRequest = Request<'list-items'> &
     nextToken?: string;
   }>;
 
-export type ListItemsResponnse = Response<'list-items'> &
+export type ListItemsResponse = Response<'list-items'> &
   DiredItemList &
   Readonly<{
     nextToken?: string;
   }>;
+
+export type UpdateItemListRequest = Request<'update-item-list'> &
+  Readonly<{
+    path?: string;
+  }>;
+
+export type UpdateItemListResponse = Response<'update-item-list'>;
 
 export type GetParentDirectoryRequest = Request<'get-parent-directory'> &
   Readonly<{ path: string }>;

@@ -20,7 +20,7 @@ import {
   JoinPathRequest,
   JoinPathResponse,
   ListItemsRequest,
-  ListItemsResponnse,
+  ListItemsResponse,
   RenameDirectoryRequest,
   RenameDirectoryResponse,
   RenameFileRequest,
@@ -31,7 +31,7 @@ import {
 import { request } from '@core/native/request';
 
 export const listItems = async (path?: string): Promise<ItemList> =>
-  await request<ListItemsRequest, ListItemsResponnse>({
+  await request<ListItemsRequest, ListItemsResponse>({
     key: 'list-items',
     path,
   });
@@ -45,7 +45,7 @@ export const eachListItems = async ({
 }>): Promise<void> => {
   await eachListItemsHelper({
     makeRequest: ({ nextToken }) =>
-      request<ListItemsRequest, ListItemsResponnse>({
+      request<ListItemsRequest, ListItemsResponse>({
         key: 'list-items',
         path,
         nextToken,

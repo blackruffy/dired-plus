@@ -20,7 +20,7 @@ import {
   JoinPathRequest,
   JoinPathResponse,
   ListItemsRequest,
-  ListItemsResponnse,
+  ListItemsResponse,
   MessageKey,
   RenameDirectoryRequest,
   RenameDirectoryResponse,
@@ -73,7 +73,7 @@ export const startListen = ({
                 path: req.path,
                 nextToken: req.nextToken,
                 onResponse: (itemList, nextToken) =>
-                  response<ListItemsResponnse>(req, {
+                  response<ListItemsResponse>(req, {
                     ...itemList,
                     nextToken,
                   }),

@@ -1,3 +1,5 @@
+import { updateItemList } from '@src/filer/request';
+import { State as AppState } from '@src/state';
 import { initializeTheme } from '@src/theme';
 import * as vscode from 'vscode';
 
@@ -5,11 +7,17 @@ export type WebViewManager = Readonly<{
   getPanel: () => vscode.WebviewPanel;
 }>;
 
+type State = {
+  panels: {
+    [idx: number]: vscode.WebviewPanel | null;
+  };
+};
+
 export const createWebViewManager = (
   args: Readonly<{
     id: string;
     title: string;
-    context: vscode.ExtensionContext;
+    appState: AppState;
     scriptPath: ReadonlyArray<string>;
     startListen: (
       _: Readonly<{
@@ -19,18 +27,13 @@ export const createWebViewManager = (
     ) => void;
   }>,
 ): WebViewManager => {
-  type State = {
-    panels: {
-      [idx: number]: vscode.WebviewPanel | null;
-    };
-  };
   const state: State = {
     panels: {},
   };
 
   const createHTML = (panel: vscode.WebviewPanel): string => {
     const scriptPathOnDisk = vscode.Uri.joinPath(
-      args.context.extensionUri,
+      args.appState.context.extensionUri,
       ...args.scriptPath,
     );
     const scriptUri = panel.webview.asWebviewUri(scriptPathOnDisk);
@@ -60,6 +63,7 @@ export const createWebViewManager = (
         // localResourceRoots: [
         //   vscode.Uri.joinPath(context.extensionUri, 'dist', 'webview'),
         // ],
+        retainContextWhenHidden: true,
       },
     );
 
@@ -67,7 +71,13 @@ export const createWebViewManager = (
       state.panels[column] = null;
     });
 
-    args.startListen({ context: args.context, panel });
+    panel.onDidChangeViewState(async e => {
+      if (e.webviewPanel.active === true) {
+        await updateItemList(args.appState, panel);
+      }
+    });
+
+    args.startListen({ context: args.appState.context, panel });
     panel.webview.html = createHTML(panel);
     return panel;
   };
@@ -75,14 +85,16 @@ export const createWebViewManager = (
   const getPanel = (): vscode.WebviewPanel => {
     const column =
       vscode.window.activeTextEditor?.viewColumn ?? vscode.ViewColumn.One;
+    const currentPanel = state.panels[column];
 
-    if (state.panels[column] != null) {
-      state.panels[column]?.dispose();
+    if (currentPanel == null) {
+      const newPanel = createWebViewPanel(column);
+      state.panels[column] = newPanel;
+      initializeTheme(newPanel);
+      return newPanel;
+    } else {
+      return currentPanel;
     }
-    const newPanel = createWebViewPanel(column);
-    state.panels[column] = newPanel;
-    initializeTheme(newPanel);
-    return newPanel;
   };
 
   return {

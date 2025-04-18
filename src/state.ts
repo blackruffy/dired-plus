@@ -7,6 +7,8 @@ export type State = Readonly<{
   outputChannel: vscode.OutputChannel;
   shortStorage: ShortStorage;
   longStorage: LongStorage;
+  lastActivePath?: string;
+  setLastActivePath: (path: string | undefined) => void;
 }>;
 
 export type ShortStorage = Readonly<{
@@ -79,9 +81,15 @@ export const newLongStorage = (
 export const newState = (
   context: vscode.ExtensionContext,
   outputChannel: vscode.OutputChannel,
-): State => ({
-  context,
-  outputChannel,
-  shortStorage: newShortStorage(context),
-  longStorage: newLongStorage(context),
-});
+): State => {
+  const self: State = {
+    context,
+    outputChannel,
+    shortStorage: newShortStorage(context),
+    longStorage: newLongStorage(context),
+    setLastActivePath: (path: string | undefined) => {
+      (self as { lastActivePath?: string }).lastActivePath = path;
+    },
+  };
+  return self;
+};

@@ -2,7 +2,7 @@ import { openFile } from '@src/filer/helpers';
 import { LongStorage, ShortStorage } from '@src/state';
 import * as vscode from 'vscode';
 
-const maxShortHistorySize = 10;
+const maxShortHistorySize = 50;
 const maxLongHistorySize = 1000;
 
 /**

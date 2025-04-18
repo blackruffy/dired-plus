@@ -244,20 +244,29 @@ export const listItemsHandler = scope(() => {
       currentDirectory: string;
       path?: string;
       nextToken?: string;
-      onResponse: (itemList: DiredItemList, nextToken?: string) => Res;
+      onResponse?: (itemList: DiredItemList, nextToken?: string) => Res;
     }>,
-  ): Promise<void> => {
+  ): Promise<
+    Readonly<{
+      itemList: DiredItemList;
+      nextToken?: string;
+    }>
+  > => {
     if (args.nextToken != null) {
       const session = sessions[args.nextToken];
       const items = await session.itemsIter.next();
       const hasNext = session.itemsIter.hasNext();
       const nextToken = hasNext ? args.nextToken : undefined;
-      args.panel.webview.postMessage(
-        args.onResponse({ parent: session.parent, items }, nextToken),
-      );
+      const resp = { itemList: { parent: session.parent, items }, nextToken };
+      if (args.onResponse != null) {
+        args.panel.webview.postMessage(
+          args.onResponse(resp.itemList, resp.nextToken),
+        );
+      }
       if (hasNext === false) {
         delete sessions[args.nextToken];
       }
+      return resp;
     } else {
       const searchPath = args.path ?? `${args.currentDirectory}${nodePath.sep}`;
       const itemStat = await getItemStat(searchPath);
@@ -280,9 +289,13 @@ export const listItemsHandler = scope(() => {
         };
         sessions[sessionId] = session;
       }
-      args.panel.webview.postMessage(
-        args.onResponse({ parent, items }, nextToken),
-      );
+      const resp = { itemList: { parent, items }, nextToken };
+      if (args.onResponse != null) {
+        args.panel.webview.postMessage(
+          args.onResponse(resp.itemList, resp.nextToken),
+        );
+      }
+      return resp;
     }
   };
 });

@@ -11,6 +11,7 @@ export const initializeEditorHistory = (
   );
 
   const activePath = vscode.window.activeTextEditor?.document.uri.fsPath;
+  state.setLastActivePath(activePath);
   if (activePath != null) {
     updateShortHistory(state.shortStorage, activePath);
   }
@@ -23,6 +24,7 @@ export const initializeEditorHistory = (
         editor != null &&
         fsPath != null
       ) {
+        state.setLastActivePath(fsPath);
         // insert the editor path to the top of the history
         updateShortHistory(state.shortStorage, fsPath);
         updateLongHistory(state.longStorage, fsPath);

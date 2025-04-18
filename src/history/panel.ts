@@ -11,7 +11,7 @@ export const getPanel = scope(() => {
       ? (webViewManager = helpers.webview.createWebViewManager({
           id: 'dired-plus-history',
           title: 'History',
-          context: state.context,
+          appState: state,
           scriptPath: ['dist', 'webview', 'history', 'index.js'],
           startListen: ({ context, panel }) =>
             startListen(context, panel, state.longStorage),
