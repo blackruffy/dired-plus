@@ -33,6 +33,7 @@ import {
   response,
 } from '@src/common/messages';
 import { defaultHandlers } from '@src/helpers/listener';
+import { State } from '@src/state';
 import * as nodePath from 'path';
 import * as vscode from 'vscode';
 import {
@@ -53,17 +54,17 @@ import {
 } from './helpers';
 
 export const startListen = ({
-  context,
+  appState,
   panel,
 }: Readonly<{
-  context: vscode.ExtensionContext;
+  appState: State;
   panel: vscode.WebviewPanel;
 }>): vscode.Disposable => {
   const currentDirectory = getCurrentDirectory();
   return panel.webview.onDidReceiveMessage(
     async (message: Request<MessageKey>) => {
       try {
-        if (!(await defaultHandlers({ context, panel, message }))) {
+        if (!(await defaultHandlers({ appState, panel, message }))) {
           switch (message.key) {
             case 'list-items': {
               const req = message as ListItemsRequest;
@@ -236,6 +237,6 @@ export const startListen = ({
       }
     },
     undefined,
-    context.subscriptions,
+    appState.context.subscriptions,
   );
 };

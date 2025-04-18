@@ -1,4 +1,5 @@
-import { updateItemList } from '@src/filer/request';
+import { updateItemList as diredUpdateItemList } from '@src/filer/request';
+import { updateItemList as historyUpdateItemList } from '@src/history/request';
 import { State as AppState } from '@src/state';
 import { initializeTheme } from '@src/theme';
 import * as vscode from 'vscode';
@@ -21,7 +22,7 @@ export const createWebViewManager = (
     scriptPath: ReadonlyArray<string>;
     startListen: (
       _: Readonly<{
-        context: vscode.ExtensionContext;
+        appState: AppState;
         panel: vscode.WebviewPanel;
       }>,
     ) => void;
@@ -73,11 +74,15 @@ export const createWebViewManager = (
 
     panel.onDidChangeViewState(async e => {
       if (e.webviewPanel.active === true) {
-        await updateItemList(args.appState, panel);
+        if (args.id === 'dired-plus-filer') {
+          await diredUpdateItemList(args.appState, panel);
+        } else if (args.id === 'dired-plus-history') {
+          await historyUpdateItemList(args.appState, panel);
+        }
       }
     });
 
-    args.startListen({ context: args.appState.context, panel });
+    args.startListen({ appState: args.appState, panel });
     panel.webview.html = createHTML(panel);
     return panel;
   };

@@ -13,8 +13,8 @@ export const getPanel = scope(() => {
           title: 'History',
           appState: state,
           scriptPath: ['dist', 'webview', 'history', 'index.js'],
-          startListen: ({ context, panel }) =>
-            startListen(context, panel, state.longStorage),
+          startListen: ({ appState, panel }) =>
+            startListen(appState, panel, state.longStorage),
         }))
       : webViewManager
     ).getPanel();

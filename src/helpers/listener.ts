@@ -10,18 +10,19 @@ import {
   response,
 } from '@src/common/messages';
 import { openFile } from '@src/filer/helpers';
+import { State } from '@src/state';
 import { getColorTheme } from '@src/theme';
 import * as vscode from 'vscode';
 
 export const defaultHandlers = async ({
+  appState,
   panel,
   message,
 }: Readonly<{
-  context: vscode.ExtensionContext;
+  appState: State;
   panel: vscode.WebviewPanel;
   message: Request<MessageKey>;
 }>): Promise<boolean> => {
-  const active = vscode.window.activeTextEditor;
   switch (message.key) {
     case 'open-file': {
       const req = message as OpenFileRequest;
@@ -30,9 +31,8 @@ export const defaultHandlers = async ({
       return true;
     }
     case 'close-panel': {
-      panel.dispose();
-      if (active) {
-        vscode.window.showTextDocument(active.document, active.viewColumn);
+      if (appState.lastActivePath != null) {
+        await openFile(appState.lastActivePath);
       }
       return true;
     }

@@ -7,18 +7,18 @@ import {
   response,
 } from '@src/common/messages';
 import { defaultHandlers } from '@src/helpers/listener';
-import { LongStorage } from '@src/state';
+import { LongStorage, State } from '@src/state';
 import * as vscode from 'vscode';
 
 export const startListen = (
-  context: vscode.ExtensionContext,
+  appState: State,
   panel: vscode.WebviewPanel,
   longStorage: LongStorage,
 ): vscode.Disposable => {
   return panel.webview.onDidReceiveMessage(
     async (message: Request<MessageKey>) => {
       try {
-        if (!(await defaultHandlers({ context, panel, message }))) {
+        if (!(await defaultHandlers({ appState, panel, message }))) {
           switch (message.key) {
             case 'get-long-history': {
               const req = message as GetLongHistoryRequest;
@@ -39,6 +39,6 @@ export const startListen = (
       }
     },
     undefined,
-    context.subscriptions,
+    appState.context.subscriptions,
   );
 };
