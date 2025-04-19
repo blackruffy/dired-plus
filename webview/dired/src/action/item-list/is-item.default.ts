@@ -9,6 +9,7 @@ import {
   keyCtrlEnter,
   keyCtrlF,
   keyCtrlR,
+  keyCtrlS,
   keyCtrlSpace,
   keyCtrlU,
   keyEnter,
@@ -108,6 +109,16 @@ export const itemListIsItemDefault = ({
             setChecked,
           }),
         ),
+
+    item == null
+      ? null
+      : keyCtrlS({
+          desc: { id: messageId.copyPath },
+          run: async () => {
+            await navigator.clipboard.writeText(item.path);
+            return {};
+          },
+        }),
 
     item == null
       ? null

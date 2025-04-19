@@ -10,6 +10,7 @@ export const en: Messages = {
   cancel: 'Cancel',
   open: 'Open',
   copy: 'Copy',
+  copyPath: 'Copy Path',
   rename: 'Rename',
   delete: 'Delete',
   select: 'Select',

@@ -23,7 +23,10 @@ import { showFolder } from '@dired/events/native';
 import { messageId } from '@dired/i18n/ja';
 import { Action, Mode, SearchBox } from '@dired/store';
 
-export const searchBoxIsItemDefault = ({
+/**
+ * @deprecated
+ */
+export const _searchBoxIsItemDefault = ({
   item,
   itemList,
   selectedItemIndex,

@@ -18,7 +18,10 @@ import { messageId } from '@dired/i18n/ja';
 import { Action, Mode, SearchBox } from '@dired/store';
 import { pipe } from 'fp-ts/lib/function';
 
-export const searchBoxIsItemCopy = ({
+/**
+ * @deprecated
+ */
+export const _searchBoxIsItemCopy = ({
   item,
   itemList,
   source,

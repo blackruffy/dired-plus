@@ -16,6 +16,7 @@ export const ja = {
   cancel: 'キャンセル',
   open: '開く',
   copy: 'コピー',
+  copyPath: 'パスをコピー',
   rename: '移動',
   delete: '削除',
   select: '選択',

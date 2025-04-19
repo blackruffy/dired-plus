@@ -1,4 +1,4 @@
-import { MessageKey, Request, UpdateItemListRequest } from '@common/messages';
+import { MessageKey, Request } from '@common/messages';
 import { scope } from '@common/scope';
 import * as core from '@core/utils/initialize';
 import { getLongHistory } from '@history/native/api';

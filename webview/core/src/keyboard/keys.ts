@@ -40,6 +40,9 @@ export const keyAlphabet = (
 export const keyCtrl = (name: string, code: string) =>
   key(`^ ${name}`, code, { controlKey: true });
 
+export const keyMeta = (name: string, code: string) =>
+  key(`⌘ ${name}`, code, { metaKey: true });
+
 export const keyAlt = (name: string, code: string) =>
   key(`⎇ ${name}`, code, { altKey: true });
 
@@ -96,12 +99,15 @@ export const keyCtrlO = keyCtrlAlphabet('O');
 export const keyCtrlP = keyCtrlAlphabet('P');
 export const keyCtrlQ = keyCtrlAlphabet('Q');
 export const keyCtrlR = keyCtrlAlphabet('R');
+export const keyCtrlS = keyCtrlAlphabet('S');
 export const keyCtrlU = keyCtrlAlphabet('U');
 export const keyCtrlV = keyCtrlAlphabet('V');
+export const keyCtrlW = keyCtrlAlphabet('W');
 export const keyCtrlX = keyCtrlAlphabet('X');
 export const keyCtrlY = keyCtrlAlphabet('Y');
 export const keyCtrlZ = keyCtrlAlphabet('Z');
 
+export const keyAltC = keyAltAlphabet('C');
 export const keyAltV = keyAltAlphabet('V');
 
 export const defaultKeys = <State, IntlId extends IntlIdBase>(

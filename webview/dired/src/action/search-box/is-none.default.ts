@@ -14,7 +14,10 @@ import { createDirectory, createFile } from '@dired/events/native';
 import { messageId } from '@dired/i18n/ja';
 import { Action, SearchBox, statusState } from '@dired/store';
 
-export const searchBoxIsNoneDefault = ({
+/**
+ * @deprecated
+ */
+export const _searchBoxIsNoneDefault = ({
   path,
   itemList,
   selectedItemIndex,

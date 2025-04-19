@@ -13,7 +13,10 @@ import { messageId } from '@dired/i18n/ja';
 import { Action, Mode, SearchBox, statusState } from '@dired/store';
 import { pipe } from 'fp-ts/lib/function';
 
-export const searchBoxIsNoneRename = ({
+/**
+ * @deprecated
+ */
+export const _searchBoxIsNoneRename = ({
   item,
   itemList,
   source,
